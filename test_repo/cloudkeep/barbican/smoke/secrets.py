@@ -19,8 +19,8 @@ from test_repo.cloudkeep.barbican.fixtures import SecretsFixture
 
 class SecretsAPI(SecretsFixture):
 
-    @unittest2.skip('Currently failing due to #76')
     def test_adding_full_secret(self):
+        """ Reported in Barbican GitHub Issue #76 """
         resp = self.behaviors.create_secret_from_config()
 
         self.assertEqual(resp['status_code'], 200)
