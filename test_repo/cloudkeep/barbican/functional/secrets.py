@@ -20,7 +20,10 @@ from test_repo.cloudkeep.barbican.fixtures import SecretsFixture
 class SecretsAPI(SecretsFixture):
 
     def test_secret_with_plain_text_deletion(self):
-        """ Reported in Barbican GitHub Issue #77 """
+        """ Covers case where the system fails to delete a secret if it
+        contains a set "plain_text" field.
+        - Reported in Barbican GitHub Issue #77
+        """
         resp = self.behaviors.create_secret_from_config(use_expiration=False,
                                                         use_plain_text=True)
         self.assertEqual(resp['status_code'], 201)
@@ -29,7 +32,11 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(del_resp.status_code, 200)
 
     def test_find_a_single_secret_via_paging(self):
-        """ Reported in Barbican GitHub Issue #81 """
+        """ Covers case where when you attempt to retrieve a list of secrets,
+        if the limit is set higher than 8, the next attribute in the response
+        is not available.
+        - Reported in Barbican GitHub Issue #81
+        """
         resp = self.behaviors.create_secret_from_config(use_expiration=False)
         for count in range(1, 11):
             self.behaviors.create_secret_from_config(use_expiration=False)
@@ -44,16 +51,24 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(secret.bit_length, 512)
 
     def test_creating_w_null_entries(self):
-        """ Reported in Barbican GitHub Issue #90 """
+        """ Covers case when you push a secret full of nulls. This should
+        return a 400.
+        - Reported in Barbican GitHub Issue #90
+        """
         resp = self.behaviors.create_secret()
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
     def test_creating_w_empty_name(self):
-        resp = self.behaviors.create_secret(name=None,
+        """ When a test is created with an empty or null name attribute, the
+         system should return the secret's UUID on a get
+        """
+        create_resp = self.behaviors.create_secret(name=None,
                                             mime_type=self.config.mime_type)
-        self.assertEqual(resp['status_code'], 400,
-                         'Should have failed with 400')
+
+        get_resp = self.client.get_secret(secret_id=create_resp['secret_id'])
+
+        self.assertEqual(get_resp.entity.name, create_resp['secret_id'])
 
     def test_creating_w_empty_mime_type(self):
         resps = self.behaviors.create_and_check_secret(mime_type='')
@@ -93,3 +108,25 @@ class SecretsAPI(SecretsFixture):
         resps = self.behaviors.create_and_check_secret(plain_text=['boom'])
         self.assertEqual(resps['create_resp']['status_code'], 400,
                          'Should have failed with 400')
+
+    def test_paging_limit_and_offset(self):
+        # Create secret pool
+        for count in range(1, 20):
+            self.behaviors.create_secret_from_config(use_expiration=False)
+
+        # First set of secrets
+        resp = self.client.get_secrets(limit=10, offset=0)
+        sec_group1 = resp.entity
+
+        # Second set of secrets
+        resp = self.client.get_secrets(limit=20, offset=10)
+        sec_group2 = resp.entity
+
+        duplicates = [secret for secret in sec_group1.secrets
+                      if secret in sec_group2.secrets]
+
+        self.assertEqual(len(sec_group1.secrets), 10)
+        self.assertGreaterEqual(len(sec_group2.secrets), 1)
+        self.assertEqual(len(duplicates), 0,
+                         'Using offset didn\'t return unique secrets')
+

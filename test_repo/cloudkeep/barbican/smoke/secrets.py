@@ -20,10 +20,12 @@ from test_repo.cloudkeep.barbican.fixtures import SecretsFixture
 class SecretsAPI(SecretsFixture):
 
     def test_adding_full_secret(self):
-        """ Reported in Barbican GitHub Issue #76 """
+        """ Covers proper creation of secret with an expiration attribute set
+        - Reported in Barbican GitHub Issue #76
+        """
         resp = self.behaviors.create_secret_from_config()
 
-        self.assertEqual(resp['status_code'], 200)
+        self.assertEqual(resp['status_code'], 201)
         self.assertGreater(len(resp['secret_id']), 0)
 
     def test_adding_secret_wout_expiration(self):
