@@ -63,12 +63,13 @@ class SecretsAPI(SecretsFixture):
         """ When a test is created with an empty or null name attribute, the
          system should return the secret's UUID on a get
         """
-        create_resp = self.behaviors.create_secret(name=None,
-                                            mime_type=self.config.mime_type)
+        c_resp = self.behaviors.create_secret(name=None,
+                                              mime_type=self.config.mime_type)
 
-        get_resp = self.client.get_secret(secret_id=create_resp['secret_id'])
-
-        self.assertEqual(get_resp.entity.name, create_resp['secret_id'])
+        get_resp = self.client.get_secret(secret_id=c_resp['secret_id'])
+        self.assertEqual(get_resp.entity.name,
+                         c_resp['secret_id'],
+                         'name doesn\'t match UUID of secret')
 
     def test_creating_w_empty_mime_type(self):
         resps = self.behaviors.create_and_check_secret(mime_type='')
@@ -129,4 +130,3 @@ class SecretsAPI(SecretsFixture):
         self.assertGreaterEqual(len(sec_group2.secrets), 1)
         self.assertEqual(len(duplicates), 0,
                          'Using offset didn\'t return unique secrets')
-
