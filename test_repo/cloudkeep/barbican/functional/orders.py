@@ -43,7 +43,7 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
-        self.assertEqual(resp['status_code'], 400, 'Returned bad status code')
+        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
 
     def test_create_order_with_invalid_mime_type(self):
         """ Covers defect where you attempt to create an order with an invalid
