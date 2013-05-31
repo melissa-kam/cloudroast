@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import unittest2
+from datetime import datetime, timedelta
 from test_repo.cloudkeep.barbican.fixtures import SecretsFixture
 
 
@@ -30,6 +31,19 @@ class SecretsAPI(SecretsFixture):
 
         del_resp = self.behaviors.delete_secret(resp['secret_id'])
         self.assertEqual(del_resp.status_code, 200)
+
+    @unittest2.skip('Barbican Issue #131')
+    def test_create_secret_with_expiration_timezone(self):
+        """ Covers case of a timezone being added to the expiration.
+        Should return with a fail with a 400.
+        - Reported in Barbican GitHub Issue #131
+        """
+        bad_timestamp = '{time}{timezone}'.format(
+            time=(datetime.today() + timedelta(days=1)),
+            timezone='-05:00')
+
+        resp = self.behaviors.create_secret_overriding_cfg(expiration=bad_timestamp)
+        self.assertEqual(resp['status_code'], 400)
 
     def test_find_a_single_secret_via_paging(self):
         """ Covers case where when you attempt to retrieve a list of secrets,
@@ -62,6 +76,7 @@ class SecretsAPI(SecretsFixture):
     def test_creating_w_empty_name(self):
         """ When a test is created with an empty or null name attribute, the
          system should return the secret's UUID on a get
+         - Reported in Barbican GitHub Issue #89
         """
         c_resp = self.behaviors.create_secret(name=None,
                                               mime_type=self.config.mime_type)
