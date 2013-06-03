@@ -20,6 +20,30 @@ from test_repo.cloudkeep.barbican.fixtures import SecretsFixture
 
 class SecretsAPI(SecretsFixture):
 
+    def check_expiration_iso8601_timezone(self, timezone, offset):
+        one_day_ahead = (datetime.today() + timedelta(days=1))
+        timestamp = '{time}{timezone}'.format(
+            time=one_day_ahead,
+            timezone=timezone)
+
+        resp = self.behaviors.create_secret_overriding_cfg(
+            expiration=timestamp)
+        self.assertEqual(resp['status_code'], 201)
+
+        secret = self.client.get_secret(resp['secret_id']).entity
+        exp = datetime.strptime(secret.expiration, '%Y-%m-%dT%H:%M:%S.%f')
+        self.assertEqual(exp, one_day_ahead + timedelta(hours=offset),
+                         'Response didn\'t return the expected time')
+
+    def check_invalid_expiration_timezone(self, timezone):
+        timestamp = '{time}{timezone}'.format(
+            time=(datetime.today() + timedelta(days=1)),
+            timezone=timezone)
+
+        resp = self.behaviors.create_secret_overriding_cfg(
+            expiration=timestamp)
+        self.assertEqual(resp['status_code'], 400)
+
     def test_secret_with_plain_text_deletion(self):
         """ Covers case where the system fails to delete a secret if it
         contains a set "plain_text" field.
@@ -32,18 +56,27 @@ class SecretsAPI(SecretsFixture):
         del_resp = self.behaviors.delete_secret(resp['secret_id'])
         self.assertEqual(del_resp.status_code, 200)
 
-    @unittest2.skip('Barbican Issue #131')
-    def test_create_secret_with_expiration_timezone(self):
+    def test_create_secret_with_long_expiration_timezone(self):
         """ Covers case of a timezone being added to the expiration.
-        Should return with a fail with a 400.
+        The server should convert it into zulu time.
         - Reported in Barbican GitHub Issue #131
         """
-        bad_timestamp = '{time}{timezone}'.format(
-            time=(datetime.today() + timedelta(days=1)),
-            timezone='-05:00')
+        self.check_expiration_iso8601_timezone('-05:00', 5)
+        self.check_expiration_iso8601_timezone('+05:00', -5)
 
-        resp = self.behaviors.create_secret_overriding_cfg(expiration=bad_timestamp)
-        self.assertEqual(resp['status_code'], 400)
+    def test_create_secret_with_short_expiration_timezone(self):
+        """ Covers case of a timezone being added to the expiration.
+        The server should convert it into zulu time.
+        - Reported in Barbican GitHub Issue #135
+        """
+        self.check_expiration_iso8601_timezone('-01', 1)
+        self.check_expiration_iso8601_timezone('+01', -1)
+
+    def test_create_secret_with_bad_expiration_timezone(self):
+        """ Covers case of a malformed timezone being added to the expiration.
+        - Reported in Barbican GitHub Issue #134
+        """
+        self.check_invalid_expiration_timezone('-5:00')
 
     def test_find_a_single_secret_via_paging(self):
         """ Covers case where when you attempt to retrieve a list of secrets,
