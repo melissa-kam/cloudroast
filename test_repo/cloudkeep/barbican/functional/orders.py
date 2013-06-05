@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import unittest2
 from test_repo.cloudkeep.barbican.fixtures import OrdersFixture
 
 
@@ -57,3 +58,17 @@ class OrdersAPI(OrdersFixture):
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
         self.assertEqual(resp['status_code'], 400, 'Returned bad status code')
+
+    @unittest2.skip('Issue #140')
+    def test_getting_secret_data_as_plain_text(self):
+        """ Covers defect where you attempt to get secret information in
+        text/plain, and the request fails to decrypt the information.
+        - Reported in Barbican GitHub Issue #140
+        """
+        resps = self.behaviors.create_and_check_order(
+            mime_type="text/plain",
+            name=self.config.name,
+            algorithm=self.config.algorithm,
+            bit_length=self.config.bit_length,
+            cypher_type=self.config.cypher_type)
+        self.assertEqual(resps['get_secret_resp'].status_code, 200, 'Returned bad status code')
