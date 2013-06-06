@@ -71,7 +71,8 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
-        self.assertEqual(resps['get_secret_resp'].status_code, 200, 'Returned bad status code')
+        self.assertEqual(resps['get_secret_resp'].status_code, 200,
+                         'Returned bad status code')
 
     def test_get_order_that_doesnt_exist(self):
         """

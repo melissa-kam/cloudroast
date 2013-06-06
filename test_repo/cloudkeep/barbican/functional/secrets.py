@@ -187,18 +187,20 @@ class SecretsAPI(SecretsFixture):
             secret_id='not_a_uuid',
             mime_type=self.config.mime_type,
             plain_text='testing putting to non-existent secret')
-        self.assertEqual(resp.status_code, 404, 'Should have failed with 404')
+        self.assertEqual(resp.status_code, 404,
+                         'Should have failed with 404')
 
     def test_putting_w_invalid_mime_type(self):
-        """ Covers case of putting secret information with an invalid mime-type.
-        Should return 400.
+        """ Covers case of putting secret information with an
+        invalid mime-type. Should return 400.
         """
         resp = self.behaviors.create_secret(mime_type=self.config.mime_type)
         put_resp = self.client.add_secret_plain_text(
             secret_id=resp['secret_id'],
             mime_type='crypto/boom',
             plain_text='testing putting with invalid mime type')
-        self.assertEqual(put_resp.status_code, 400, 'Should have failed with 400')
+        self.assertEqual(put_resp.status_code, 400,
+                         'Should have failed with 400')
 
     def test_putting_secret_w_data_already(self):
         """ Covers case of putting secret information to a secret that already
@@ -209,7 +211,8 @@ class SecretsAPI(SecretsFixture):
             secret_id=resp['secret_id'],
             mime_type=self.config.mime_type,
             plain_text='testing putting to a secret that already has data')
-        self.assertEqual(put_resp.status_code, 409, 'Should have failed with 409')
+        self.assertEqual(put_resp.status_code, 409,
+                         'Should have failed with 409')
 
     def test_putting_w_empty_data(self):
         """
@@ -220,7 +223,8 @@ class SecretsAPI(SecretsFixture):
             secret_id=resp['secret_id'],
             mime_type=self.config.mime_type,
             plain_text=None)
-        self.assertEqual(put_resp.status_code, 400, 'Should have failed with 400')
+        self.assertEqual(put_resp.status_code, 400,
+                         'Should have failed with 400')
 
     def test_putting_w_oversized_data(self):
         """ Covers case of putting secret data that is beyond size limit.
@@ -232,7 +236,8 @@ class SecretsAPI(SecretsFixture):
             secret_id=resp['secret_id'],
             mime_type=self.config.mime_type,
             plain_text=str(data))
-        self.assertEqual(put_resp.status_code, 413, 'Should have failed with 413')
+        self.assertEqual(put_resp.status_code, 413,
+                         'Should have failed with 413')
 
     def test_deleting_secret_that_doesnt_exist(self):
         """
