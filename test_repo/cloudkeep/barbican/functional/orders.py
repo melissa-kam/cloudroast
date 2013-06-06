@@ -72,3 +72,41 @@ class OrdersAPI(OrdersFixture):
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
         self.assertEqual(resps['get_secret_resp'].status_code, 200, 'Returned bad status code')
+
+    def test_get_order_that_doesnt_exist(self):
+        """
+        Covers case of getting a non-existent order. Should return 404.
+        """
+        resp = self.client.get_order('not_an_order')
+        self.assertEqual(resp.status_code, 404, 'Should have failed with 404')
+
+    def test_delete_order_that_doesnt_exist(self):
+        """
+        Covers case of deleting a non-existent order. Should return 404.
+        """
+        resp = self.client.delete_order('not_an_order')
+        self.assertEqual(resp.status_code, 404, 'Should have failed with 404')
+
+    def test_order_paging_limit_and_offset(self):
+        """
+        Covers testing paging limit and offset attributes when getting orders.
+        """
+        # Create order pool
+        for count in range(1, 20):
+            self.behaviors.create_order_from_config()
+
+        # First set of orders
+        resp = self.client.get_orders(limit=10, offset=0)
+        ord_group1 = resp.entity
+
+        # Second set of orders
+        resp = self.client.get_orders(limit=20, offset=10)
+        ord_group2 = resp.entity
+
+        duplicates = [order for order in ord_group1.orders
+                      if order in ord_group2.orders]
+
+        self.assertEqual(len(ord_group1.orders), 10)
+        self.assertGreaterEqual(len(ord_group2.orders), 1)
+        self.assertEqual(len(duplicates), 0,
+                         'Using offset didn\'t return unique orders.')
