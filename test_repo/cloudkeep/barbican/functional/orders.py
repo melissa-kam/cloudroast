@@ -111,3 +111,41 @@ class OrdersAPI(OrdersFixture):
         self.assertGreaterEqual(len(ord_group2.orders), 1)
         self.assertEqual(len(duplicates), 0,
                          'Using offset didn\'t return unique orders.')
+
+    def test_find_a_single_order_via_paging(self):
+        """
+        Covers finding an order with paging.
+        """
+        resp = self.behaviors.create_order_from_config()
+        for count in range(1, 11):
+            self.behaviors.create_order_from_config()
+        order = self.behaviors.find_order(resp['order_id'])
+        self.assertIsNotNone(order, 'Couldn\'t find created order')
+
+    def test_create_order_w_expiration(self):
+        """
+        Covers creating order with expiration.
+        """
+        resp = self.behaviors.create_order_from_config(use_expiration=True)
+        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+
+    def test_creating_order_w_null_entries(self):
+        resp = self.behaviors.create_order()
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
+    def test_create_order_wout_name_checking_name(self):
+        """ When an order is created with an empty or null name attribute, the
+        system should return the secret's UUID on a get. Extends coverage of
+        test_create_order_wout_name. Assumes that the order status will be
+        active and not pending.
+        """
+        resps = self.behaviors.create_and_check_order(
+            mime_type="application/octet-stream",
+            name=None,
+            algorithm=self.config.algorithm,
+            bit_length=self.config.bit_length,
+            cypher_type=self.config.cypher_type)
+        secret_metadata = resps['get_order_resp'].entity.secret
+        self.assertEqual(secret_metadata.name, resps['secret_id'],
+                         'Name did not match secret\'s UUID')

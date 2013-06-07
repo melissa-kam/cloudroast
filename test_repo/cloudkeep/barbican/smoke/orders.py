@@ -23,6 +23,29 @@ class OrdersAPI(OrdersFixture):
         resp = self.behaviors.create_order_from_config()
         self.assertEqual(resp['status_code'], 202)
 
+    def test_get_order_metadata(self):
+        """ Checks metadata of secret created by order. Assumes that the
+        order status will be active and not pending.
+        """
+        resps = self.behaviors.create_and_check_order(
+            mime_type="application/octet-stream",
+            name=self.config.name,
+            algorithm=self.config.algorithm,
+            bit_length=self.config.bit_length,
+            cypher_type=self.config.cypher_type)
+        create_resp = resps['create_resp']
+        self.assertEqual(create_resp['status_code'], 202)
+
+        ord_resp = resps['get_order_resp']
+        self.assertEqual(ord_resp.status_code, 200)
+        self.assertEqual(ord_resp.entity.status, 'ACTIVE')
+
+        metadata = ord_resp.entity.secret
+        self.assertEqual(metadata.name, self.config.name)
+        self.assertEqual(metadata.cypher_type, self.config.cypher_type)
+        self.assertEqual(metadata.algorithm, self.config.algorithm)
+        self.assertEqual(metadata.bit_length, self.config.bit_length)
+
     def test_get_order(self):
         # Create an order to get
         resp = self.behaviors.create_order_from_config()
