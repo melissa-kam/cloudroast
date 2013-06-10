@@ -245,3 +245,12 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.behaviors.delete_secret(secret_id='not_a_uuid')
         self.assertEqual(resp.status_code, 404, 'Should have failed with 404')
+
+    def test_creating_secret_w_invalid_expiration(self):
+        """
+        Covers creating secret with expiration that has already passed.
+        """
+        resp = self.behaviors.create_secret_overriding_cfg(
+            expiration='2000-01-10T14:58:52.546795')
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
