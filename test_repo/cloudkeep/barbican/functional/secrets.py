@@ -254,3 +254,24 @@ class SecretsAPI(SecretsFixture):
             expiration='2000-01-10T14:58:52.546795')
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
+
+    def test_checking_content_types_when_data(self):
+        """
+        Covers checking that content types attribute is shown when secret
+        has encrypted data associated with it.
+        """
+        resps = self.behaviors.create_and_check_secret()
+        secret = resps['get_resp'].entity
+        self.assertIsNotNone(secret.content_types)
+
+    def test_checking_no_content_types_when_no_data(self):
+        """
+        Covers checking that the content types attribute is not shown if the
+        secret does not have encrypted data associated with it.
+        """
+        create_resp = self.behaviors.create_secret(
+            mime_type=self.config.mime_type)
+        secret_id = create_resp['secret_id']
+        resp = self.client.get_secret(secret_id=secret_id)
+        secret = resp.entity
+        self.assertIsNone(secret.content_types)
