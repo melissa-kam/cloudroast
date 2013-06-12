@@ -245,3 +245,23 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(order_metadata.cypher_type,
                          secret_metadata.cypher_type,
                          'Cypher types were not the same')
+
+    def test_creating_order_w_invalid_bit_length(self):
+        """
+        Cover case of creating an order with a bit length that is not
+        an integer. Should return 400.
+        """
+        resp = self.behaviors.create_order_overriding_cfg(
+            bit_length='not-an-int')
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
+    def test_creating_order_w_negative_bit_length(self):
+        """
+        Covers case of creating an order with a bit length that is negative.
+        Should return 400.
+        """
+        resp = self.behaviors.create_order_overriding_cfg(
+            bit_length=-1)
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')

@@ -262,7 +262,8 @@ class SecretsAPI(SecretsFixture):
         """
         resps = self.behaviors.create_and_check_secret()
         secret = resps['get_resp'].entity
-        self.assertIsNotNone(secret.content_types)
+        self.assertIsNotNone(secret.content_types,
+                             'Should not have had content types')
 
     def test_checking_no_content_types_when_no_data(self):
         """
@@ -274,4 +275,25 @@ class SecretsAPI(SecretsFixture):
         secret_id = create_resp['secret_id']
         resp = self.client.get_secret(secret_id=secret_id)
         secret = resp.entity
-        self.assertIsNone(secret.content_types)
+        self.assertIsNone(secret.content_types,
+                          'Should have had content types')
+
+    def test_creating_secret_w_invalid_bit_length(self):
+        """
+        Cover case of creating a secret with a bit length that is not
+        an integer. Should return 400.
+        """
+        resp = self.behaviors.create_secret_overriding_cfg(
+            bit_length='not-an-int')
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
+    def test_creating_secret_w_negative_bit_length(self):
+        """
+        Covers case of creating a secret with a bit length that is negative.
+        Should return 400.
+        """
+        resp = self.behaviors.create_secret_overriding_cfg(
+            bit_length=-1)
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
