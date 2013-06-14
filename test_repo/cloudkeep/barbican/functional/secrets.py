@@ -256,8 +256,7 @@ class SecretsAPI(SecretsFixture):
                          'Should have failed with 400')
 
     def test_checking_content_types_when_data(self):
-        """
-        Covers checking that content types attribute is shown when secret
+        """ Covers checking that content types attribute is shown when secret
         has encrypted data associated with it.
         """
         resps = self.behaviors.create_and_check_secret()
@@ -266,8 +265,7 @@ class SecretsAPI(SecretsFixture):
                              'Should not have had content types')
 
     def test_checking_no_content_types_when_no_data(self):
-        """
-        Covers checking that the content types attribute is not shown if the
+        """ Covers checking that the content types attribute is not shown if the
         secret does not have encrypted data associated with it.
         """
         create_resp = self.behaviors.create_secret(
@@ -279,8 +277,7 @@ class SecretsAPI(SecretsFixture):
                           'Should have had content types')
 
     def test_creating_secret_w_invalid_bit_length(self):
-        """
-        Cover case of creating a secret with a bit length that is not
+        """ Cover case of creating a secret with a bit length that is not
         an integer. Should return 400.
         """
         resp = self.behaviors.create_secret_overriding_cfg(
@@ -289,8 +286,7 @@ class SecretsAPI(SecretsFixture):
                          'Should have failed with 400')
 
     def test_creating_secret_w_negative_bit_length(self):
-        """
-        Covers case of creating a secret with a bit length that is negative.
+        """ Covers case of creating a secret with a bit length that is negative.
         Should return 400.
         """
         resp = self.behaviors.create_secret_overriding_cfg(

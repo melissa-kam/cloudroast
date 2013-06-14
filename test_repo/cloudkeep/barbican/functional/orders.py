@@ -222,8 +222,7 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(secret.bit_length, 128)
 
     def test_order_and_secret_metadata_same(self):
-        """
-        Covers checking that secret metadata from a get on the order and
+        """ Covers checking that secret metadata from a get on the order and
         secret metadata from a get on the secret are the same. Assumes
         that the order status will be active and not pending.
         """
@@ -247,8 +246,7 @@ class OrdersAPI(OrdersFixture):
                          'Cypher types were not the same')
 
     def test_creating_order_w_invalid_bit_length(self):
-        """
-        Cover case of creating an order with a bit length that is not
+        """ Cover case of creating an order with a bit length that is not
         an integer. Should return 400.
         """
         resp = self.behaviors.create_order_overriding_cfg(
@@ -257,8 +255,7 @@ class OrdersAPI(OrdersFixture):
                          'Should have failed with 400')
 
     def test_creating_order_w_negative_bit_length(self):
-        """
-        Covers case of creating an order with a bit length that is negative.
+        """ Covers case of creating an order with a bit length that is negative.
         Should return 400.
         """
         resp = self.behaviors.create_order_overriding_cfg(
