@@ -67,23 +67,24 @@ class SecretsFixture(ClientLibFixture):
     def setUpClass(cls):
         super(SecretsFixture, cls).setUpClass()
         cls.config = CloudKeepSecretsConfig()
-        cls.client = SecretsClient(
+        cls.barb_client = SecretsClient(
             url=cls.cloudkeep.base_url,
             api_version=cls.cloudkeep.api_version,
             tenant_id=cls.cloudkeep.tenant_id,
             serialize_format=cls.marshalling.serializer,
             deserialize_format=cls.marshalling.deserializer)
-        cls.behaviors = SecretsBehaviors(client=cls.client, config=cls.config)
-        cls.client_lib = ClientLibSecretsClient(
+        cls.barb_behaviors = SecretsBehaviors(client=cls.barb_client,
+                                              config=cls.config)
+        cls.cl_client = ClientLibSecretsClient(
             url=cls.cloudkeep.base_url,
             api_version=cls.cloudkeep.api_version,
             tenant_id=cls.cloudkeep.tenant_id,
             token='bypass')
         cls.cl_behaviors = ClientLibSecretsBehaviors(
-            client=cls.client, client_lib=cls.client_lib, config=cls.config)
+            barb_client=cls.barb_client, cl_client=cls.cl_client,
+            barb_behaviors=cls.barb_behaviors, config=cls.config)
 
     def tearDown(self):
-        self.behaviors.delete_all_created_secrets()
         self.cl_behaviors.delete_all_created_secrets()
         super(SecretsFixture, self).tearDown()
 
@@ -93,7 +94,7 @@ class OrdersFixture(ClientLibFixture):
     def setUpClass(cls):
         super(OrdersFixture, cls).setUpClass()
         cls.config = CloudKeepSecretsConfig()
-        cls.client = OrdersClient(
+        cls.barb_client = OrdersClient(
             url=cls.cloudkeep.base_url,
             api_version=cls.cloudkeep.api_version,
             tenant_id=cls.cloudkeep.tenant_id,
@@ -105,19 +106,18 @@ class OrdersFixture(ClientLibFixture):
             tenant_id=cls.cloudkeep.tenant_id,
             serialize_format=cls.marshalling.serializer,
             deserialize_format=cls.marshalling.deserializer)
-        cls.behaviors = OrdersBehavior(client=cls.client,
+        cls.behaviors = OrdersBehavior(client=cls.barb_client,
                                        secrets_client=cls.secrets_client,
                                        config=cls.config)
-        cls.client_lib = ClientLibOrdersClient(
+        cls.cl_client = ClientLibOrdersClient(
             url=cls.cloudkeep.base_url,
             api_version=cls.cloudkeep.api_version,
             tenant_id=cls.cloudkeep.tenant_id,
             token='bypass')
         cls.cl_behaviors = ClientLibOrdersBehaviors(
-            client=cls.client, secrets_client=cls.secrets_client,
-            client_lib=cls.client_lib, config=cls.config)
+            barb_client=cls.barb_client, secrets_client=cls.secrets_client,
+            cl_client=cls.cl_client, config=cls.config)
 
     def tearDown(self):
-        self.behaviors.delete_all_created_orders_and_secrets()
         self.cl_behaviors.delete_all_created_orders_and_secrets()
         super(OrdersFixture, self).tearDown()
