@@ -20,17 +20,24 @@ from test_repo.cloudkeep.client_lib.fixtures import OrdersFixture
 class OrdersAPI(OrdersFixture):
 
     def test_cl_create_order(self):
+        """Covers creating an order with the barbicanclient library.
+        """
         resp = self.cl_behaviors.create_and_check_order()
-        self.assertEqual(resp['get_resp'].status_code, 200)
+        self.assertEqual(resp['get_resp'].status_code, 200,
+                         'Returned bad status code')
 
     def test_cl_create_order_metadata(self):
+        """Covers creating an order with barbicanclient library and checking
+        the metadata of the order.
+        """
         resp = self.cl_behaviors.create_and_check_order(
             mime_type=self.config.mime_type,
             name=self.config.name,
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
-        self.assertEqual(resp['get_resp'].status_code, 200)
+        self.assertEqual(resp['get_resp'].status_code, 200,
+                         'Returned bad status code')
 
         order = resp['order']
         secret = order.secret
@@ -43,45 +50,56 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(secret['cypher_type'], self.config.cypher_type)
 
     def test_get_order_by_href(self):
+        """Covers getting an order by href with barbicanclient library.
+        """
         resp = self.behaviors.create_order_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 202)
+        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
 
-        order = self.client_lib.get_order(resp['order_ref'])
+        order = self.cl_client.get_order(resp['order_ref'])
         self.assertIsNotNone(order)
 
     def test_get_order_by_id(self):
+        """Covers getting an order by id with barbicanclient library.
+        """
         resp = self.behaviors.create_order_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 202)
+        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
 
-        order = self.client_lib.get_order_by_id(resp['order_id'])
+        order = self.cl_client.get_order_by_id(resp['order_id'])
         self.assertIsNotNone(order)
 
     def test_delete_order_by_href(self):
+        """Covers deleting an order by href with barbicanclient library.
+        """
         resp = self.behaviors.create_order_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 202)
+        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
 
-        self.client_lib.delete_order(resp['order_ref'])
+        self.cl_client.delete_order(resp['order_ref'])
 
-        get_resp = self.client.get_order(resp['order_id'])
-        self.assertEqual(get_resp.status_code, 404)
+        get_resp = self.barb_client.get_order(resp['order_id'])
+        self.assertEqual(get_resp.status_code, 404,
+                         'Should have failed with 404')
 
     def test_delete_order_by_id(self):
+        """Covers deleting an order by id with barbicanclient library.
+        """
         resp = self.behaviors.create_order_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 202)
+        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
 
-        self.client_lib.delete_order_by_id(resp['order_id'])
+        self.cl_client.delete_order_by_id(resp['order_id'])
 
-        get_resp = self.client.get_order(resp['order_id'])
-        self.assertEqual(get_resp.status_code, 404)
+        get_resp = self.barb_client.get_order(resp['order_id'])
+        self.assertEqual(get_resp.status_code, 404,
+                         'Should have failed with 404')
 
     def test_list_orders(self):
+        """Covers listing orders with barbicanclient library.
+        """
         resp = self.behaviors.create_order_from_config(use_expiration=False)
-        self.assertEqual(resp['status_code'], 202)
+        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
 
-        orders = self.client_lib.list_orders()
+        orders = self.cl_client.list_orders()
         self.assertGreater(len(orders), 0)
-
