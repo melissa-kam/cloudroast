@@ -82,7 +82,7 @@ class SecretsFixture(ClientLibFixture):
             token='bypass')
         cls.cl_behaviors = ClientLibSecretsBehaviors(
             barb_client=cls.barb_client, cl_client=cls.cl_client,
-            barb_behaviors=cls.barb_behaviors, config=cls.config)
+            config=cls.config)
 
     def tearDown(self):
         self.cl_behaviors.delete_all_created_secrets()
@@ -106,9 +106,9 @@ class OrdersFixture(ClientLibFixture):
             tenant_id=cls.cloudkeep.tenant_id,
             serialize_format=cls.marshalling.serializer,
             deserialize_format=cls.marshalling.deserializer)
-        cls.behaviors = OrdersBehavior(client=cls.barb_client,
-                                       secrets_client=cls.secrets_client,
-                                       config=cls.config)
+        cls.barb_behaviors = OrdersBehavior(client=cls.barb_client,
+                                            secrets_client=cls.secrets_client,
+                                            config=cls.config)
         cls.cl_client = ClientLibOrdersClient(
             url=cls.cloudkeep.base_url,
             api_version=cls.cloudkeep.api_version,

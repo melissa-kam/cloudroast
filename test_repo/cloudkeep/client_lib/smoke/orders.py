@@ -49,30 +49,30 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(secret['bit_length'], self.config.bit_length)
         self.assertEqual(secret['cypher_type'], self.config.cypher_type)
 
-    def test_get_order_by_href(self):
+    def test_cl_get_order_by_href(self):
         """Covers getting an order by href with barbicanclient library.
         """
-        resp = self.behaviors.create_order_from_config(
+        resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
 
         order = self.cl_client.get_order(resp['order_ref'])
         self.assertIsNotNone(order)
 
-    def test_get_order_by_id(self):
+    def test_cl_get_order_by_id(self):
         """Covers getting an order by id with barbicanclient library.
         """
-        resp = self.behaviors.create_order_from_config(
+        resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
 
         order = self.cl_client.get_order_by_id(resp['order_id'])
         self.assertIsNotNone(order)
 
-    def test_delete_order_by_href(self):
+    def test_cl_delete_order_by_href(self):
         """Covers deleting an order by href with barbicanclient library.
         """
-        resp = self.behaviors.create_order_from_config(
+        resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
 
@@ -82,10 +82,10 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(get_resp.status_code, 404,
                          'Should have failed with 404')
 
-    def test_delete_order_by_id(self):
+    def test_cl_delete_order_by_id(self):
         """Covers deleting an order by id with barbicanclient library.
         """
-        resp = self.behaviors.create_order_from_config(
+        resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
 
@@ -95,10 +95,11 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(get_resp.status_code, 404,
                          'Should have failed with 404')
 
-    def test_list_orders(self):
+    def test_cl_list_orders(self):
         """Covers listing orders with barbicanclient library.
         """
-        resp = self.behaviors.create_order_from_config(use_expiration=False)
+        resp = self.barb_behaviors.create_order_from_config(
+            use_expiration=False)
         self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
 
         orders = self.cl_client.list_orders()

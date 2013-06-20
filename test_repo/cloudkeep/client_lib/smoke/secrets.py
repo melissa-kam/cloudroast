@@ -35,58 +35,58 @@ class SecretsAPI(SecretsFixture):
         """
         secret = self.cl_behaviors.create_secret_from_config(
             use_expiration=False)
-        resp = self.barb_client.get_secret(secret.id)
+        resp = self.barb_client.get_secret(secret_id=secret.id)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
 
     def test_cl_get_secret_by_href(self):
         """Covers getting a secret by href with barbicanclient library.
         """
-        resp = self.cl_behaviors.barbican_create_secret_from_config(
+        resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
 
-        secret = self.cl_client.get_secret(resp['secret_ref'])
+        secret = self.cl_client.get_secret(href=resp['secret_ref'])
         self.assertIsNotNone(secret)
 
     def test_cl_get_secret_by_id(self):
         """Covers getting a secret by id with barbicanclient library.
         """
-        resp = self.cl_behaviors.barbican_create_secret_from_config(
+        resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
 
-        secret = self.cl_client.get_secret_by_id(resp['secret_id'])
+        secret = self.cl_client.get_secret_by_id(secret_id=resp['secret_id'])
         self.assertIsNotNone(secret)
 
     def test_cl_delete_secret_by_href(self):
         """Covers deleting a secret by href with barbicanclient library.
         """
-        resp = self.cl_behaviors.barbican_create_secret_from_config(
+        resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
 
-        self.cl_client.delete_secret(resp['secret_ref'])
+        self.cl_behaviors.delete_secret(secret_ref=resp['secret_ref'])
 
-        get_resp = self.barb_client.get_secret(resp['secret_id'])
+        get_resp = self.barb_client.get_secret(secret_id=resp['secret_id'])
         self.assertEqual(get_resp.status_code, 404,
                          'Should have failed with 404')
 
     def test_cl_delete_secret_by_id(self):
         """Covers deleting a secret by id with barbicanclient library.
         """
-        resp = self.cl_behaviors.barbican_create_secret_from_config(
+        resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
 
-        self.cl_client.delete_secret_by_id(resp['secret_id'])
+        self.cl_behaviors.delete_secret_by_id(secret_id=resp['secret_id'])
 
-        get_resp = self.barb_client.get_secret(resp['secret_id'])
+        get_resp = self.barb_client.get_secret(secret_id=resp['secret_id'])
         self.assertEqual(get_resp.status_code, 404,
                          'Should have failed with 404')
 
     def test_cl_list_secrets(self):
         """Covers listing secrets with barbicanclient library.
         """
-        resp = self.cl_behaviors.barbican_create_secret_from_config(
+        resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
 
@@ -114,7 +114,7 @@ class SecretsAPI(SecretsFixture):
         """Covers getting the secret payload by href with
         barbicanclient library.
         """
-        resp = self.cl_behaviors.barbican_create_secret_from_config(
+        resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
 
@@ -127,7 +127,7 @@ class SecretsAPI(SecretsFixture):
         """Covers getting the secret payload by id with
         barbicanclient library.
         """
-        resp = self.cl_behaviors.barbican_create_secret_from_config(
+        resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
 
