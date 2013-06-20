@@ -262,3 +262,15 @@ class OrdersAPI(OrdersFixture):
             bit_length=-1)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
+
+    def test_creating_order_wout_bit_length(self):
+        """Covers case where order creation fails when bit length is not
+        provided.
+        - Reported in Barbican GitHub Issue #156
+        """
+        resp = self.behaviors.create_order(
+            mime_type=self.config.mime_type,
+            name=self.config.name,
+            algorithm=self.config.algorithm,
+            cypher_type=self.config.cypher_type)
+        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
