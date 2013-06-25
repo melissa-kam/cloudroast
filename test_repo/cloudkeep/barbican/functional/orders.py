@@ -30,7 +30,7 @@ class OrdersAPI(OrdersFixture):
             expiration=timestamp)
         self.assertEqual(resp['status_code'], 202)
 
-        order = self.client.get_order(resp['order_id']).entity
+        order = self.orders_client.get_order(resp['order_id']).entity
         exp = datetime.strptime(order.secret.expiration,
                                 '%Y-%m-%dT%H:%M:%S.%f')
         self.assertEqual(exp, one_day_ahead + timedelta(hours=offset),
@@ -104,14 +104,14 @@ class OrdersAPI(OrdersFixture):
         """
         Covers case of getting a non-existent order. Should return 404.
         """
-        resp = self.client.get_order('not_an_order')
+        resp = self.orders_client.get_order('not_an_order')
         self.assertEqual(resp.status_code, 404, 'Should have failed with 404')
 
     def test_delete_order_that_doesnt_exist(self):
         """
         Covers case of deleting a non-existent order. Should return 404.
         """
-        resp = self.client.delete_order('not_an_order')
+        resp = self.orders_client.delete_order('not_an_order')
         self.assertEqual(resp.status_code, 404, 'Should have failed with 404')
 
     def test_order_paging_limit_and_offset(self):
@@ -123,11 +123,11 @@ class OrdersAPI(OrdersFixture):
             self.behaviors.create_order_from_config()
 
         # First set of orders
-        resp = self.client.get_orders(limit=10, offset=0)
+        resp = self.orders_client.get_orders(limit=10, offset=0)
         ord_group1 = resp.entity
 
         # Second set of orders
-        resp = self.client.get_orders(limit=20, offset=10)
+        resp = self.orders_client.get_orders(limit=20, offset=10)
         ord_group2 = resp.entity
 
         duplicates = [order for order in ord_group1.orders
@@ -178,15 +178,18 @@ class OrdersAPI(OrdersFixture):
         test_create_order_wout_name. Assumes that the order status will be
         active and not pending.
         """
-        resps = self.behaviors.create_and_check_order(
-            mime_type="application/octet-stream",
+        resp = self.behaviors.create_order(
+            mime_type=self.config.mime_type,
             name="",
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
 
-        secret_metadata = resps['get_order_resp'].entity.secret
-        self.assertEqual(secret_metadata.name, resps['secret_id'],
+        get_resp = self.orders_client.get_order(resp['order_id'])
+        secret_id = self.behaviors.get_id_from_ref(
+            ref=get_resp.entity.secret_href)
+        secret = get_resp.entity.secret
+        self.assertEqual(secret.name, secret_id,
                          'Name did not match secret\'s UUID')
 
     def test_create_order_with_long_expiration_timezone(self):
@@ -227,6 +230,7 @@ class OrdersAPI(OrdersFixture):
         that the order status will be active and not pending.
         """
         resps = self.behaviors.create_and_check_order()
+
         order_metadata = resps['get_order_resp'].entity.secret
         secret_metadata = resps['get_secret_resp'].entity
         self.assertEqual(order_metadata.name, secret_metadata.name,
@@ -255,8 +259,8 @@ class OrdersAPI(OrdersFixture):
                          'Should have failed with 400')
 
     def test_creating_order_w_negative_bit_length(self):
-        """ Covers case of creating an order with a bit length that is negative.
-        Should return 400.
+        """ Covers case of creating an order with a bit length that is
+        negative. Should return 400.
         """
         resp = self.behaviors.create_order_overriding_cfg(
             bit_length=-1)

@@ -52,7 +52,7 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(resp['status_code'], 202)
 
         # Verify Creation
-        get_resp = self.client.get_order(resp['order_id'])
+        get_resp = self.orders_client.get_order(resp['order_id'])
         order = get_resp.entity
         order_status = (order.status == Order.STATUS_ACTIVE or
                         order.status == Order.STATUS_PENDING)
@@ -74,7 +74,7 @@ class OrdersAPI(OrdersFixture):
         for i in range(0, 11):
             self.behaviors.create_order_from_config()
 
-        resp = self.client.get_orders()
+        resp = self.orders_client.get_orders()
         order_group = resp.entity
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(len(order_group.orders), 10)

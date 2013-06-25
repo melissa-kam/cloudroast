@@ -120,13 +120,14 @@ class SecretsAPI(SecretsFixture):
                          'name doesn\'t match UUID of secret')
 
     def test_creating_w_empty_mime_type(self):
-        resps = self.behaviors.create_and_check_secret(mime_type='')
-        self.assertEqual(resps['create_resp']['status_code'], 400,
+        resp = self.behaviors.create_secret(mime_type='')
+        self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
     def test_creating_w_empty_secret(self):
-        resps = self.behaviors.create_and_check_secret(plain_text='')
-        self.assertEqual(resps['create_resp']['status_code'], 400,
+        resp = self.behaviors.create_secret(mime_type=self.config.mime_type,
+                                            plain_text='')
+        self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
     def test_creating_w_oversized_secret(self):
@@ -265,8 +266,8 @@ class SecretsAPI(SecretsFixture):
                              'Should not have had content types')
 
     def test_checking_no_content_types_when_no_data(self):
-        """ Covers checking that the content types attribute is not shown if the
-        secret does not have encrypted data associated with it.
+        """ Covers checking that the content types attribute is not shown if
+        the secret does not have encrypted data associated with it.
         """
         create_resp = self.behaviors.create_secret(
             mime_type=self.config.mime_type)
@@ -286,10 +287,17 @@ class SecretsAPI(SecretsFixture):
                          'Should have failed with 400')
 
     def test_creating_secret_w_negative_bit_length(self):
-        """ Covers case of creating a secret with a bit length that is negative.
-        Should return 400.
+        """ Covers case of creating a secret with a bit length
+        that is negative. Should return 400.
         """
         resp = self.behaviors.create_secret_overriding_cfg(
             bit_length=-1)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
+
+    def test_creating_secret_w_only_mime_type(self):
+        """ Covers creating secret with only required fields. In this case,
+        only mime type is required.
+        """
+        resp = self.behaviors.create_secret(mime_type=self.config.mime_type)
+        self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
