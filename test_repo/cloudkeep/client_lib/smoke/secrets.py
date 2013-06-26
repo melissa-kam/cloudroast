@@ -27,6 +27,7 @@ class SecretsAPI(SecretsFixture):
             use_expiration=True)
 
         resp = self.barb_client.get_secret(secret.id)
+
         self.assertEqual(resp.status_code, 200,
                          'Barbican returned bad status code')
 
@@ -34,10 +35,8 @@ class SecretsAPI(SecretsFixture):
         """Covers creating a secret without expiration with
         barbicanclient library.
         """
-        secret = self.cl_behaviors.create_secret_from_config(
-            use_expiration=False)
-        resp = self.barb_client.get_secret(secret_id=secret.id)
-        self.assertEqual(resp.status_code, 200,
+        resps = self.cl_behaviors.create_and_check_secret()
+        self.assertEqual(resps['get_resp'].status_code, 200,
                          'Barbican returned bad status code')
 
     def test_cl_get_secret_by_href(self):
@@ -68,6 +67,9 @@ class SecretsAPI(SecretsFixture):
                          'Barbican returned bad status code')
 
         self.cl_behaviors.delete_secret(secret_ref=resp['secret_ref'])
+        # Deleting here because using two different behaviors
+        self.barb_behaviors.remove_from_created_secrets(
+            secret_id=resp['secret_id'])
 
         get_resp = self.barb_client.get_secret(secret_id=resp['secret_id'])
         self.assertEqual(get_resp.status_code, 404,
@@ -82,6 +84,9 @@ class SecretsAPI(SecretsFixture):
                          'Barbican returned bad status code')
 
         self.cl_behaviors.delete_secret_by_id(secret_id=resp['secret_id'])
+        # Deleting here because using two different behaviors
+        self.barb_behaviors.remove_from_created_secrets(
+            secret_id=resp['secret_id'])
 
         get_resp = self.barb_client.get_secret(secret_id=resp['secret_id'])
         self.assertEqual(get_resp.status_code, 404,
@@ -95,7 +100,18 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(resp['status_code'], 201,
                          'Barbican returned bad status code')
 
-        secrets = self.cl_client.list_secrets()
+        list_tuple = self.cl_client.list_secrets()
+        secrets = list_tuple[0]
+        self.assertGreater(len(secrets), 0)
+
+    def test_cl_list_secrets_by_href(self):
+        resp = self.barb_behaviors.create_secret_from_config(
+            use_expiration=False)
+        self.assertEqual(resp['status_code'], 201,
+                         'Barbican returned bad status code')
+
+        list_tuple = self.cl_client.list_secrets_by_href()
+        secrets = list_tuple[0]
         self.assertGreater(len(secrets), 0)
 
     def test_cl_create_secret_metadata(self):

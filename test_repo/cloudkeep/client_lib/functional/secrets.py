@@ -19,6 +19,17 @@ from barbicanclient.common.exceptions import ClientException
 
 class SecretsAPI(SecretsFixture):
 
+    def test_cl_create_secret_w_only_mime_type(self):
+        """Covers creating secret with only required fields. In this case,
+        only mime type is required.
+        """
+        secret = self.cl_behaviors.create_secret(
+            mime_type=self.config.mime_type)
+
+        resp = self.barb_client.get_secret(secret.id)
+        self.assertEqual(resp.status_code, 200,
+                         'Barbican returned bad status code')
+
     def test_cl_create_secret_w_null_values(self):
         """Covers creating secret with all null values. Should raise a
         ClientException.
@@ -46,7 +57,8 @@ class SecretsAPI(SecretsFixture):
         Should raise a ClientException.
         """
         self.assertRaises(ClientException,
-                          self.cl_behaviors.create_secret_overriding_cfg,
+                          self.cl_behaviors.create_secret,
+                          mime_type=self.config.mime_type,
                           plain_text='')
 
     def test_cl_create_secret_w_invalid_mime_type(self):
@@ -69,7 +81,7 @@ class SecretsAPI(SecretsFixture):
         """Covers creating secret with a bit length that is not an integer.
         Should raise a ClientException.
         """
-        self.assertRaises(ValueError,
+        self.assertRaises(ClientException,
                           self.cl_behaviors.create_secret_overriding_cfg,
                           bit_length='not-an-int')
 
@@ -262,7 +274,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(resp['status_code'], 201,
                          'Barbican returned bad status code')
 
-        data = 'testing_cl_get_secret_by_id_after_update'
+        data = 'testing_cl_get_raw_secret_by_id_after_update'
         update_resp = self.barb_client.add_secret_plain_text(
             secret_id=resp['secret_id'],
             mime_type=self.config.mime_type,
@@ -274,3 +286,36 @@ class SecretsAPI(SecretsFixture):
             secret_id=resp['secret_id'],
             mime_type=self.config.mime_type)
         self.assertEquals(raw_secret, data, 'Secret data does not match')
+
+    def test_cl_list_secrets_limit_and_offset(self):
+        """Covers using the limit and offset attribute of listing secrets.
+        """
+        # Create secret pool
+        for count in range(1, 20):
+            resp = self.barb_behaviors.create_secret_from_config(
+                use_expiration=False)
+            self.assertEqual(resp['status_code'], 201,
+                             'Barbican returned bad status code')
+
+        # First set of secrets
+        list_tuple = self.cl_client.list_secrets(limit=10, offset=0)
+        sec_group1 = list_tuple[0]
+
+        # Second set of secrets
+        list_tuple = self.cl_client.list_secrets(limit=20, offset=10)
+        sec_group2 = list_tuple[0]
+
+        sec_id1 = []
+        sec_ids2 = []
+        for secret in sec_group1:
+            sec_id1.append(secret.id)
+        for secret in sec_group2:
+            sec_ids2.append(secret.id)
+
+        duplicates = [secret_id for secret_id in sec_id1
+                      if secret_id in sec_ids2]
+
+        self.assertEqual(len(sec_group1), 10)
+        self.assertGreaterEqual(len(sec_group2), 1)
+        self.assertEqual(len(duplicates), 0,
+                         'Using offset didn\'t return unique secrets')
