@@ -23,12 +23,15 @@ class OrdersAPI(OrdersFixture):
         """Covers creating order with only required fields. In this case,
         only mime type is required.
         """
-        order = self.cl_behaviors.create_order(
-            mime_type=self.config.mime_type)
+        try:
+            order = self.cl_behaviors.create_order(
+                mime_type=self.config.mime_type)
 
-        resp = self.barb_client.get_order(order.id)
-        self.assertEqual(resp.status_code, 200,
-                         'Barbican returned bad status code')
+            resp = self.barb_client.get_order(order.id)
+            self.assertEqual(resp.status_code, 200,
+                             'Barbican returned bad status code')
+        except ClientException, error:
+            self.fail("Failed with ClientException: %s" % error)
 
     def test_cl_create_order_w_null_values(self):
         """Covers creating order with all null values. Should raise a
@@ -246,3 +249,81 @@ class OrdersAPI(OrdersFixture):
         self.assertGreaterEqual(len(order_group2), 1)
         self.assertEqual(len(duplicates), 0,
                          'Using offset didn\'t return unique orders')
+
+    def test_cl_list_orders_next(self):
+        """Covers using next reference for listing orders.
+        """
+        # Create order pool
+        for count in range(1, 20):
+            resp = self.barb_behaviors.create_order_from_config(
+                use_expiration=False)
+            self.assertEqual(resp['status_code'], 202,
+                             'Barbican returned bad status code')
+
+        # First set of orders
+        order_group1, prev_ref, next_ref = self.cl_client.list_orders(
+            limit=10, offset=0)
+
+        # Next set of orders
+        list_tuple = self.cl_client.list_orders_by_href(href=next_ref)
+        order_group2 = list_tuple[0]
+
+        order_ids1 = []
+        order_ids2 = []
+        for order in order_group1:
+            order_ids1.append(order.id)
+        for order in order_group2:
+            order_ids2.append(order.id)
+
+        duplicates = [order_id for order_id in order_ids1
+                      if order_id in order_ids2]
+
+        self.assertEqual(len(duplicates), 0,
+                         'Using next reference didn\'t return unique orders')
+        self.assertEqual(len(order_group2), 10)
+
+    def test_cl_list_orders_previous(self):
+        """Covers using next reference for listing orders.
+        """
+        # Create order pool
+        for count in range(1, 20):
+            resp = self.barb_behaviors.create_order_from_config(
+                use_expiration=False)
+            self.assertEqual(resp['status_code'], 202,
+                             'Barbican returned bad status code')
+
+        # First set of orders
+        order_group1, prev_ref, next_ref = self.cl_client.list_orders(
+            limit=10, offset=10)
+
+        # Previous set of orders
+        list_tuple = self.cl_client.list_orders_by_href(href=prev_ref)
+        order_group2 = list_tuple[0]
+
+        order_ids1 = []
+        order_ids2 = []
+        for order in order_group1:
+            order_ids1.append(order.id)
+        for order in order_group2:
+            order_ids2.append(order.id)
+
+        duplicates = [order_id for order_id in order_ids1
+                      if order_id in order_ids2]
+
+        self.assertEqual(len(duplicates), 0,
+                         'Using next reference didn\'t return unique orders')
+        self.assertEqual(len(order_group2), 10)
+
+    def test_cl_list_orders_w_null_values(self):
+        """Covers listing orders with null values for the offset and limit
+        parameters.
+        - Reported in python-barbicanclient GitHub Issue #12
+        """
+        resp = self.barb_behaviors.create_order_from_config(
+            use_expiration=False)
+        self.assertEqual(resp['status_code'], 202,
+                         'Barbican returned bad status code')
+        try:
+            self.cl_client.list_orders(limit=None, offset=None)
+        except ClientException, error:
+            self.fail("Failed with ClientException: %s" % error)

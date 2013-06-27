@@ -80,10 +80,14 @@ class SecretsAPI(SecretsFixture):
     def test_cl_create_secret_w_invalid_bit_length(self):
         """Covers creating secret with a bit length that is not an integer.
         Should raise a ClientException.
+        - Reported in python-barbicanclient GitHub Issue #11
         """
-        self.assertRaises(ClientException,
-                          self.cl_behaviors.create_secret_overriding_cfg,
-                          bit_length='not-an-int')
+        try:
+            self.assertRaises(ClientException,
+                              self.cl_behaviors.create_secret_overriding_cfg,
+                              bit_length='not-an-int')
+        except ValueError, error:
+            self.fail("Failed with ValueError: %s" % error)
 
     def test_cl_create_secret_w_negative_bit_length(self):
         """Covers creating secret with a negative bit length.
@@ -305,17 +309,96 @@ class SecretsAPI(SecretsFixture):
         list_tuple = self.cl_client.list_secrets(limit=20, offset=10)
         sec_group2 = list_tuple[0]
 
-        sec_id1 = []
+        sec_ids1 = []
         sec_ids2 = []
         for secret in sec_group1:
-            sec_id1.append(secret.id)
+            sec_ids1.append(secret.id)
         for secret in sec_group2:
             sec_ids2.append(secret.id)
 
-        duplicates = [secret_id for secret_id in sec_id1
+        duplicates = [secret_id for secret_id in sec_ids1
                       if secret_id in sec_ids2]
 
         self.assertEqual(len(sec_group1), 10)
         self.assertGreaterEqual(len(sec_group2), 1)
         self.assertEqual(len(duplicates), 0,
                          'Using offset didn\'t return unique secrets')
+
+    def test_cl_list_secrets_next(self):
+        """Covers using next reference for listing secrets.
+        """
+        # Create secret pool
+        for count in range(1, 20):
+            resp = self.barb_behaviors.create_secret_from_config(
+                use_expiration=False)
+            self.assertEqual(resp['status_code'], 201,
+                             'Barbican returned bad status code')
+
+        # First set of secrets
+        sec_group1, prev_ref, next_ref = self.cl_client.list_secrets(
+            limit=10, offset=0)
+
+        # Next set of secrets
+        list_tuple = self.cl_client.list_secrets_by_href(href=next_ref)
+        sec_group2 = list_tuple[0]
+
+        sec_ids1 = []
+        sec_ids2 = []
+        for secret in sec_group1:
+            sec_ids1.append(secret.id)
+        for secret in sec_group2:
+            sec_ids2.append(secret.id)
+
+        duplicates = [secret_id for secret_id in sec_ids1
+                      if secret_id in sec_ids2]
+
+        self.assertEqual(len(duplicates), 0,
+                         'Using next reference didn\'t return unique secrets')
+        self.assertEqual(len(sec_group2), 10)
+
+    def test_cl_list_secrets_previous(self):
+        """Covers using previous reference for listing secrets.
+        """
+        for count in range(1, 20):
+            resp = self.barb_behaviors.create_secret_from_config(
+                use_expiration=False)
+            self.assertEqual(resp['status_code'], 201,
+                             'Barbican returned bad status code')
+
+        # First set of secrets
+        sec_group1, prev_ref, next_ref = self.cl_client.list_secrets(
+            limit=10, offset=10)
+
+        # Previous set of secrets
+        list_tuple = self.cl_client.list_secrets_by_href(href=prev_ref)
+        sec_group2 = list_tuple[0]
+
+        sec_ids1 = []
+        sec_ids2 = []
+        for secret in sec_group1:
+            sec_ids1.append(secret.id)
+        for secret in sec_group2:
+            sec_ids2.append(secret.id)
+
+        duplicates = [secret_id for secret_id in sec_ids1
+                      if secret_id in sec_ids2]
+
+        self.assertEqual(
+            len(duplicates),
+            0,
+            'Using previous reference didn\'t return unique secrets')
+        self.assertEqual(len(sec_group2), 10)
+
+    def test_cl_list_secrets_w_null_values(self):
+        """Covers listing secrets with null values for the offset and limit
+        parameters.
+        - Reported in python-barbicanclient GitHub Issue #12
+        """
+        resp = self.barb_behaviors.create_secret_from_config(
+            use_expiration=False)
+        self.assertEqual(resp['status_code'], 201,
+                         'Barbican returned bad status code')
+        try:
+            self.cl_client.list_secrets(limit=None, offset=None)
+        except ClientException, error:
+            self.fail("Failed with ClientException: %s" % error)

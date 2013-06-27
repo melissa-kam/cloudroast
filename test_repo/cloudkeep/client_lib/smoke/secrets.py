@@ -23,13 +23,16 @@ class SecretsAPI(SecretsFixture):
         Includes creating a secret with an expiration.
         - Reported in python-barbicanclient GitHub Issue #9
         """
-        secret = self.cl_behaviors.create_secret_from_config(
-            use_expiration=True)
+        try:
+            secret = self.cl_behaviors.create_secret_from_config(
+                use_expiration=True)
 
-        resp = self.barb_client.get_secret(secret.id)
+            resp = self.barb_client.get_secret(secret.id)
 
-        self.assertEqual(resp.status_code, 200,
-                         'Barbican returned bad status code')
+            self.assertEqual(resp.status_code, 200,
+                             'Barbican returned bad status code')
+        except TypeError, error:
+            self.fail("Failed with TypeError: %s" % error)
 
     def test_cl_create_secret_wout_expiration(self):
         """Covers creating a secret without expiration with
@@ -100,11 +103,13 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(resp['status_code'], 201,
                          'Barbican returned bad status code')
 
-        list_tuple = self.cl_client.list_secrets()
+        list_tuple = self.cl_client.list_secrets(limit=10, offset=0)
         secrets = list_tuple[0]
         self.assertGreater(len(secrets), 0)
 
     def test_cl_list_secrets_by_href(self):
+        """Covers listing secrets by href with barbicanclient library.
+        """
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 201,
