@@ -111,6 +111,19 @@ class SecretsAPI(SecretsFixture):
          system should return the secret's UUID on a get
          - Reported in Barbican GitHub Issue #89
         """
+        c_resp = self.behaviors.create_secret(name='',
+                                              mime_type=self.config.mime_type)
+
+        get_resp = self.client.get_secret(secret_id=c_resp['secret_id'])
+        self.assertEqual(get_resp.entity.name,
+                         c_resp['secret_id'],
+                         'name doesn\'t match UUID of secret')
+
+    def test_creating_w_null_name(self):
+        """ When a test is created with an empty or null name attribute, the
+         system should return the secret's UUID on a get
+         - Reported in Barbican GitHub Issue #89
+        """
         c_resp = self.behaviors.create_secret(name=None,
                                               mime_type=self.config.mime_type)
 
@@ -121,6 +134,11 @@ class SecretsAPI(SecretsFixture):
 
     def test_creating_w_empty_mime_type(self):
         resp = self.behaviors.create_secret(mime_type='')
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
+    def test_creating_w_null_mime_type(self):
+        resp = self.behaviors.create_secret(mime_type=None)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
@@ -217,7 +235,19 @@ class SecretsAPI(SecretsFixture):
 
     def test_putting_w_empty_data(self):
         """
-        Covers case of putting empty data to a secret. Should return 400.
+        Covers case of putting empty String to a secret. Should return 400.
+        """
+        resp = self.behaviors.create_secret(mime_type=self.config.mime_type)
+        put_resp = self.client.add_secret_plain_text(
+            secret_id=resp['secret_id'],
+            mime_type=self.config.mime_type,
+            plain_text='')
+        self.assertEqual(put_resp.status_code, 400,
+                         'Should have failed with 400')
+
+    def test_putting_w_null_data(self):
+        """
+        Covers case of putting null String to a secret. Should return 400.
         """
         resp = self.behaviors.create_secret(mime_type=self.config.mime_type)
         put_resp = self.client.add_secret_plain_text(
@@ -301,3 +331,12 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.behaviors.create_secret(mime_type=self.config.mime_type)
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
+
+    def test_secret_paging_w_invalid_parameters(self):
+        """ Covers listing secrets with invalid limit and offset parameters.
+        Should return 400.
+        - Reported in Barbican GitHub Issue #171
+        """
+        self.behaviors.create_secret_from_config(use_expiration=False)
+        resp = self.client.get_secrets(limit='not-an-int', offset='not-an-int')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')

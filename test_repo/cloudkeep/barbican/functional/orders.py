@@ -21,6 +21,10 @@ from test_repo.cloudkeep.barbican.fixtures import OrdersFixture
 class OrdersAPI(OrdersFixture):
 
     def check_expiration_iso8601_timezone(self, timezone, offset):
+        """ Creates an order with an expiration for the timezone and
+        offset and checks that the creation succeeds and the expiration
+        is correct.
+        """
         one_day_ahead = (datetime.today() + timedelta(days=1))
         timestamp = '{time}{timezone}'.format(
             time=one_day_ahead,
@@ -37,6 +41,9 @@ class OrdersAPI(OrdersFixture):
                          'Response didn\'t return the expected time')
 
     def check_invalid_expiration_timezone(self, timezone):
+        """ Creates an order with an expiration for the given invalid
+        timezone and checks that the creation fails.
+        """
         timestamp = '{time}{timezone}'.format(
             time=(datetime.today() + timedelta(days=1)),
             timezone=timezone)
@@ -59,7 +66,7 @@ class OrdersAPI(OrdersFixture):
             cypher_type=self.config.cypher_type)
         self.assertEqual(resp['status_code'], 400, 'Returned bad status code')
 
-    def test_create_order_wout_name(self):
+    def test_create_order_w_null_name(self):
         """ When you attempt to create an order without the name attribute the
          request appears to fail without a status code.
         - Reported in Barbican GitHub Issue #93
@@ -67,6 +74,18 @@ class OrdersAPI(OrdersFixture):
         resp = self.behaviors.create_order(
             mime_type=self.config.mime_type,
             name=None,
+            algorithm=self.config.algorithm,
+            bit_length=self.config.bit_length,
+            cypher_type=self.config.cypher_type)
+        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+
+    def test_create_order_w_empty_name(self):
+        """ Covers case of creating an order with an empty String as the name
+        attribute.
+        """
+        resp = self.behaviors.create_order(
+            mime_type=self.config.mime_type,
+            name='',
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
@@ -172,8 +191,8 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
-    def test_create_order_wout_name_checking_name(self):
-        """ When an order is created with an empty or null name attribute, the
+    def test_create_order_w_empty_checking_name(self):
+        """ When an order is created with an empty name attribute, the
         system should return the secret's UUID on a get. Extends coverage of
         test_create_order_wout_name. Assumes that the order status will be
         active and not pending.
@@ -181,6 +200,26 @@ class OrdersAPI(OrdersFixture):
         resp = self.behaviors.create_order(
             mime_type=self.config.mime_type,
             name="",
+            algorithm=self.config.algorithm,
+            bit_length=self.config.bit_length,
+            cypher_type=self.config.cypher_type)
+
+        get_resp = self.orders_client.get_order(resp['order_id'])
+        secret_id = self.behaviors.get_id_from_ref(
+            ref=get_resp.entity.secret_href)
+        secret = get_resp.entity.secret
+        self.assertEqual(secret.name, secret_id,
+                         'Name did not match secret\'s UUID')
+
+    def test_create_order_w_null_checking_name(self):
+        """ When an order is created with a null name attribute, the
+        system should return the secret's UUID on a get. Extends coverage of
+        test_create_order_wout_name. Assumes that the order status will be
+        active and not pending.
+        """
+        resp = self.behaviors.create_order(
+            mime_type=self.config.mime_type,
+            name=None,
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
@@ -267,7 +306,7 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
-    def test_creating_order_wout_bit_length(self):
+    def test_creating_order_w_null_bit_length(self):
         """Covers case where order creation fails when bit length is not
         provided.
         - Reported in Barbican GitHub Issue #156
@@ -276,5 +315,16 @@ class OrdersAPI(OrdersFixture):
             mime_type=self.config.mime_type,
             name=self.config.name,
             algorithm=self.config.algorithm,
-            cypher_type=self.config.cypher_type)
+            cypher_type=self.config.cypher_type,
+            bit_length=None)
         self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+
+    def test_order_paging_w_invalid_parameters(self):
+        """ Covers listing orders with invalid limit and offset parameters.
+        Should return 400.
+        - Reported in Barbican GitHub Issue #171
+        """
+        self.behaviors.create_order_from_config(use_expiration=False)
+        resp = self.orders_client.get_orders(
+            limit='not-an-int', offset='not-an-int')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
