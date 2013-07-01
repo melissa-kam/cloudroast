@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
 from test_repo.cloudkeep.client_lib.fixtures import OrdersFixture
 
 
@@ -126,7 +125,7 @@ class OrdersAPI(OrdersFixture):
             use_expiration=False)
         self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
 
-        list_tuple = self.cl_client.list_orders()
+        list_tuple = self.cl_client.list_orders(limit=10, offset=0)
         orders = list_tuple[0]
         self.assertGreater(len(orders), 0)
 

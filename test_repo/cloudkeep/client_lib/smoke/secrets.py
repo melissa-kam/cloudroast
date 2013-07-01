@@ -28,7 +28,6 @@ class SecretsAPI(SecretsFixture):
                 use_expiration=True)
 
             resp = self.barb_client.get_secret(secret.id)
-
             self.assertEqual(resp.status_code, 200,
                              'Barbican returned bad status code')
         except TypeError, error:

@@ -43,6 +43,13 @@ class SecretsAPI(SecretsFixture):
             name=None, mime_type=self.config.mime_type)
         self.assertIsNotNone(secret)
 
+    def test_cl_create_secret_w_empty_name(self):
+        """Covers creating secret with an empty name.
+        """
+        secret = self.cl_behaviors.create_secret(
+            name='', mime_type=self.config.mime_type)
+        self.assertIsNotNone(secret)
+
     def test_cl_create_secret_w_null_name_checking_name(self):
         """Covers creating secret with a null name, checking that the name
         matches the secret ID.
@@ -52,8 +59,17 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(secret.name, secret.id,
                          "Name did not match secret ID")
 
+    def test_cl_create_secret_w_empty_name_checking_name(self):
+        """Covers creating secret with an empty name, checking that the name
+        matches the secret ID.
+        """
+        secret = self.cl_behaviors.create_secret(
+            name='', mime_type=self.config.mime_type)
+        self.assertEqual(secret.name, secret.id,
+                         "Name did not match secret ID")
+
     def test_cl_create_secret_w_empty_secret(self):
-        """Covers creating secret with an empty plain-text value.
+        """Covers creating secret with an empty String as the plain-text value.
         Should raise a ClientException.
         """
         self.assertRaises(ClientException,
@@ -388,17 +404,3 @@ class SecretsAPI(SecretsFixture):
             0,
             'Using previous reference didn\'t return unique secrets')
         self.assertEqual(len(sec_group2), 10)
-
-    def test_cl_list_secrets_w_null_values(self):
-        """Covers listing secrets with null values for the offset and limit
-        parameters.
-        - Reported in python-barbicanclient GitHub Issue #12
-        """
-        resp = self.barb_behaviors.create_secret_from_config(
-            use_expiration=False)
-        self.assertEqual(resp['status_code'], 201,
-                         'Barbican returned bad status code')
-        try:
-            self.cl_client.list_secrets(limit=None, offset=None)
-        except ClientException, error:
-            self.fail("Failed with ClientException: %s" % error)

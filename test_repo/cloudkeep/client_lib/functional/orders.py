@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
 from test_repo.cloudkeep.client_lib.fixtures import OrdersFixture
 from barbicanclient.common.exceptions import ClientException
 
@@ -39,7 +40,7 @@ class OrdersAPI(OrdersFixture):
         """
         self.assertRaises(ClientException, self.cl_behaviors.create_order)
 
-    def test_cl_create_order_wout_name(self):
+    def test_cl_create_order_w_null_name(self):
         """Covers creating order without a null name.
         """
         order = self.cl_behaviors.create_order(
@@ -50,12 +51,37 @@ class OrdersAPI(OrdersFixture):
             cypher_type=self.config.cypher_type)
         self.assertIsNotNone(order)
 
-    def test_cl_create_order_wout_name_checking_name(self):
+    def test_cl_create_order_w_null_name_checking_name(self):
         """Covers creating order with a null name, checking that the name
         matches the order ID.
         """
         order = self.cl_behaviors.create_order(
             name=None,
+            mime_type=self.config.mime_type,
+            algorithm=self.config.algorithm,
+            bit_length=self.config.bit_length,
+            cypher_type=self.config.cypher_type)
+        secret_id = self.cl_behaviors.get_id_from_ref(order.secret_ref)
+        self.assertEqual(order.secret['name'], secret_id,
+                         "Name did not match order ID")
+
+    def test_cl_create_order_w_null_name(self):
+        """Covers creating order without an empty name.
+        """
+        order = self.cl_behaviors.create_order(
+            name='',
+            mime_type=self.config.mime_type,
+            algorithm=self.config.algorithm,
+            bit_length=self.config.bit_length,
+            cypher_type=self.config.cypher_type)
+        self.assertIsNotNone(order)
+
+    def test_cl_create_order_w_null_name_checking_name(self):
+        """Covers creating order with an empty name, checking that the name
+        matches the order ID.
+        """
+        order = self.cl_behaviors.create_order(
+            name='',
             mime_type=self.config.mime_type,
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
@@ -313,17 +339,3 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(len(duplicates), 0,
                          'Using next reference didn\'t return unique orders')
         self.assertEqual(len(order_group2), 10)
-
-    def test_cl_list_orders_w_null_values(self):
-        """Covers listing orders with null values for the offset and limit
-        parameters.
-        - Reported in python-barbicanclient GitHub Issue #12
-        """
-        resp = self.barb_behaviors.create_order_from_config(
-            use_expiration=False)
-        self.assertEqual(resp['status_code'], 202,
-                         'Barbican returned bad status code')
-        try:
-            self.cl_client.list_orders(limit=None, offset=None)
-        except ClientException, error:
-            self.fail("Failed with ClientException: %s" % error)
