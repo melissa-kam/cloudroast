@@ -18,11 +18,16 @@ from cafe.drivers.unittest.fixtures import BaseTestFixture
 from cloudcafe.cloudkeep.barbican.version.client import VersionClient
 from cloudcafe.cloudkeep.barbican.secrets.client import SecretsClient
 from cloudcafe.cloudkeep.barbican.orders.client import OrdersClient
+from cloudcafe.cloudkeep.barbican.tokens_api.client import TokenAPI_Client
 from cloudcafe.cloudkeep.barbican.secrets.behaviors import SecretsBehaviors
 from cloudcafe.cloudkeep.barbican.orders.behaviors import OrdersBehavior
+from cloudcafe.cloudkeep.barbican.tokens_api.behaviors import \
+    TokenAPI_Behaviors
 from cloudcafe.cloudkeep.config import MarshallingConfig, CloudKeepConfig, \
-    CloudKeepSecretsConfig
+    CloudKeepSecretsConfig, CloudKeepKeystoneConfig
 
+
+from cloudcafe.cloudkeep.barbican.tokens_api.provider import TokenAPI_Provider
 
 class BarbicanFixture(BaseTestFixture):
 
@@ -31,6 +36,7 @@ class BarbicanFixture(BaseTestFixture):
         super(BarbicanFixture, cls).setUpClass()
         cls.marshalling = MarshallingConfig()
         cls.cloudkeep = CloudKeepConfig()
+        cls.keystone = CloudKeepKeystoneConfig()
 
     def get_id(self, request):
         """
@@ -96,3 +102,14 @@ class OrdersFixture(BarbicanFixture):
     def tearDown(self):
         self.behaviors.delete_all_created_orders_and_secrets()
         super(OrdersFixture, self).tearDown()
+
+
+class AuthenticationFixture(BarbicanFixture):
+    @classmethod
+    def setUpClass(cls):
+        super(AuthenticationFixture, cls).setUpClass()
+        cls.client = TokenAPI_Client(
+            url=cls.keystone.authentication_endpoint,
+            serialize_format=cls.marshalling.serializer,
+            deserialize_format=cls.marshalling.deserializer)
+        cls.behaviors = TokenAPI_Behaviors(cls.client)
