@@ -108,8 +108,12 @@ class AuthenticationFixture(BarbicanFixture):
     @classmethod
     def setUpClass(cls):
         super(AuthenticationFixture, cls).setUpClass()
-        cls.client = TokenAPI_Client(
+        cls.auth_client = TokenAPI_Client(
             url=cls.keystone.authentication_endpoint,
             serialize_format=cls.marshalling.serializer,
             deserialize_format=cls.marshalling.deserializer)
-        cls.behaviors = TokenAPI_Behaviors(cls.client)
+        cls.auth_behaviors = TokenAPI_Behaviors(cls.auth_client)
+        cls.version_client = VersionClient(
+            url=cls.keystone.endpoint,
+            serialize_format=cls.marshalling.serializer,
+            deserialize_format=cls.marshalling.deserializer)
