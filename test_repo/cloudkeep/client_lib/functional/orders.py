@@ -41,8 +41,7 @@ class OrdersAPI(OrdersFixture):
         self.assertRaises(ClientException, self.cl_behaviors.create_order)
 
     def test_cl_create_order_w_null_name(self):
-        """Covers creating order without a null name.
-        """
+        """Covers creating order without a null name."""
         order = self.cl_behaviors.create_order(
             name=None,
             mime_type=self.config.mime_type,
@@ -66,8 +65,7 @@ class OrdersAPI(OrdersFixture):
                          "Name did not match order ID")
 
     def test_cl_create_order_w_null_name(self):
-        """Covers creating order without an empty name.
-        """
+        """Covers creating order without an empty name."""
         order = self.cl_behaviors.create_order(
             name='',
             mime_type=self.config.mime_type,
@@ -78,8 +76,7 @@ class OrdersAPI(OrdersFixture):
 
     def test_cl_create_order_w_null_name_checking_name(self):
         """Covers creating order with an empty name, checking that the name
-        matches the order ID.
-        """
+        matches the order ID."""
         order = self.cl_behaviors.create_order(
             name='',
             mime_type=self.config.mime_type,
@@ -244,8 +241,7 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(secret.cypher_type, self.config.cypher_type)
 
     def test_cl_list_orders_limit_and_offset(self):
-        """Covers using the limit and offset attribute of listing orders.
-        """
+        """Covers using the limit and offset attribute of listing orders."""
         # Create order pool
         for count in range(1, 20):
             resp = self.barb_behaviors.create_order_from_config(
@@ -277,8 +273,7 @@ class OrdersAPI(OrdersFixture):
                          'Using offset didn\'t return unique orders')
 
     def test_cl_list_orders_next(self):
-        """Covers using next reference for listing orders.
-        """
+        """Covers using next reference for listing orders."""
         # Create order pool
         for count in range(1, 20):
             resp = self.barb_behaviors.create_order_from_config(
@@ -309,8 +304,7 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(len(order_group2), 10)
 
     def test_cl_list_orders_previous(self):
-        """Covers using next reference for listing orders.
-        """
+        """Covers using next reference for listing orders."""
         # Create order pool
         for count in range(1, 20):
             resp = self.barb_behaviors.create_order_from_config(

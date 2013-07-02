@@ -42,8 +42,7 @@ class SecretsAPI(SecretsFixture):
                          'Barbican returned bad status code')
 
     def test_cl_get_secret_by_href(self):
-        """Covers getting a secret by href with barbicanclient library.
-        """
+        """Covers getting a secret by href with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
 
@@ -51,8 +50,7 @@ class SecretsAPI(SecretsFixture):
         self.assertIsNotNone(secret)
 
     def test_cl_get_secret_by_id(self):
-        """Covers getting a secret by id with barbicanclient library.
-        """
+        """Covers getting a secret by id with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 201,
@@ -61,8 +59,7 @@ class SecretsAPI(SecretsFixture):
         self.assertIsNotNone(secret)
 
     def test_cl_delete_secret_by_href(self):
-        """Covers deleting a secret by href with barbicanclient library.
-        """
+        """Covers deleting a secret by href with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 201,
@@ -78,8 +75,7 @@ class SecretsAPI(SecretsFixture):
                          'Should have failed with 404')
 
     def test_cl_delete_secret_by_id(self):
-        """Covers deleting a secret by id with barbicanclient library.
-        """
+        """Covers deleting a secret by id with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 201,
@@ -95,8 +91,7 @@ class SecretsAPI(SecretsFixture):
                          'Should have failed with 404')
 
     def test_cl_list_secrets(self):
-        """Covers listing secrets with barbicanclient library.
-        """
+        """Covers listing secrets with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 201,
@@ -107,8 +102,7 @@ class SecretsAPI(SecretsFixture):
         self.assertGreater(len(secrets), 0)
 
     def test_cl_list_secrets_by_href(self):
-        """Covers listing secrets by href with barbicanclient library.
-        """
+        """Covers listing secrets by href with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 201,

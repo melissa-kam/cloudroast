@@ -37,15 +37,13 @@ class SecretsAPI(SecretsFixture):
         self.assertRaises(ClientException, self.cl_behaviors.create_secret)
 
     def test_cl_create_secret_w_null_name(self):
-        """Covers creating secret with a null name.
-        """
+        """Covers creating secret with a null name."""
         secret = self.cl_behaviors.create_secret(
             name=None, mime_type=self.config.mime_type)
         self.assertIsNotNone(secret)
 
     def test_cl_create_secret_w_empty_name(self):
-        """Covers creating secret with an empty name.
-        """
+        """Covers creating secret with an empty name."""
         secret = self.cl_behaviors.create_secret(
             name='', mime_type=self.config.mime_type)
         self.assertIsNotNone(secret)
@@ -156,8 +154,7 @@ class SecretsAPI(SecretsFixture):
                           secret_id='invalid-id')
 
     def test_cl_get_secret_checking_metadata_by_href(self):
-        """Covers getting a secret by href and checking the secret metadata.
-        """
+        """Covers getting a secret by href and checking the secret metadata."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 201,
@@ -173,8 +170,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(secret.bit_length, self.config.bit_length)
 
     def test_cl_get_secret_checking_metadata_by_id(self):
-        """Covers getting a secret by id and checking the secret metadata.
-        """
+        """Covers getting a secret by id and checking the secret metadata."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
         self.assertEqual(resp['status_code'], 201,
@@ -308,8 +304,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEquals(raw_secret, data, 'Secret data does not match')
 
     def test_cl_list_secrets_limit_and_offset(self):
-        """Covers using the limit and offset attribute of listing secrets.
-        """
+        """Covers using the limit and offset attribute of listing secrets."""
         # Create secret pool
         for count in range(1, 20):
             resp = self.barb_behaviors.create_secret_from_config(
@@ -341,8 +336,7 @@ class SecretsAPI(SecretsFixture):
                          'Using offset didn\'t return unique secrets')
 
     def test_cl_list_secrets_next(self):
-        """Covers using next reference for listing secrets.
-        """
+        """Covers using next reference for listing secrets."""
         # Create secret pool
         for count in range(1, 20):
             resp = self.barb_behaviors.create_secret_from_config(
@@ -373,8 +367,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(len(sec_group2), 10)
 
     def test_cl_list_secrets_previous(self):
-        """Covers using previous reference for listing secrets.
-        """
+        """Covers using previous reference for listing secrets."""
         for count in range(1, 20):
             resp = self.barb_behaviors.create_secret_from_config(
                 use_expiration=False)

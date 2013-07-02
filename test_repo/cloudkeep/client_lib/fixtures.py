@@ -21,7 +21,7 @@ from cloudcafe.cloudkeep.barbican.orders.client import OrdersClient
 from cloudcafe.cloudkeep.barbican.secrets.behaviors import SecretsBehaviors
 from cloudcafe.cloudkeep.barbican.orders.behaviors import OrdersBehavior
 from cloudcafe.cloudkeep.config import MarshallingConfig, CloudKeepConfig, \
-    CloudKeepSecretsConfig
+    CloudKeepSecretsConfig, CloudKeepClientLibConfig
 from cloudcafe.cloudkeep.client_lib.secrets.clients import \
     ClientLibSecretsClient
 from cloudcafe.cloudkeep.client_lib.secrets.behaviors import \
@@ -67,6 +67,7 @@ class SecretsFixture(ClientLibFixture):
     def setUpClass(cls):
         super(SecretsFixture, cls).setUpClass()
         cls.config = CloudKeepSecretsConfig()
+        cls.client_lib_config = CloudKeepClientLibConfig()
         cls.barb_client = SecretsClient(
             url=cls.cloudkeep.base_url,
             api_version=cls.cloudkeep.api_version,
@@ -79,10 +80,10 @@ class SecretsFixture(ClientLibFixture):
             url=cls.cloudkeep.base_url,
             api_version=cls.cloudkeep.api_version,
             tenant_id=cls.cloudkeep.tenant_id,
-            auth_endpoint='auth_endpoint',
-            user='user',
-            key='key',
-            token='bypass')
+            auth_endpoint=cls.client_lib_config.authentication_endpoint,
+            user=cls.client_lib_config.username,
+            key=cls.client_lib_config.key,
+            token=cls.client_lib_config.token)
         cls.cl_behaviors = ClientLibSecretsBehaviors(
             barb_client=cls.barb_client, cl_client=cls.cl_client,
             config=cls.config)
@@ -98,6 +99,7 @@ class OrdersFixture(ClientLibFixture):
     def setUpClass(cls):
         super(OrdersFixture, cls).setUpClass()
         cls.config = CloudKeepSecretsConfig()
+        cls.client_lib_config = CloudKeepClientLibConfig()
         cls.barb_client = OrdersClient(
             url=cls.cloudkeep.base_url,
             api_version=cls.cloudkeep.api_version,
@@ -117,10 +119,10 @@ class OrdersFixture(ClientLibFixture):
             url=cls.cloudkeep.base_url,
             api_version=cls.cloudkeep.api_version,
             tenant_id=cls.cloudkeep.tenant_id,
-            auth_endpoint='auth_endpoint',
-            user='user',
-            key='key',
-            token='bypass')
+            auth_endpoint=cls.client_lib_config.authentication_endpoint,
+            user=cls.client_lib_config.username,
+            key=cls.client_lib_config.key,
+            token=cls.client_lib_config.token)
         cls.cl_behaviors = ClientLibOrdersBehaviors(
             barb_client=cls.barb_client, secrets_client=cls.secrets_client,
             cl_client=cls.cl_client, config=cls.config)
