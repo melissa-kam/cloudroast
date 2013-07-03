@@ -16,6 +16,7 @@ limitations under the License.
 import unittest2
 from datetime import datetime, timedelta
 from test_repo.cloudkeep.barbican.fixtures import SecretsFixture
+from cafe.drivers.unittest.decorators import tags
 
 
 class SecretsAPI(SecretsFixture):
@@ -44,6 +45,7 @@ class SecretsAPI(SecretsFixture):
             expiration=timestamp)
         self.assertEqual(resp['status_code'], 400)
 
+    @tags(type='positive')
     def test_secret_with_plain_text_deletion(self):
         """ Covers case where the system fails to delete a secret if it
         contains a set "plain_text" field.
@@ -56,6 +58,7 @@ class SecretsAPI(SecretsFixture):
         del_resp = self.behaviors.delete_secret(resp['secret_id'])
         self.assertEqual(del_resp.status_code, 200)
 
+    @tags(type='positive')
     def test_create_secret_with_long_expiration_timezone(self):
         """ Covers case of a timezone being added to the expiration.
         The server should convert it into zulu time.
@@ -64,6 +67,7 @@ class SecretsAPI(SecretsFixture):
         self.check_expiration_iso8601_timezone('-05:00', 5)
         self.check_expiration_iso8601_timezone('+05:00', -5)
 
+    @tags(type='positive')
     def test_create_secret_with_short_expiration_timezone(self):
         """ Covers case of a timezone being added to the expiration.
         The server should convert it into zulu time.
@@ -72,12 +76,14 @@ class SecretsAPI(SecretsFixture):
         self.check_expiration_iso8601_timezone('-01', 1)
         self.check_expiration_iso8601_timezone('+01', -1)
 
+    @tags(type='negative')
     def test_create_secret_with_bad_expiration_timezone(self):
         """ Covers case of a malformed timezone being added to the expiration.
         - Reported in Barbican GitHub Issue #134
         """
         self.check_invalid_expiration_timezone('-5:00')
 
+    @tags(type='positive')
     def test_find_a_single_secret_via_paging(self):
         """ Covers case where when you attempt to retrieve a list of secrets,
         if the limit is set higher than 8, the next attribute in the response
@@ -90,6 +96,7 @@ class SecretsAPI(SecretsFixture):
         secret = self.behaviors.find_secret(resp['secret_id'])
         self.assertIsNotNone(secret, 'Couldn\'t find created secret')
 
+    @tags(type='positive')
     def test_creating_secret_w_bit_length_str(self):
         resps = self.behaviors.create_and_check_secret(bit_length=512)
         secret = resps['get_resp'].entity
@@ -97,6 +104,7 @@ class SecretsAPI(SecretsFixture):
         self.assertIs(type(secret.bit_length), int)
         self.assertEqual(secret.bit_length, 512)
 
+    @tags(type='negative')
     def test_creating_w_null_entries(self):
         """ Covers case when you push a secret full of nulls. This should
         return a 400.
@@ -106,6 +114,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
+    @tags(type='positive')
     def test_creating_w_empty_name(self):
         """ When a test is created with an empty or null name attribute, the
          system should return the secret's UUID on a get
@@ -119,6 +128,7 @@ class SecretsAPI(SecretsFixture):
                          c_resp['secret_id'],
                          'name doesn\'t match UUID of secret')
 
+    @tags(type='positive')
     def test_creating_w_null_name(self):
         """ When a test is created with an empty or null name attribute, the
          system should return the secret's UUID on a get
@@ -132,22 +142,26 @@ class SecretsAPI(SecretsFixture):
                          c_resp['secret_id'],
                          'name doesn\'t match UUID of secret')
 
+    @tags(type='negative')
     def test_creating_w_empty_mime_type(self):
         resp = self.behaviors.create_secret(mime_type='')
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
+    @tags(type='negative')
     def test_creating_w_null_mime_type(self):
         resp = self.behaviors.create_secret(mime_type=None)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
+    @tags(type='negative')
     def test_creating_w_empty_secret(self):
         resp = self.behaviors.create_secret(mime_type=self.config.mime_type,
                                             plain_text='')
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
+    @tags(type='negative')
     def test_creating_w_oversized_secret(self):
         """
         Current size limit is 10k bytes. Beyond that it should return 413
@@ -158,25 +172,30 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(resps['create_resp']['status_code'], 413,
                          'Should have failed with 413')
 
+    @tags(type='negative')
     def test_creating_w_invalid_mime_type(self):
         resps = self.behaviors.create_and_check_secret(mime_type='crypto/boom')
         self.assertEqual(resps['create_resp']['status_code'], 400,
                          'Should have failed with 400')
 
+    @tags(type='negative')
     def test_getting_secret_that_doesnt_exist(self):
         resp = self.client.get_secret('not_a_uuid')
         self.assertEqual(resp.status_code, 404, 'Should have failed with 404')
 
+    @tags(type='negative')
     def test_getting_secret_data_w_invalid_mime_type(self):
         resp = self.behaviors.create_secret_from_config(use_expiration=False)
         resp = self.client.get_secret(resp['secret_id'], mime_type='i/m')
         self.assertEqual(resp.status_code, 406, 'Should have failed with 406')
 
+    @tags(type='negative')
     def test_creating_w_plain_text_as_array(self):
         resps = self.behaviors.create_and_check_secret(plain_text=['boom'])
         self.assertEqual(resps['create_resp']['status_code'], 400,
                          'Should have failed with 400')
 
+    @tags(type='positive')
     def test_paging_limit_and_offset(self):
         # Create secret pool
         for count in range(1, 20):
@@ -198,6 +217,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(len(duplicates), 0,
                          'Using offset didn\'t return unique secrets')
 
+    @tags(type='negative')
     def test_putting_secret_that_doesnt_exist(self):
         """ Covers case of putting secret information to a non-existent
         secret. Should return 404.
@@ -209,6 +229,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(resp.status_code, 404,
                          'Should have failed with 404')
 
+    @tags(type='negative')
     def test_putting_w_invalid_mime_type(self):
         """ Covers case of putting secret information with an
         invalid mime-type. Should return 400.
@@ -221,6 +242,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(put_resp.status_code, 400,
                          'Should have failed with 400')
 
+    @tags(type='negative')
     def test_putting_secret_w_data_already(self):
         """ Covers case of putting secret information to a secret that already
         has encrypted data associated with it. Should return 409.
@@ -233,6 +255,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(put_resp.status_code, 409,
                          'Should have failed with 409')
 
+    @tags(type='negative')
     def test_putting_w_empty_data(self):
         """
         Covers case of putting empty String to a secret. Should return 400.
@@ -245,6 +268,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(put_resp.status_code, 400,
                          'Should have failed with 400')
 
+    @tags(type='negative')
     def test_putting_w_null_data(self):
         """
         Covers case of putting null String to a secret. Should return 400.
@@ -257,6 +281,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(put_resp.status_code, 400,
                          'Should have failed with 400')
 
+    @tags(type='negative')
     def test_putting_w_oversized_data(self):
         """ Covers case of putting secret data that is beyond size limit.
         Current size limit is 10k bytes. Beyond that it should return 413.
@@ -270,6 +295,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(put_resp.status_code, 413,
                          'Should have failed with 413')
 
+    @tags(type='negative')
     def test_deleting_secret_that_doesnt_exist(self):
         """
         Covers case of deleting a non-existent secret. Should return 404.
@@ -277,15 +303,18 @@ class SecretsAPI(SecretsFixture):
         resp = self.behaviors.delete_secret(secret_id='not_a_uuid')
         self.assertEqual(resp.status_code, 404, 'Should have failed with 404')
 
+    @tags(type='negative')
     def test_creating_secret_w_invalid_expiration(self):
         """
         Covers creating secret with expiration that has already passed.
+        Should return 400.
         """
         resp = self.behaviors.create_secret_overriding_cfg(
             expiration='2000-01-10T14:58:52.546795')
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
+    @tags(type='positive')
     def test_checking_content_types_when_data(self):
         """ Covers checking that content types attribute is shown when secret
         has encrypted data associated with it.
@@ -295,6 +324,7 @@ class SecretsAPI(SecretsFixture):
         self.assertIsNotNone(secret.content_types,
                              'Should not have had content types')
 
+    @tags(type='positive')
     def test_checking_no_content_types_when_no_data(self):
         """ Covers checking that the content types attribute is not shown if
         the secret does not have encrypted data associated with it.
@@ -307,6 +337,7 @@ class SecretsAPI(SecretsFixture):
         self.assertIsNone(secret.content_types,
                           'Should have had content types')
 
+    @tags(type='negative')
     def test_creating_secret_w_invalid_bit_length(self):
         """ Cover case of creating a secret with a bit length that is not
         an integer. Should return 400.
@@ -316,6 +347,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
+    @tags(type='negative')
     def test_creating_secret_w_negative_bit_length(self):
         """ Covers case of creating a secret with a bit length
         that is negative. Should return 400.
@@ -325,6 +357,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
+    @tags(type='positive')
     def test_creating_secret_w_only_mime_type(self):
         """ Covers creating secret with only required fields. In this case,
         only mime type is required.
@@ -332,6 +365,7 @@ class SecretsAPI(SecretsFixture):
         resp = self.behaviors.create_secret(mime_type=self.config.mime_type)
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
 
+    @tags(type='negative')
     def test_secret_paging_w_invalid_parameters(self):
         """ Covers listing secrets with invalid limit and offset parameters.
         Should return 400.

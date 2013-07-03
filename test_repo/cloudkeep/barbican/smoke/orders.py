@@ -15,14 +15,17 @@ limitations under the License.
 """
 from cloudcafe.cloudkeep.barbican.orders.models.order import Order
 from test_repo.cloudkeep.barbican.fixtures import OrdersFixture
+from cafe.drivers.unittest.decorators import tags
 
 
 class OrdersAPI(OrdersFixture):
 
+    @tags(type='positive')
     def test_create_order(self):
         resp = self.behaviors.create_order_from_config()
         self.assertEqual(resp['status_code'], 202)
 
+    @tags(type='positive')
     def test_get_order_metadata(self):
         """ Checks metadata of secret created by order. Assumes that the
         order status will be active and not pending.
@@ -46,6 +49,7 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(metadata.algorithm, self.config.algorithm)
         self.assertEqual(metadata.bit_length, self.config.bit_length)
 
+    @tags(type='positive')
     def test_get_order(self):
         # Create an order to get
         resp = self.behaviors.create_order_from_config()
@@ -61,6 +65,7 @@ class OrdersAPI(OrdersFixture):
         self.assertIsNotNone(order.secret_href)
         self.assertTrue(order_status)
 
+    @tags(type='positive')
     def test_delete_order(self):
         # Create an order to delete
         resp = self.behaviors.create_order_from_config()
@@ -69,6 +74,7 @@ class OrdersAPI(OrdersFixture):
         del_resp = self.behaviors.delete_order(resp['order_id'])
         self.assertEqual(del_resp.status_code, 200)
 
+    @tags(type='positive')
     def test_get_orders(self):
         # Create 10 orders
         for i in range(0, 11):

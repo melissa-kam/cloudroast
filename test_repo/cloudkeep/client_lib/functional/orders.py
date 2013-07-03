@@ -16,10 +16,12 @@ limitations under the License.
 
 from test_repo.cloudkeep.client_lib.fixtures import OrdersFixture
 from barbicanclient.common.exceptions import ClientException
+from cafe.drivers.unittest.decorators import tags
 
 
 class OrdersAPI(OrdersFixture):
 
+    @tags(type='positive')
     def test_cl_create_order_w_only_mime_type(self):
         """Covers creating order with only required fields. In this case,
         only mime type is required.
@@ -27,12 +29,12 @@ class OrdersAPI(OrdersFixture):
         try:
             order = self.cl_behaviors.create_order(
                 mime_type=self.config.mime_type)
-
-            resp = self.barb_client.get_order(order.id)
-            self.assertEqual(resp.status_code, 200,
-                             'Barbican returned bad status code')
         except ClientException, error:
-            self.fail("Failed with ClientException: %s" % error)
+            self.fail("Creation failed with ClientException: %s" % error)
+
+        resp = self.barb_client.get_order(order.id)
+        self.assertEqual(resp.status_code, 200,
+                         'Barbican returned bad status code')
 
     def test_cl_create_order_w_null_values(self):
         """Covers creating order with all null values. Should raise a
@@ -40,6 +42,7 @@ class OrdersAPI(OrdersFixture):
         """
         self.assertRaises(ClientException, self.cl_behaviors.create_order)
 
+    @tags(type='positive')
     def test_cl_create_order_w_null_name(self):
         """Covers creating order without a null name."""
         order = self.cl_behaviors.create_order(
@@ -50,6 +53,7 @@ class OrdersAPI(OrdersFixture):
             cypher_type=self.config.cypher_type)
         self.assertIsNotNone(order)
 
+    @tags(type='positive')
     def test_cl_create_order_w_null_name_checking_name(self):
         """Covers creating order with a null name, checking that the name
         matches the order ID.
@@ -64,7 +68,8 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(order.secret['name'], secret_id,
                          "Name did not match order ID")
 
-    def test_cl_create_order_w_null_name(self):
+    @tags(type='positive')
+    def test_cl_create_order_w_empty_name(self):
         """Covers creating order without an empty name."""
         order = self.cl_behaviors.create_order(
             name='',
@@ -74,7 +79,8 @@ class OrdersAPI(OrdersFixture):
             cypher_type=self.config.cypher_type)
         self.assertIsNotNone(order)
 
-    def test_cl_create_order_w_null_name_checking_name(self):
+    @tags(type='positive')
+    def test_cl_create_order_w_empty_name_checking_name(self):
         """Covers creating order with an empty name, checking that the name
         matches the order ID."""
         order = self.cl_behaviors.create_order(
@@ -87,6 +93,7 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(order.secret['name'], secret_id,
                          "Name did not match order ID")
 
+    @tags(type='negative')
     def test_cl_create_order_w_invalid_mime_type(self):
         """Covers creating order with an invalid mime type.
         Should raise a ClientException.
@@ -95,6 +102,7 @@ class OrdersAPI(OrdersFixture):
                           self.cl_behaviors.create_order_overriding_cfg,
                           mime_type='crypto/boom')
 
+    @tags(type='negative')
     def test_cl_create_order_w_invalid_bit_length(self):
         """Covers creating order with a bit length that is not an integer.
         Should raise a ClientException.
@@ -103,6 +111,7 @@ class OrdersAPI(OrdersFixture):
                           self.cl_behaviors.create_order_overriding_cfg,
                           bit_length='not-an-int')
 
+    @tags(type='negative')
     def test_cl_create_order_w_negative_bit_length(self):
         """Covers creating order with a negative bit length.
         Should raise a ClientException.
@@ -111,6 +120,7 @@ class OrdersAPI(OrdersFixture):
                           self.cl_behaviors.create_order_overriding_cfg,
                           bit_length=-1)
 
+    @tags(type='positive')
     def test_cl_create_order_checking_metadata(self):
         """Covers creating order and checking metadata of secret created.
         Assumes that order status is active and not pending.
@@ -124,6 +134,7 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(secret['algorithm'], self.config.algorithm)
         self.assertEqual(secret['bit_length'], self.config.bit_length)
 
+    @tags(type='negative')
     def test_cl_delete_nonexistent_order_by_href(self):
         """Covers deleting an order that does not exist by href.
         Should raise a ClientException.
@@ -132,6 +143,7 @@ class OrdersAPI(OrdersFixture):
                           self.cl_behaviors.delete_order,
                           'not-an-href')
 
+    @tags(type='negative')
     def test_cl_delete_nonexistent_order_by_id(self):
         """Covers deleting an order that does not exist by id.
         Should raise a ClientException.
@@ -140,6 +152,7 @@ class OrdersAPI(OrdersFixture):
                           self.cl_behaviors.delete_order_by_id,
                           'not-an-id')
 
+    @tags(type='negative')
     def test_def_get_nonexistent_order_by_href(self):
         """Covers getting an order that does not exist by href.
         Should raise a ClientException.
@@ -148,6 +161,7 @@ class OrdersAPI(OrdersFixture):
                           self.cl_client.get_order,
                           'not-an-href')
 
+    @tags(type='negative')
     def test_cl_get_nonexistent_order_by_id(self):
         """Covers deleting an order that does not exist by id.
         Should raise a ClientException.
@@ -156,6 +170,7 @@ class OrdersAPI(OrdersFixture):
                           self.cl_client.get_order_by_id,
                           'not-an-id')
 
+    @tags(type='positive')
     def test_cl_get_order_by_href_checking_metadata(self):
         """Covers getting an order by href and checking the secret
         metadata. Assumes that order status is active and not pending.
@@ -174,6 +189,7 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(secret_metadata['cypher_type'],
                          self.config.cypher_type)
 
+    @tags(type='positive')
     def test_cl_get_order_by_id_checking_metadata(self):
         """Covers getting an order by id and checking the secret
         metadata. Compares to the values of the initial creation.
@@ -193,6 +209,7 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(secret_metadata['cypher_type'],
                          self.config.cypher_type)
 
+    @tags(type='positive')
     def test_cl_get_order_w_expiration_by_href(self):
         """Covers getting an order that created a secret with an expiration
         by href. Assumes that order status is active and not pending.
@@ -207,6 +224,7 @@ class OrdersAPI(OrdersFixture):
         secret = order.secret
         self.assertIsNotNone(secret['expiration'])
 
+    @tags(type='positive')
     def test_cl_get_order_w_expiration_by_id(self):
         """Covers getting an order that created a secret with an expiration
         by id. Assumes that order status is active and not pending.
@@ -221,6 +239,7 @@ class OrdersAPI(OrdersFixture):
         secret = order.secret
         self.assertIsNotNone(secret['expiration'])
 
+    @tags(type='positive')
     def test_cl_order_get_secret_checking_metadata(self):
         """Covers getting a secret using the Order object function and
         checking the metadata of the secret. Assumes that order status
@@ -240,6 +259,7 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(secret.bit_length, self.config.bit_length)
         self.assertEqual(secret.cypher_type, self.config.cypher_type)
 
+    @tags(type='positive')
     def test_cl_list_orders_limit_and_offset(self):
         """Covers using the limit and offset attribute of listing orders."""
         # Create order pool
@@ -272,6 +292,7 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(len(duplicates), 0,
                          'Using offset didn\'t return unique orders')
 
+    @tags(type='positive')
     def test_cl_list_orders_next(self):
         """Covers using next reference for listing orders."""
         # Create order pool
@@ -303,6 +324,7 @@ class OrdersAPI(OrdersFixture):
                          'Using next reference didn\'t return unique orders')
         self.assertEqual(len(order_group2), 10)
 
+    @tags(type='positive')
     def test_cl_list_orders_previous(self):
         """Covers using next reference for listing orders."""
         # Create order pool

@@ -14,10 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from test_repo.cloudkeep.barbican.fixtures import VersionFixture
+from cafe.drivers.unittest.decorators import tags
 
 
 class TestVersion(VersionFixture):
 
+    @tags(type='positive')
     def test_get_version(self):
         response = self.client.get_version()
         version = response.entity

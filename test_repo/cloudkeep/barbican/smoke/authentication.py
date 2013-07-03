@@ -15,10 +15,12 @@ limitations under the License.
 """
 
 from test_repo.cloudkeep.barbican.fixtures import AuthenticationFixture
+from cafe.drivers.unittest.decorators import tags
 
 
 class AuthenticationAPI(AuthenticationFixture):
 
+    @tags(type='positive')
     def test_get_version_w_authentication(self):
         """Covers acquiring an authentication token and using it to get the
         version. Only getting the version is implemented with authentication.
