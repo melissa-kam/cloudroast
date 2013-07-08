@@ -266,6 +266,7 @@ class OrdersAPI(OrdersFixture):
         self.check_expiration_iso8601_timezone('-01', 1)
         self.check_expiration_iso8601_timezone('+01', -1)
 
+    @tags(type='negative')
     def test_create_order_with_bad_expiration_timezone(self):
         """ Covers case of a malformed timezone being added to the expiration.
         - Reported in Barbican GitHub Issue #134
@@ -274,14 +275,39 @@ class OrdersAPI(OrdersFixture):
 
     @tags(type='positive')
     def test_create_order_w_128_bit_length(self):
-        """
-        Covers case of creating an order with a 128 bit length.
-        """
+        """Covers case of creating an order with a 128 bit length."""
         resps = self.behaviors.create_and_check_order(bit_length=128)
+        self.assertEqual(resps['create_resp']['status_code'],
+                         202, 'Returned bad status code')
+
         secret = resps['get_order_resp'].entity.secret
         self.assertEqual(resps['get_order_resp'].status_code, 200)
         self.assertIs(type(secret.bit_length), int)
         self.assertEqual(secret.bit_length, 128)
+
+    @tags(type='positive')
+    def test_create_order_w_192_bit_length(self):
+        """Covers case of creating an order with a 192 bit length."""
+        resps = self.behaviors.create_and_check_order(bit_length=192)
+        self.assertEqual(resps['create_resp']['status_code'],
+                         202, 'Returned bad status code')
+
+        secret = resps['get_order_resp'].entity.secret
+        self.assertEqual(resps['get_order_resp'].status_code, 200)
+        self.assertIs(type(secret.bit_length), int)
+        self.assertEqual(secret.bit_length, 192)
+
+    @tags(type='positive')
+    def test_create_order_w_256_bit_length(self):
+        """Covers case of creating an order with a 256 bit length."""
+        resps = self.behaviors.create_and_check_order(bit_length=256)
+        self.assertEqual(resps['create_resp']['status_code'],
+                         202, 'Returned bad status code')
+
+        secret = resps['get_order_resp'].entity.secret
+        self.assertEqual(resps['get_order_resp'].status_code, 200)
+        self.assertIs(type(secret.bit_length), int)
+        self.assertEqual(secret.bit_length, 256)
 
     @tags(type='positive')
     def test_order_and_secret_metadata_same(self):
@@ -354,24 +380,6 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='positive')
-    def test_create_order_w_192_bit_length(self):
-        """Covers case of creating an order with a 192 bit length."""
-        resps = self.behaviors.create_and_check_order(bit_length=192)
-        secret = resps['get_order_resp'].entity.secret
-        self.assertEqual(resps['get_order_resp'].status_code, 200)
-        self.assertIs(type(secret.bit_length), int)
-        self.assertEqual(secret.bit_length, 192)
-
-    @tags(type='positive')
-    def test_create_order_w_256_bit_length(self):
-        """Covers case of creating an order with a 256 bit length."""
-        resps = self.behaviors.create_and_check_order(bit_length=256)
-        secret = resps['get_order_resp'].entity.secret
-        self.assertEqual(resps['get_order_resp'].status_code, 200)
-        self.assertIs(type(secret.bit_length), int)
-        self.assertEqual(secret.bit_length, 256)
-
-    @tags(type='positive')
     def test_create_order_w_cbc_cypher_type(self):
         """Covers case of creating an order with a cbc cypher type."""
         resp = self.behaviors.create_order_overriding_cfg(cypher_type='cbc')
@@ -397,8 +405,9 @@ class OrdersAPI(OrdersFixture):
         """Covers case of creating an order with an alphanumeric name."""
         name = randomstring.get_random_string(prefix='1a2b')
         resps = self.behaviors.create_and_check_order(name=name)
-        self.assertEqual(resps['create_resp']['status_code'],
-                         202, 'Returned bad status code')
+        self.assertEqual(resps['create_resp']['status_code'], 202,
+                         'Returned bad status code')
+
         secret = resps['get_secret_resp'].entity
         self.assertEqual(secret.name, name, 'Secret name is not correct')
 
@@ -409,8 +418,9 @@ class OrdersAPI(OrdersFixture):
         """
         name = '~!@#$%^&*()_+`-={}[]|:;<>,.?"'
         resps = self.behaviors.create_and_check_order(name=name)
-        self.assertEqual(resps['create_resp']['status_code'],
-                         202, 'Returned bad status code')
+        self.assertEqual(resps['create_resp']['status_code'], 202,
+                         'Returned bad status code')
+
         secret = resps['get_secret_resp'].entity
         self.assertEqual(secret.name, name, 'Secret name is not correct')
 
@@ -419,8 +429,9 @@ class OrdersAPI(OrdersFixture):
         """Covers case of creating an order with a random uuid as the name."""
         uuid = str(uuid4())
         resps = self.behaviors.create_and_check_order(name=uuid)
-        self.assertEqual(resps['create_resp']['status_code'],
-                         202, 'Returned bad status code')
+        self.assertEqual(resps['create_resp']['status_code'], 202,
+                         'Returned bad status code')
+
         secret = resps['get_secret_resp'].entity
         self.assertEqual(secret.name, uuid, 'Secret name is not correct')
 
@@ -429,7 +440,8 @@ class OrdersAPI(OrdersFixture):
         """Covers case of creating an order with a 225 character name."""
         name = randomstring.get_random_string(size=225)
         resps = self.behaviors.create_and_check_order(name=name)
-        self.assertEqual(resps['create_resp']['status_code'],
-                         202, 'Returned bad status code')
+        self.assertEqual(resps['create_resp']['status_code'], 202,
+                         'Returned bad status code')
+
         secret = resps['get_secret_resp'].entity
         self.assertEqual(secret.name, name, 'Secret name is not correct')
