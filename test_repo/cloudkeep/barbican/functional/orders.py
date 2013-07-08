@@ -14,10 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import unittest2
-
 from datetime import datetime, timedelta
+from uuid import uuid4
+
 from test_repo.cloudkeep.barbican.fixtures import OrdersFixture
 from cafe.drivers.unittest.decorators import tags
+from cloudcafe.common.tools import randomstring
 
 
 class OrdersAPI(OrdersFixture):
@@ -147,7 +149,7 @@ class OrdersAPI(OrdersFixture):
         Covers testing paging limit and offset attributes when getting orders.
         """
         # Create order pool
-        for count in range(1, 20):
+        for count in range(20):
             self.behaviors.create_order_from_config()
 
         # First set of orders
@@ -208,7 +210,7 @@ class OrdersAPI(OrdersFixture):
     def test_create_order_w_empty_checking_name(self):
         """ When an order is created with an empty name attribute, the
         system should return the secret's UUID on a get. Extends coverage of
-        test_create_order_wout_name. Assumes that the order status will be
+        test_create_order_w_empty_name. Assumes that the order status will be
         active and not pending.
         """
         resp = self.behaviors.create_order(
@@ -273,7 +275,7 @@ class OrdersAPI(OrdersFixture):
     @tags(type='positive')
     def test_create_order_w_128_bit_length(self):
         """
-        Covers case of creating an order with a bit length.
+        Covers case of creating an order with a 128 bit length.
         """
         resps = self.behaviors.create_and_check_order(bit_length=128)
         secret = resps['get_order_resp'].entity.secret
@@ -350,3 +352,82 @@ class OrdersAPI(OrdersFixture):
         resp = self.orders_client.get_orders(
             limit='not-an-int', offset='not-an-int')
         self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
+
+    @tags(type='positive')
+    def test_create_order_w_192_bit_length(self):
+        """Covers case of creating an order with a 192 bit length."""
+        resps = self.behaviors.create_and_check_order(bit_length=192)
+        secret = resps['get_order_resp'].entity.secret
+        self.assertEqual(resps['get_order_resp'].status_code, 200)
+        self.assertIs(type(secret.bit_length), int)
+        self.assertEqual(secret.bit_length, 192)
+
+    @tags(type='positive')
+    def test_create_order_w_256_bit_length(self):
+        """Covers case of creating an order with a 256 bit length."""
+        resps = self.behaviors.create_and_check_order(bit_length=256)
+        secret = resps['get_order_resp'].entity.secret
+        self.assertEqual(resps['get_order_resp'].status_code, 200)
+        self.assertIs(type(secret.bit_length), int)
+        self.assertEqual(secret.bit_length, 256)
+
+    @tags(type='positive')
+    def test_create_order_w_cbc_cypher_type(self):
+        """Covers case of creating an order with a cbc cypher type."""
+        resp = self.behaviors.create_order_overriding_cfg(cypher_type='cbc')
+        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+
+    @tags(type='positive')
+    def test_create_order_w_aes_algorithm(self):
+        """Covers case of creating an order with an aes algorithm."""
+        resp = self.behaviors.create_order_overriding_cfg(algorithm='aes')
+        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+
+    @tags(type='positive')
+    def test_create_order_w_app_octet_stream_mime_type(self):
+        """Covers case of creating an order with an application/octet-stream
+        mime type.
+        """
+        resp = self.behaviors.create_order_overriding_cfg(
+            algorithm='application/octet-stream')
+        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+
+    @tags(type='positive')
+    def test_create_order_w_alphanumeric_name(self):
+        """Covers case of creating an order with an alphanumeric name."""
+        name = randomstring.get_random_string(prefix='1a2b')
+        resps = self.behaviors.create_and_check_order(name=name)
+        self.assertEqual(resps['create_resp']['status_code'],
+                         202, 'Returned bad status code')
+        secret = resps['get_secret_resp'].entity
+        self.assertEqual(secret.name, name, 'Secret name is not correct')
+
+    @tags(type='positive')
+    def test_create_order_w_misc_characters_as_name(self):
+        name = '~!@#$%^&*()_+`-={}[]|:;<>,.?"'
+        resps = self.behaviors.create_and_check_order(name=name)
+        self.assertEqual(resps['create_resp']['status_code'],
+                         202, 'Returned bad status code')
+        secret = resps['get_secret_resp'].entity
+        self.assertEqual(secret.name, name, 'Secret name is not correct')
+
+    @tags(type='positive')
+    def test_create_order_w_uuid_as_name(self):
+        """Covers case of creating an order with a random uuid as the name."""
+        uuid = str(uuid4())
+        resps = self.behaviors.create_and_check_order(name=uuid)
+        self.assertEqual(resps['create_resp']['status_code'],
+                         202, 'Returned bad status code')
+        secret = resps['get_secret_resp'].entity
+        self.assertEqual(secret.name, uuid, 'Secret name is not correct')
+
+    @tags(type='positive')
+    def test_create_order_w_name_of_len_255(self):
+        """Covers case of creating an order with a 225 character name.
+        """
+        name = randomstring.get_random_string(size=225)
+        resps = self.behaviors.create_and_check_order(name=name)
+        self.assertEqual(resps['create_resp']['status_code'],
+                         202, 'Returned bad status code')
+        secret = resps['get_secret_resp'].entity
+        self.assertEqual(secret.name, name, 'Secret name is not correct')

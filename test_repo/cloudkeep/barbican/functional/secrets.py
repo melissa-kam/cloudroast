@@ -198,7 +198,7 @@ class SecretsAPI(SecretsFixture):
     @tags(type='positive')
     def test_paging_limit_and_offset(self):
         # Create secret pool
-        for count in range(1, 20):
+        for count in range(20):
             self.behaviors.create_secret_from_config(use_expiration=False)
 
         # First set of secrets

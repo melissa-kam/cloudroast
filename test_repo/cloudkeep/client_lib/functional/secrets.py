@@ -334,7 +334,7 @@ class SecretsAPI(SecretsFixture):
     def test_cl_list_secrets_limit_and_offset(self):
         """Covers using the limit and offset attribute of listing secrets."""
         # Create secret pool
-        for count in range(1, 20):
+        for count in range(20):
             resp = self.barb_behaviors.create_secret_from_config(
                 use_expiration=False)
             self.assertEqual(resp['status_code'], 201,
