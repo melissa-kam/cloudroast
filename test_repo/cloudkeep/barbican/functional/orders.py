@@ -69,14 +69,13 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(resp['status_code'], 400, 'Returned bad status code')
 
     @tags(type='positive')
-    def test_create_order_w_null_name(self):
+    def test_create_order_wout_name(self):
         """ When you attempt to create an order without the name attribute the
          request appears to fail without a status code.
         - Reported in Barbican GitHub Issue #93
         """
         resp = self.behaviors.create_order(
             mime_type=self.config.mime_type,
-            name=None,
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
@@ -226,7 +225,7 @@ class OrdersAPI(OrdersFixture):
                          'Name did not match secret\'s UUID')
 
     @tags(type='positive')
-    def test_create_order_w_null_checking_name(self):
+    def test_create_order_wout_name_checking_name(self):
         """ When an order is created with a null name attribute, the
         system should return the secret's UUID on a get. Extends coverage of
         test_create_order_wout_name. Assumes that the order status will be
@@ -271,7 +270,7 @@ class OrdersAPI(OrdersFixture):
         self.check_invalid_expiration_timezone('-5:00')
 
     @tags(type='positive')
-    def test_create_order_w_bit_length_str(self):
+    def test_create_order_w_128_bit_length(self):
         """
         Covers case of creating an order with a bit length.
         """
@@ -328,7 +327,7 @@ class OrdersAPI(OrdersFixture):
                          'Should have failed with 400')
 
     @tags(type='positive')
-    def test_creating_order_w_null_bit_length(self):
+    def test_creating_order_wout_bit_length(self):
         """Covers case where order creation fails when bit length is not
         provided.
         - Reported in Barbican GitHub Issue #156

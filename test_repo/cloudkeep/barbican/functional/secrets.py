@@ -97,7 +97,8 @@ class SecretsAPI(SecretsFixture):
         self.assertIsNotNone(secret, 'Couldn\'t find created secret')
 
     @tags(type='positive')
-    def test_creating_secret_w_bit_length_str(self):
+    def test_creating_secret_w_bit_length(self):
+        """ Covers creating secret with a bit length. """
         resps = self.behaviors.create_and_check_secret(bit_length=512)
         secret = resps['get_resp'].entity
         self.assertEqual(resps['get_resp'].status_code, 200)
