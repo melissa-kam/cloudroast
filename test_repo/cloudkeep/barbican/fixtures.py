@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from os import path
+
 from cafe.drivers.unittest.fixtures import BaseTestFixture
 from cloudcafe.cloudkeep.barbican.version.client import VersionClient
 from cloudcafe.cloudkeep.barbican.secrets.client import SecretsClient
@@ -26,8 +27,6 @@ from cloudcafe.cloudkeep.barbican.tokens_api.behaviors import \
 from cloudcafe.cloudkeep.config import MarshallingConfig, CloudKeepConfig, \
     CloudKeepSecretsConfig, CloudKeepKeystoneConfig
 
-
-from cloudcafe.cloudkeep.barbican.tokens_api.provider import TokenAPI_Provider
 
 class BarbicanFixture(BaseTestFixture):
 

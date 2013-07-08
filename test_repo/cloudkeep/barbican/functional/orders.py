@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import unittest2
+
 from datetime import datetime, timedelta
 from test_repo.cloudkeep.barbican.fixtures import OrdersFixture
 from cafe.drivers.unittest.decorators import tags
@@ -328,8 +329,7 @@ class OrdersAPI(OrdersFixture):
 
     @tags(type='positive')
     def test_creating_order_wout_bit_length(self):
-        """Covers case where order creation fails when bit length is not
-        provided.
+        """Covers case where order is created without bit length.
         - Reported in Barbican GitHub Issue #156
         """
         resp = self.behaviors.create_order(
