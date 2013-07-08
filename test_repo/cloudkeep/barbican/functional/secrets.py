@@ -14,8 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from datetime import datetime, timedelta
+from uuid import uuid4
+
 from test_repo.cloudkeep.barbican.fixtures import SecretsFixture
 from cafe.drivers.unittest.decorators import tags
+from cloudcafe.common.tools import randomstring
 
 
 class SecretsAPI(SecretsFixture):
@@ -374,3 +377,45 @@ class SecretsAPI(SecretsFixture):
         self.behaviors.create_secret_from_config(use_expiration=False)
         resp = self.client.get_secrets(limit='not-an-int', offset='not-an-int')
         self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
+
+    @tags(type='positive')
+    def test_creating_secret_w_alphanumeric_name(self):
+        """Covers case of creating secret with an alphanumeric name."""
+        name = randomstring.get_random_string(prefix='1a2b')
+        resps = self.behaviors.create_and_check_secret(name=name)
+        self.assertEqual(resps['create_resp']['status_code'],
+                         201, 'Returned bad status code')
+        secret = resps['get_resp'].entity
+        self.assertEqual(secret.name, name, 'Secret name is not correct')
+
+    @tags(type='positive')
+    def test_creating_secret_w_punctuation_in_name(self):
+        """Covers case of creating a secret with miscellaneous punctuation and
+        symbols in the name.
+        """
+        name = '~!@#$%^&*()_+`-={}[]|:;<>,.?"'
+        resps = self.behaviors.create_and_check_secret(name=name)
+        self.assertEqual(resps['create_resp']['status_code'],
+                         201, 'Returned bad status code')
+        secret = resps['get_resp'].entity
+        self.assertEqual(secret.name, name, 'Secret name is not correct')
+
+    @tags(type='positive')
+    def test_creating_secret_w_uuid_as_name(self):
+        """Covers case of creating a secret with a random uuid as the name."""
+        uuid = str(uuid4())
+        resps = self.behaviors.create_and_check_secret(name=uuid)
+        self.assertEqual(resps['create_resp']['status_code'],
+                         201, 'Returned bad status code')
+        secret = resps['get_resp'].entity
+        self.assertEqual(secret.name, uuid, 'Secret name is not correct')
+
+    @tags(type='positive')
+    def test_create_secret_w_name_of_len_255(self):
+        """Covers case of creating a secret with a 225 character name."""
+        name = randomstring.get_random_string(size=225)
+        resps = self.behaviors.create_and_check_secret(name=name)
+        self.assertEqual(resps['create_resp']['status_code'],
+                         201, 'Returned bad status code')
+        secret = resps['get_resp'].entity
+        self.assertEqual(secret.name, name, 'Secret name is not correct')

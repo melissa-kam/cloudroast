@@ -403,7 +403,10 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(secret.name, name, 'Secret name is not correct')
 
     @tags(type='positive')
-    def test_create_order_w_misc_characters_as_name(self):
+    def test_create_order_w_punctuation_in_name(self):
+        """Covers case of creating order with miscellaneous punctuation and
+        symbols in the name.
+        """
         name = '~!@#$%^&*()_+`-={}[]|:;<>,.?"'
         resps = self.behaviors.create_and_check_order(name=name)
         self.assertEqual(resps['create_resp']['status_code'],
@@ -423,8 +426,7 @@ class OrdersAPI(OrdersFixture):
 
     @tags(type='positive')
     def test_create_order_w_name_of_len_255(self):
-        """Covers case of creating an order with a 225 character name.
-        """
+        """Covers case of creating an order with a 225 character name."""
         name = randomstring.get_random_string(size=225)
         resps = self.behaviors.create_and_check_order(name=name)
         self.assertEqual(resps['create_resp']['status_code'],
