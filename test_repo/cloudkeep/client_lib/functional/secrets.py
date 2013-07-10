@@ -112,7 +112,7 @@ class SecretsAPI(SecretsFixture):
                               self.cl_behaviors.create_secret_overriding_cfg,
                               bit_length='not-an-int')
         except ValueError, error:
-            self.fail("Creation failed with ValueError: %s" % error)
+            self.fail("Creation failed with ValueError: {0}".format(error))
 
     @tags(type='negative')
     def test_cl_create_secret_w_negative_bit_length(self):
@@ -345,7 +345,7 @@ class SecretsAPI(SecretsFixture):
         sec_group1 = list_tuple[0]
 
         # Second set of secrets
-        list_tuple = self.cl_client.list_secrets(limit=20, offset=10)
+        list_tuple = self.cl_client.list_secrets(limit=10, offset=10)
         sec_group2 = list_tuple[0]
 
         sec_ids1 = []
@@ -359,7 +359,7 @@ class SecretsAPI(SecretsFixture):
                       if secret_id in sec_ids2]
 
         self.assertEqual(len(sec_group1), 10)
-        self.assertGreaterEqual(len(sec_group2), 1)
+        self.assertEqual(len(sec_group2), 10)
         self.assertEqual(len(duplicates), 0,
                          'Using offset didn\'t return unique secrets')
 
@@ -367,7 +367,7 @@ class SecretsAPI(SecretsFixture):
     def test_cl_list_secrets_next(self):
         """Covers using next reference for listing secrets."""
         # Create secret pool
-        for count in range(1, 20):
+        for count in range(20):
             resp = self.barb_behaviors.create_secret_from_config(
                 use_expiration=False)
             self.assertEqual(resp['status_code'], 201,
@@ -398,7 +398,7 @@ class SecretsAPI(SecretsFixture):
     @tags(type='positive')
     def test_cl_list_secrets_previous(self):
         """Covers using previous reference for listing secrets."""
-        for count in range(1, 20):
+        for count in range(20):
             resp = self.barb_behaviors.create_secret_from_config(
                 use_expiration=False)
             self.assertEqual(resp['status_code'], 201,

@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import unittest2
 
 from test_repo.cloudkeep.client_lib.fixtures import OrdersFixture
 from barbicanclient.common.exceptions import ClientException
@@ -21,6 +22,7 @@ from cafe.drivers.unittest.decorators import tags
 
 class OrdersAPI(OrdersFixture):
 
+    @unittest2.skip
     @tags(type='positive')
     def test_cl_create_order_w_only_mime_type(self):
         """Covers creating order with only required fields. In this case,
@@ -30,7 +32,8 @@ class OrdersAPI(OrdersFixture):
             order = self.cl_behaviors.create_order(
                 mime_type=self.config.mime_type)
         except ClientException, error:
-            self.fail("Creation failed with ClientException: %s" % error)
+            self.fail("Creation failed with ClientException: "
+                      "{0}".format(error))
 
         resp = self.barb_client.get_order(order.id)
         self.assertEqual(resp.status_code, 200,
@@ -274,7 +277,7 @@ class OrdersAPI(OrdersFixture):
         order_group1 = tuple[0]
 
         # Second set of orders
-        tuple = self.cl_client.list_orders(limit=20, offset=10)
+        tuple = self.cl_client.list_orders(limit=10, offset=10)
         order_group2 = tuple[0]
 
         order_ids1 = []
@@ -288,7 +291,7 @@ class OrdersAPI(OrdersFixture):
                       if order_id in order_ids2]
 
         self.assertEqual(len(order_group1), 10)
-        self.assertGreaterEqual(len(order_group2), 1)
+        self.assertEqual(len(order_group2), 10)
         self.assertEqual(len(duplicates), 0,
                          'Using offset didn\'t return unique orders')
 
@@ -296,7 +299,7 @@ class OrdersAPI(OrdersFixture):
     def test_cl_list_orders_next(self):
         """Covers using next reference for listing orders."""
         # Create order pool
-        for count in range(1, 20):
+        for count in range(20):
             resp = self.barb_behaviors.create_order_from_config(
                 use_expiration=False)
             self.assertEqual(resp['status_code'], 202,
@@ -328,7 +331,7 @@ class OrdersAPI(OrdersFixture):
     def test_cl_list_orders_previous(self):
         """Covers using next reference for listing orders."""
         # Create order pool
-        for count in range(1, 20):
+        for count in range(20):
             resp = self.barb_behaviors.create_order_from_config(
                 use_expiration=False)
             self.assertEqual(resp['status_code'], 202,

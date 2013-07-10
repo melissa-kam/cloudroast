@@ -13,12 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import unittest2
+
 from test_repo.cloudkeep.client_lib.fixtures import SecretsFixture
 from cafe.drivers.unittest.decorators import tags
 
 
 class SecretsAPI(SecretsFixture):
 
+    @unittest2.skip
     @tags(type='positive')
     def test_cl_create_secret(self):
         """Covers creating a secret with the barbicanclient library.
@@ -29,7 +32,7 @@ class SecretsAPI(SecretsFixture):
             secret = self.cl_behaviors.create_secret_from_config(
                 use_expiration=True)
         except TypeError, error:
-            self.fail("Creation failed with TypeError: %s" % error)
+            self.fail("Creation failed with TypeError: {0}".format(error))
 
         resp = self.barb_client.get_secret(secret.id)
         self.assertEqual(resp.status_code, 200,

@@ -15,6 +15,7 @@ limitations under the License.
 """
 from datetime import datetime, timedelta
 from uuid import uuid4
+import unittest2
 
 from test_repo.cloudkeep.barbican.fixtures import SecretsFixture
 from cafe.drivers.unittest.decorators import tags
@@ -69,6 +70,7 @@ class SecretsAPI(SecretsFixture):
         self.check_expiration_iso8601_timezone('-05:00', 5)
         self.check_expiration_iso8601_timezone('+05:00', -5)
 
+    @unittest2.skip('Issue #135')
     @tags(type='positive')
     def test_create_secret_with_short_expiration_timezone(self):
         """ Covers case of a timezone being added to the expiration.
@@ -78,6 +80,7 @@ class SecretsAPI(SecretsFixture):
         self.check_expiration_iso8601_timezone('-01', 1)
         self.check_expiration_iso8601_timezone('+01', -1)
 
+    @unittest2.skip('Issue #134')
     @tags(type='negative')
     def test_create_secret_with_bad_expiration_timezone(self):
         """ Covers case of a malformed timezone being added to the expiration.
@@ -153,7 +156,14 @@ class SecretsAPI(SecretsFixture):
 
     @tags(type='negative')
     def test_creating_w_null_mime_type(self):
-        resp = self.behaviors.create_secret(mime_type=None)
+        resp = self.behaviors.create_secret(
+            name=self.config.name,
+            plain_text=self.config.plain_text,
+            algorithm=self.config.plain_text,
+            cypher_type=self.config.cypher_type,
+            bit_length=self.config.bit_length,
+            mime_type=None
+        )
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
@@ -200,25 +210,98 @@ class SecretsAPI(SecretsFixture):
 
     @tags(type='positive')
     def test_paging_limit_and_offset(self):
+        """
+        Covers using paging limit and offset attributes when getting
+        a list of secrets.
+        """
         # Create secret pool
         for count in range(20):
-            self.behaviors.create_secret_from_config(use_expiration=False)
+            resp = self.behaviors.create_secret_from_config(
+                use_expiration=False)
+            self.assertEqual(resp['status_code'], 201,
+                             'Returned bad status code')
 
         # First set of secrets
         resp = self.client.get_secrets(limit=10, offset=0)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         sec_group1 = resp.entity
 
         # Second set of secrets
-        resp = self.client.get_secrets(limit=20, offset=10)
+        resp = self.client.get_secrets(limit=10, offset=10)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         sec_group2 = resp.entity
 
         duplicates = [secret for secret in sec_group1.secrets
                       if secret in sec_group2.secrets]
 
         self.assertEqual(len(sec_group1.secrets), 10)
-        self.assertGreaterEqual(len(sec_group2.secrets), 1)
+        self.assertEqual(len(sec_group2.secrets), 10)
         self.assertEqual(len(duplicates), 0,
                          'Using offset didn\'t return unique secrets')
+
+    @tags(type='positive')
+    def test_secret_paging_next_option(self):
+        """Covers getting a list of secrets and using the next
+        reference.
+        """
+        # Create secret pool
+        for count in range(200):
+            resp = self.behaviors.create_secret_from_config(
+                use_expiration=False)
+            self.assertEqual(resp['status_code'], 201,
+                             'Returned bad status code')
+
+        # First set of secrets
+        resp = self.client.get_secrets(limit=40, offset=115)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+        sec_group1 = resp.entity
+        self.assertEqual(len(sec_group1.secrets), 40)
+        next_ref = sec_group1.next
+        self.assertIsNotNone(next_ref)
+
+        #Next set of secrets
+        resp = self.client.get_secrets_by_ref(ref=next_ref)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+        sec_group2 = resp.entity
+        self.assertEqual(len(sec_group2.secrets), 40)
+
+        duplicates = [secret for secret in sec_group1.secrets
+                      if secret in sec_group2.secrets]
+
+        self.assertEqual(len(duplicates), 0,
+                         'Using next reference didn\'t return unique secrets')
+
+    @tags(type='positive')
+    def test_secret_paging_previous_option(self):
+        """Covers getting a list of secrets and using the previous
+        reference.
+        """
+        # Create secret pool
+        for count in range(200):
+            resp = self.behaviors.create_secret_from_config(
+                use_expiration=False)
+            self.assertEqual(resp['status_code'], 201,
+                             'Returned bad status code')
+
+        resp = self.client.get_secrets(limit=40, offset=115)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+
+        sec_group1 = resp.entity
+        self.assertEqual(len(sec_group1.secrets), 40)
+        previous_ref = sec_group1.previous
+        self.assertIsNotNone(previous_ref)
+
+        #Previous set of secrets
+        resp = self.client.get_secrets_by_ref(ref=previous_ref)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+        sec_group2 = resp.entity
+        self.assertEqual(len(sec_group2.secrets), 40)
+
+        duplicates = [secret for secret in sec_group1.secrets
+                      if secret in sec_group2.secrets]
+
+        self.assertEqual(len(duplicates), 0, 'Using previous reference '
+                                             'didn\'t return unique secrets')
 
     @tags(type='negative')
     def test_putting_secret_that_doesnt_exist(self):
@@ -368,6 +451,7 @@ class SecretsAPI(SecretsFixture):
         resp = self.behaviors.create_secret(mime_type=self.config.mime_type)
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
 
+    @unittest2.skip('Issue #171')
     @tags(type='negative')
     def test_secret_paging_w_invalid_parameters(self):
         """ Covers listing secrets with invalid limit and offset parameters.
@@ -459,3 +543,15 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(resps['get_resp'].status_code, 200)
         self.assertIs(type(secret.bit_length), int)
         self.assertEqual(secret.bit_length, 256)
+
+    @tags(type='positive')
+    def test_creating_secret_w_aes_algorithm(self):
+        """Covers case of creating an order with an aes algorithm."""
+        resp = self.behaviors.create_secret_overriding_cfg(algorithm='aes')
+        self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
+
+    @tags(type='positive')
+    def test_creating_secret_w_cbc_cypher_type(self):
+        """Covers case of creating an order with a cbc cypher type."""
+        resp = self.behaviors.create_secret_overriding_cfg(cypher_type='cbc')
+        self.assertEqual(resp['status_code'], 201, 'Returned bad status code')

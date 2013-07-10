@@ -157,14 +157,14 @@ class OrdersAPI(OrdersFixture):
         ord_group1 = resp.entity
 
         # Second set of orders
-        resp = self.orders_client.get_orders(limit=20, offset=10)
+        resp = self.orders_client.get_orders(limit=10, offset=10)
         ord_group2 = resp.entity
 
         duplicates = [order for order in ord_group1.orders
                       if order in ord_group2.orders]
 
         self.assertEqual(len(ord_group1.orders), 10)
-        self.assertGreaterEqual(len(ord_group2.orders), 1)
+        self.assertEqual(len(ord_group2.orders), 10)
         self.assertEqual(len(duplicates), 0,
                          'Using offset didn\'t return unique orders.')
 
@@ -257,6 +257,7 @@ class OrdersAPI(OrdersFixture):
         self.check_expiration_iso8601_timezone('-05:00', 5)
         self.check_expiration_iso8601_timezone('+05:00', -5)
 
+    @unittest2.skip('Issue #135')
     @tags(type='positive')
     def test_create_order_with_short_expiration_timezone(self):
         """ Covers case of a timezone being added to the expiration.
@@ -266,6 +267,7 @@ class OrdersAPI(OrdersFixture):
         self.check_expiration_iso8601_timezone('-01', 1)
         self.check_expiration_iso8601_timezone('+01', -1)
 
+    @unittest2.skip('Issue #134')
     @tags(type='negative')
     def test_create_order_with_bad_expiration_timezone(self):
         """ Covers case of a malformed timezone being added to the expiration.
@@ -358,6 +360,7 @@ class OrdersAPI(OrdersFixture):
     @tags(type='positive')
     def test_creating_order_wout_bit_length(self):
         """Covers case where order is created without bit length.
+        Should return 400.
         - Reported in Barbican GitHub Issue #156
         """
         resp = self.behaviors.create_order(
@@ -366,8 +369,9 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             cypher_type=self.config.cypher_type,
             bit_length=None)
-        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
-
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+    @unittest2.skip('Issue #171')
     @tags(type='negative')
     def test_order_paging_w_invalid_parameters(self):
         """ Covers listing orders with invalid limit and offset parameters.
@@ -397,7 +401,7 @@ class OrdersAPI(OrdersFixture):
         mime type.
         """
         resp = self.behaviors.create_order_overriding_cfg(
-            algorithm='application/octet-stream')
+            mime_type='application/octet-stream')
         self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
 
     @tags(type='positive')
