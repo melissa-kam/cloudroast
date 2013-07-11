@@ -120,6 +120,20 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
+    @tags(type='negative')
+    def test_creating_w_empty_entries(self):
+        """ Covers case of creating a secret with empty Strings for all
+        entries. Should return a 400.
+        """
+        resp = self.behaviors.create_secret(name='',
+                                            expiration='',
+                                            algorithm='',
+                                            cypher_type='',
+                                            plain_text='',
+                                            mime_type='')
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
     @tags(type='positive')
     def test_creating_w_empty_name(self):
         """ When a test is created with an empty or null name attribute, the
@@ -159,7 +173,7 @@ class SecretsAPI(SecretsFixture):
         resp = self.behaviors.create_secret(
             name=self.config.name,
             plain_text=self.config.plain_text,
-            algorithm=self.config.plain_text,
+            algorithm=self.config.algorithm,
             cypher_type=self.config.cypher_type,
             bit_length=self.config.bit_length,
             mime_type=None
@@ -555,3 +569,13 @@ class SecretsAPI(SecretsFixture):
         """Covers case of creating an order with a cbc cypher type."""
         resp = self.behaviors.create_secret_overriding_cfg(cypher_type='cbc')
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
+
+    @tags(type='positive')
+    def test_secret_hostname_response(self):
+        """Covers case of checking that hostname of secret_ref is the same
+        as the configured hostname.
+        - Reported in Barbican GitHub Issue #182
+        """
+        resp = self.behaviors.create_secret_from_config()
+        if not resp['secret_ref'].startswith(self.cloudkeep.base_url):
+            self.fail('Incorrect hostname in response ref.')

@@ -14,12 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import unittest2
+
 from test_repo.cloudkeep.barbican.fixtures import AuthenticationFixture
 from cafe.drivers.unittest.decorators import tags
 
 
 class AuthenticationAPI(AuthenticationFixture):
 
+    @unittest2.skip
     @tags(type='positive')
     def test_get_version_w_authentication(self):
         """Covers acquiring an authentication token and using it to get the

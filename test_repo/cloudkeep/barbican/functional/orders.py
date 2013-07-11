@@ -169,12 +169,75 @@ class OrdersAPI(OrdersFixture):
                          'Using offset didn\'t return unique orders.')
 
     @tags(type='positive')
+    def test_order_paging_next_option(self):
+        """Covers getting a list of orders and using the next
+        reference.
+        """
+        # Create order pool
+        for count in range(200):
+            resp = self.behaviors.create_order_from_config()
+            self.assertEqual(resp['status_code'], 202,
+                             'Returned bad status code')
+
+        # First set of orders
+        resp = self.orders_client.get_orders(limit=40, offset=115)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+        order_group1 = resp.entity
+        self.assertEqual(len(order_group1.orders), 40)
+        next_ref = order_group1.next
+        self.assertIsNotNone(next_ref)
+
+        #Next set of orders
+        resp = self.orders_client.get_orders_by_ref(ref=next_ref)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+        order_group2 = resp.entity
+        self.assertEqual(len(order_group2.orders), 40)
+
+        duplicates = [order for order in order_group1.orders
+                      if order in order_group2.orders]
+
+        self.assertEqual(len(duplicates), 0,
+                         'Using next reference didn\'t return unique orders')
+
+    @tags(type='positive')
+    def test_order_paging_previous_option(self):
+        """Covers getting a list of orders and using the previous
+        reference.
+        """
+        # Create order pool
+        for count in range(200):
+            resp = self.behaviors.create_order_from_config()
+            self.assertEqual(resp['status_code'], 202,
+                             'Returned bad status code')
+
+        # First set of orders
+        resp = self.orders_client.get_orders(limit=40, offset=115)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+        order_group1 = resp.entity
+        self.assertEqual(len(order_group1.orders), 40)
+        prev_ref = order_group1.previous
+        self.assertIsNotNone(prev_ref)
+
+        #Previous set of orders
+        resp = self.orders_client.get_orders_by_ref(ref=prev_ref)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+        order_group2 = resp.entity
+        self.assertEqual(len(order_group2.orders), 40)
+
+        duplicates = [order for order in order_group1.orders
+                      if order in order_group2.orders]
+
+        self.assertEqual(len(duplicates), 0,
+                         'Using previous reference '
+                         'didn\'t return unique orders')
+
+    @tags(type='positive')
     def test_find_a_single_order_via_paging(self):
         """
         Covers finding an order with paging.
         """
         resp = self.behaviors.create_order_from_config()
-        for count in range(1, 11):
+        for count in range(10):
             self.behaviors.create_order_from_config()
         order = self.behaviors.find_order(resp['order_id'])
         self.assertIsNotNone(order, 'Couldn\'t find created order')
@@ -203,6 +266,19 @@ class OrdersAPI(OrdersFixture):
         Covers creating order with all null entries.
         """
         resp = self.behaviors.create_order()
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
+    @tags(type='negative')
+    def test_create_order_w_empty_entries(self):
+        """ Covers case of creating an order with empty Strings for all
+        entries. Should return a 400.
+        """
+        resp = self.behaviors.create_order(name='',
+                                            expiration='',
+                                            algorithm='',
+                                            cypher_type='',
+                                            mime_type='')
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
@@ -357,7 +433,7 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
-    @tags(type='positive')
+    @tags(type='negative')
     def test_creating_order_wout_bit_length(self):
         """Covers case where order is created without bit length.
         Should return 400.
@@ -371,6 +447,7 @@ class OrdersAPI(OrdersFixture):
             bit_length=None)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
+
     @unittest2.skip('Issue #171')
     @tags(type='negative')
     def test_order_paging_w_invalid_parameters(self):
@@ -449,3 +526,13 @@ class OrdersAPI(OrdersFixture):
 
         secret = resps['get_secret_resp'].entity
         self.assertEqual(secret.name, name, 'Secret name is not correct')
+
+    @tags(type='positive')
+    def test_order_hostname_response(self):
+        """Covers case of checking that hostname of order_ref is the same
+        as the configured hostname.
+        - Reported in Barbican GitHub Issue #182
+        """
+        resp = self.behaviors.create_order_from_config()
+        if not resp['order_ref'].startswith(self.cloudkeep.base_url):
+            self.fail('Incorrect hostname in response ref.')
