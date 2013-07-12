@@ -281,12 +281,8 @@ class OrdersAPI(OrdersFixture):
         tuple = self.cl_client.list_orders(limit=10, offset=10)
         order_group2 = tuple[0]
 
-        order_ids1 = []
-        order_ids2 = []
-        for order in order_group1:
-            order_ids1.append(order.id)
-        for order in order_group2:
-            order_ids2.append(order.id)
+        order_ids1 = [order.id for order in order_group1]
+        order_ids2 = [order.id for order in order_group2]
 
         duplicates = [order_id for order_id in order_ids1
                       if order_id in order_ids2]
@@ -314,12 +310,8 @@ class OrdersAPI(OrdersFixture):
         list_tuple = self.cl_client.list_orders_by_href(href=next_ref)
         order_group2 = list_tuple[0]
 
-        order_ids1 = []
-        order_ids2 = []
-        for order in order_group1:
-            order_ids1.append(order.id)
-        for order in order_group2:
-            order_ids2.append(order.id)
+        order_ids1 = [order.id for order in order_group1]
+        order_ids2 = [order.id for order in order_group2]
 
         duplicates = [order_id for order_id in order_ids1
                       if order_id in order_ids2]
@@ -346,12 +338,8 @@ class OrdersAPI(OrdersFixture):
         list_tuple = self.cl_client.list_orders_by_href(href=prev_ref)
         order_group2 = list_tuple[0]
 
-        order_ids1 = []
-        order_ids2 = []
-        for order in order_group1:
-            order_ids1.append(order.id)
-        for order in order_group2:
-            order_ids2.append(order.id)
+        order_ids1 = [order.id for order in order_group1]
+        order_ids2 = [order.id for order in order_group2]
 
         duplicates = [order_id for order_id in order_ids1
                       if order_id in order_ids2]

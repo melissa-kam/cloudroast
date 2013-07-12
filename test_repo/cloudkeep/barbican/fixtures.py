@@ -25,7 +25,7 @@ from cloudcafe.cloudkeep.barbican.orders.behaviors import OrdersBehavior
 from cloudcafe.cloudkeep.barbican.tokens_api.behaviors import \
     TokenAPI_Behaviors
 from cloudcafe.cloudkeep.config import MarshallingConfig, CloudKeepConfig, \
-    CloudKeepSecretsConfig, CloudKeepKeystoneConfig
+    CloudKeepSecretsConfig, CloudKeepOrdersConfig, CloudKeepKeystoneConfig
 
 
 class BarbicanFixture(BaseTestFixture):
@@ -81,7 +81,7 @@ class OrdersFixture(BarbicanFixture):
     @classmethod
     def setUpClass(cls):
         super(OrdersFixture, cls).setUpClass()
-        cls.config = CloudKeepSecretsConfig()
+        cls.config = CloudKeepOrdersConfig()
         cls.orders_client = OrdersClient(
             url=cls.cloudkeep.base_url,
             api_version=cls.cloudkeep.api_version,

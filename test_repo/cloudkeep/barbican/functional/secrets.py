@@ -259,26 +259,26 @@ class SecretsAPI(SecretsFixture):
         reference.
         """
         # Create secret pool
-        for count in range(200):
+        for count in range(170):
             resp = self.behaviors.create_secret_from_config(
                 use_expiration=False)
             self.assertEqual(resp['status_code'], 201,
                              'Returned bad status code')
 
         # First set of secrets
-        resp = self.client.get_secrets(limit=40, offset=115)
+        resp = self.client.get_secrets(limit=25, offset=115)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         sec_group1 = resp.entity
-        self.assertEqual(len(sec_group1.secrets), 40,
+        self.assertEqual(len(sec_group1.secrets), 25,
                          'Returned wrong number of secrets')
         next_ref = sec_group1.next
         self.assertIsNotNone(next_ref)
 
         #Next set of secrets
-        resp = self.client.get_secrets_by_ref(ref=next_ref)
+        resp = self.client.get_secrets(ref=next_ref)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         sec_group2 = resp.entity
-        self.assertEqual(len(sec_group2.secrets), 40)
+        self.assertEqual(len(sec_group2.secrets), 25)
 
         duplicates = [secret for secret in sec_group1.secrets
                       if secret in sec_group2.secrets]
@@ -292,26 +292,26 @@ class SecretsAPI(SecretsFixture):
         reference.
         """
         # Create secret pool
-        for count in range(200):
+        for count in range(170):
             resp = self.behaviors.create_secret_from_config(
                 use_expiration=False)
             self.assertEqual(resp['status_code'], 201,
                              'Returned bad status code')
 
-        resp = self.client.get_secrets(limit=40, offset=115)
+        resp = self.client.get_secrets(limit=25, offset=115)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
 
         sec_group1 = resp.entity
-        self.assertEqual(len(sec_group1.secrets), 40,
+        self.assertEqual(len(sec_group1.secrets), 25,
                          'Returned wrong number of secrets')
         previous_ref = sec_group1.previous
         self.assertIsNotNone(previous_ref)
 
         #Previous set of secrets
-        resp = self.client.get_secrets_by_ref(ref=previous_ref)
+        resp = self.client.get_secrets(ref=previous_ref)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         sec_group2 = resp.entity
-        self.assertEqual(len(sec_group2.secrets), 40)
+        self.assertEqual(len(sec_group2.secrets), 25)
 
         duplicates = [secret for secret in sec_group1.secrets
                       if secret in sec_group2.secrets]
@@ -583,7 +583,7 @@ class SecretsAPI(SecretsFixture):
             self.fail('Incorrect hostname in response ref.')
 
     @tags(type='positive')
-    def test_creating_secret_w_plain_text_mime_type(self):
+    def test_creating_secret_w_text_plain_mime_type(self):
         """Covers case of creating a secret with text/plain as mime type.
         """
         resp = self.behaviors.create_secret_overriding_cfg(
@@ -612,10 +612,8 @@ class SecretsAPI(SecretsFixture):
             cypher_type=self.config.cypher_type)
 
         get_resp = self.client.get_secret(resp['secret_id'])
-        secret_id = self.behaviors.get_secret_id_from_ref(
-            secret_ref=get_resp.url)
         secret = get_resp.entity
-        self.assertEqual(secret.name, secret_id,
+        self.assertEqual(secret.name, secret.get_id(),
                          'Name did not match secret\'s UUID')
 
     @tags(type='positive')
@@ -632,10 +630,8 @@ class SecretsAPI(SecretsFixture):
             cypher_type=self.config.cypher_type)
 
         get_resp = self.client.get_secret(resp['secret_id'])
-        secret_id = self.behaviors.get_secret_id_from_ref(
-            secret_ref=get_resp.url)
         secret = get_resp.entity
-        self.assertEqual(secret.name, secret_id,
+        self.assertEqual(secret.name, secret.get_id(),
                          'Name did not match secret\'s UUID')
 
     @tags(type='positive')

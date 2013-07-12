@@ -71,6 +71,19 @@ class OrdersAPI(OrdersFixture):
             cypher_type=self.config.cypher_type)
         self.assertEqual(resp['status_code'], 400, 'Returned bad status code')
 
+    @tags(type='negative')
+    def test_create_order_with_empty_mime_type(self):
+        """ Covers case of creating an order with an empty String as the
+        mime type. Should return 400.
+        """
+        resp = self.behaviors.create_order(
+            mime_type='',
+            name=self.config.name,
+            algorithm=self.config.algorithm,
+            bit_length=self.config.bit_length,
+            cypher_type=self.config.cypher_type)
+        self.assertEqual(resp['status_code'], 400, 'Returned bad status code')
+
     @tags(type='positive')
     def test_create_order_wout_name(self):
         """ When you attempt to create an order without the name attribute the
@@ -174,24 +187,24 @@ class OrdersAPI(OrdersFixture):
         reference.
         """
         # Create order pool
-        for count in range(200):
+        for count in range(170):
             resp = self.behaviors.create_order_from_config()
             self.assertEqual(resp['status_code'], 202,
                              'Returned bad status code')
 
         # First set of orders
-        resp = self.orders_client.get_orders(limit=40, offset=115)
+        resp = self.orders_client.get_orders(limit=25, offset=115)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         order_group1 = resp.entity
-        self.assertEqual(len(order_group1.orders), 40)
+        self.assertEqual(len(order_group1.orders), 25)
         next_ref = order_group1.next
         self.assertIsNotNone(next_ref)
 
         #Next set of orders
-        resp = self.orders_client.get_orders_by_ref(ref=next_ref)
+        resp = self.orders_client.get_orders(ref=next_ref)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         order_group2 = resp.entity
-        self.assertEqual(len(order_group2.orders), 40)
+        self.assertEqual(len(order_group2.orders), 25)
 
         duplicates = [order for order in order_group1.orders
                       if order in order_group2.orders]
@@ -205,24 +218,24 @@ class OrdersAPI(OrdersFixture):
         reference.
         """
         # Create order pool
-        for count in range(200):
+        for count in range(170):
             resp = self.behaviors.create_order_from_config()
             self.assertEqual(resp['status_code'], 202,
                              'Returned bad status code')
 
         # First set of orders
-        resp = self.orders_client.get_orders(limit=40, offset=115)
+        resp = self.orders_client.get_orders(limit=25, offset=115)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         order_group1 = resp.entity
-        self.assertEqual(len(order_group1.orders), 40)
+        self.assertEqual(len(order_group1.orders), 25)
         prev_ref = order_group1.previous
         self.assertIsNotNone(prev_ref)
 
         #Previous set of orders
-        resp = self.orders_client.get_orders_by_ref(ref=prev_ref)
+        resp = self.orders_client.get_orders(ref=prev_ref)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         order_group2 = resp.entity
-        self.assertEqual(len(order_group2.orders), 40)
+        self.assertEqual(len(order_group2.orders), 25)
 
         duplicates = [order for order in order_group1.orders
                       if order in order_group2.orders]
@@ -291,7 +304,7 @@ class OrdersAPI(OrdersFixture):
         """
         resp = self.behaviors.create_order(
             mime_type=self.config.mime_type,
-            name="",
+            name='',
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
@@ -596,7 +609,7 @@ class OrdersAPI(OrdersFixture):
             next_ref1 = orders_group1.next
             self.assertIsNotNone(next_ref1)
 
-            resp = self.orders_client.get_orders(limit=2, offset=offset+2)
+            resp = self.orders_client.get_orders(limit=2, offset=offset + 2)
             self.assertEqual(resp.status_code, 200, 'Returned bad status code')
             orders_group2 = resp.entity
             self.assertEqual(len(orders_group2.orders), 2)
@@ -620,3 +633,60 @@ class OrdersAPI(OrdersFixture):
             data='test-update-order')
         self.assertEqual(put_resp.status_code, 405,
                          'Should have failed with 405')
+
+    @tags(type='negative')
+    def test_create_order_w_plain_text(self):
+        """Covers case of creating order with plain text.
+        Should return 400."""
+        resp = self.orders_client.create_order_w_plain_text(
+            plain_text='test-create-order-w-plain-text',
+            mime_type=self.config.mime_type,
+            name=self.config.name,
+            algorithm=self.config.algorithm,
+            bit_length=self.config.bit_length,
+            cypher_type=self.config.cypher_type,
+            expiration=None)
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
+
+    @tags(type='negative')
+    def test_create_order_w_empty_plain_text(self):
+        """Covers case of creating order with an empty String as plain text.
+        Should return 400."""
+        resp = self.orders_client.create_order_w_plain_text(
+            plain_text='',
+            mime_type=self.config.mime_type,
+            name=self.config.name,
+            algorithm=self.config.algorithm,
+            bit_length=self.config.bit_length,
+            cypher_type=self.config.cypher_type,
+            expiration=None)
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
+
+
+    @tags(type='negative')
+    def test_creating_order_wout_algorithm(self):
+        """Covers case where order is created without an algorithm.
+        Should return 400.
+        """
+        resp = self.behaviors.create_order(
+            mime_type=self.config.mime_type,
+            name=self.config.name,
+            algorithm=None,
+            cypher_type=self.config.cypher_type,
+            bit_length=self.config.bit_length)
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
+    @tags(type='negative')
+    def test_creating_order_wout_cypher_type(self):
+        """Covers case where order is created without a cypher type.
+        Should return 400.
+        """
+        resp = self.behaviors.create_order(
+            mime_type=self.config.mime_type,
+            name=self.config.name,
+            algorithm=self.config.algorithm,
+            cypher_type=None,
+            bit_length=self.config.bit_length)
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')

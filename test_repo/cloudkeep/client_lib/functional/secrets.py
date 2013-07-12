@@ -348,12 +348,8 @@ class SecretsAPI(SecretsFixture):
         list_tuple = self.cl_client.list_secrets(limit=10, offset=10)
         sec_group2 = list_tuple[0]
 
-        sec_ids1 = []
-        sec_ids2 = []
-        for secret in sec_group1:
-            sec_ids1.append(secret.id)
-        for secret in sec_group2:
-            sec_ids2.append(secret.id)
+        sec_ids1 = [secret.id for secret in sec_group1]
+        sec_ids2 = [secret.id for secret in sec_group2]
 
         duplicates = [secret_id for secret_id in sec_ids1
                       if secret_id in sec_ids2]
@@ -381,12 +377,8 @@ class SecretsAPI(SecretsFixture):
         list_tuple = self.cl_client.list_secrets_by_href(href=next_ref)
         sec_group2 = list_tuple[0]
 
-        sec_ids1 = []
-        sec_ids2 = []
-        for secret in sec_group1:
-            sec_ids1.append(secret.id)
-        for secret in sec_group2:
-            sec_ids2.append(secret.id)
+        sec_ids1 = [secret.id for secret in sec_group1]
+        sec_ids2 = [secret.id for secret in sec_group2]
 
         duplicates = [secret_id for secret_id in sec_ids1
                       if secret_id in sec_ids2]
@@ -412,12 +404,8 @@ class SecretsAPI(SecretsFixture):
         list_tuple = self.cl_client.list_secrets_by_href(href=prev_ref)
         sec_group2 = list_tuple[0]
 
-        sec_ids1 = []
-        sec_ids2 = []
-        for secret in sec_group1:
-            sec_ids1.append(secret.id)
-        for secret in sec_group2:
-            sec_ids2.append(secret.id)
+        sec_ids1 = [secret.id for secret in sec_group1]
+        sec_ids2 = [secret.id for secret in sec_group2]
 
         duplicates = [secret_id for secret_id in sec_ids1
                       if secret_id in sec_ids2]
