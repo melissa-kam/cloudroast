@@ -269,7 +269,8 @@ class SecretsAPI(SecretsFixture):
         resp = self.client.get_secrets(limit=40, offset=115)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         sec_group1 = resp.entity
-        self.assertEqual(len(sec_group1.secrets), 40)
+        self.assertEqual(len(sec_group1.secrets), 40,
+                         'Returned wrong number of secrets')
         next_ref = sec_group1.next
         self.assertIsNotNone(next_ref)
 
@@ -301,7 +302,8 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
 
         sec_group1 = resp.entity
-        self.assertEqual(len(sec_group1.secrets), 40)
+        self.assertEqual(len(sec_group1.secrets), 40,
+                         'Returned wrong number of secrets')
         previous_ref = sec_group1.previous
         self.assertIsNotNone(previous_ref)
 
@@ -560,13 +562,13 @@ class SecretsAPI(SecretsFixture):
 
     @tags(type='positive')
     def test_creating_secret_w_aes_algorithm(self):
-        """Covers case of creating an order with an aes algorithm."""
+        """Covers case of creating a secret with an aes algorithm."""
         resp = self.behaviors.create_secret_overriding_cfg(algorithm='aes')
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
 
     @tags(type='positive')
     def test_creating_secret_w_cbc_cypher_type(self):
-        """Covers case of creating an order with a cbc cypher type."""
+        """Covers case of creating a secret with a cbc cypher type."""
         resp = self.behaviors.create_secret_overriding_cfg(cypher_type='cbc')
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
 
@@ -579,3 +581,135 @@ class SecretsAPI(SecretsFixture):
         resp = self.behaviors.create_secret_from_config()
         if not resp['secret_ref'].startswith(self.cloudkeep.base_url):
             self.fail('Incorrect hostname in response ref.')
+
+    @tags(type='positive')
+    def test_creating_secret_w_plain_text_mime_type(self):
+        """Covers case of creating a secret with text/plain as mime type.
+        """
+        resp = self.behaviors.create_secret_overriding_cfg(
+            mime_type='text/plain')
+        self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
+
+    @tags(type='positive')
+    def test_creating_secret_w_app_octet_mime_type(self):
+        """Covers case of creating a secret with text/plain as mime type.
+        """
+        resp = self.behaviors.create_secret_overriding_cfg(
+            mime_type='application/octet-stream')
+        self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
+
+    @tags(type='positive')
+    def test_creating_secret_w_empty_checking_name(self):
+        """ When an secret is created with an empty name attribute, the
+        system should return the secret's UUID on a get. Extends coverage of
+        test_creating_w_empty_name.
+        """
+        resp = self.behaviors.create_secret(
+            mime_type=self.config.mime_type,
+            name="",
+            algorithm=self.config.algorithm,
+            bit_length=self.config.bit_length,
+            cypher_type=self.config.cypher_type)
+
+        get_resp = self.client.get_secret(resp['secret_id'])
+        secret_id = self.behaviors.get_secret_id_from_ref(
+            secret_ref=get_resp.url)
+        secret = get_resp.entity
+        self.assertEqual(secret.name, secret_id,
+                         'Name did not match secret\'s UUID')
+
+    @tags(type='positive')
+    def test_creating_secret_wout_name_checking_name(self):
+        """ When a secret is created with a null name attribute, the
+        system should return the secret's UUID on a get. Extends coverage of
+        test_creating_w_null_name.
+        """
+        resp = self.behaviors.create_secret(
+            mime_type=self.config.mime_type,
+            name=None,
+            algorithm=self.config.algorithm,
+            bit_length=self.config.bit_length,
+            cypher_type=self.config.cypher_type)
+
+        get_resp = self.client.get_secret(resp['secret_id'])
+        secret_id = self.behaviors.get_secret_id_from_ref(
+            secret_ref=get_resp.url)
+        secret = get_resp.entity
+        self.assertEqual(secret.name, secret_id,
+                         'Name did not match secret\'s UUID')
+
+    @tags(type='positive')
+    def test_secret_paging_max_limit(self):
+        """Covers case of listing secrets with a limit more than the current
+        maximum of 100.
+        """
+        # Create secret pool
+        for count in range(101):
+            resp = self.behaviors.create_secret_from_config(
+                use_expiration=False)
+            self.assertEqual(resp['status_code'], 201,
+                             'Returned bad status code')
+
+        resp = self.client.get_secrets(limit=101, offset=0)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+
+        sec_group = resp.entity
+        self.assertEqual(len(sec_group.secrets), 100,
+                         'Returned wrong number of secrets')
+
+    @tags(type='positive')
+    def test_secret_paging_limit(self):
+        """Covers listing secrets with limit attribute from limits
+        of 2 to 50.
+        """
+        # Create secret pool
+        for count in range(50):
+            resp = self.behaviors.create_secret_from_config(
+                use_expiration=False)
+            self.assertEqual(resp['status_code'], 201,
+                             'Returned bad status code')
+
+        for limit in range(2, 50):
+            resp = self.client.get_secrets(limit=limit, offset=0)
+            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+
+            sec_group = resp.entity
+            self.assertEqual(len(sec_group.secrets), limit,
+                             'Returned wrong number of secrets')
+
+    @tags(type='positive')
+    def test_secret_paging_offset(self):
+        """Covers listing secrets with offset attribute from offsets
+        of 2 to 50.
+        """
+        # Create secret pool
+        for count in range(55):
+            resp = self.behaviors.create_secret_from_config(
+                use_expiration=False)
+            self.assertEqual(resp['status_code'], 201,
+                             'Returned bad status code')
+
+        # Covers offsets between 1 and 50
+        for offset in range(1, 49):
+            resp = self.client.get_secrets(limit=2, offset=offset)
+            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+            sec_group1 = resp.entity
+            self.assertEqual(len(sec_group1.secrets), 2)
+            previous_ref1 = sec_group1.previous
+            self.assertIsNotNone(previous_ref1)
+            next_ref1 = sec_group1.next
+            self.assertIsNotNone(next_ref1)
+
+            resp = self.client.get_secrets(limit=2, offset=offset + 2)
+            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+            sec_group2 = resp.entity
+            self.assertEqual(len(sec_group2.secrets), 2)
+            previous_ref2 = sec_group2.previous
+            self.assertIsNotNone(previous_ref2)
+            next_ref2 = sec_group2.next
+            self.assertIsNotNone(next_ref2)
+
+            duplicates = [secret for secret in sec_group1.secrets
+                          if secret in sec_group2.secrets]
+
+            self.assertEqual(len(duplicates), 0)

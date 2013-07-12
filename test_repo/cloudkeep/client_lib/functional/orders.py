@@ -39,6 +39,7 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(resp.status_code, 200,
                          'Barbican returned bad status code')
 
+    @tags(type='negative')
     def test_cl_create_order_w_null_values(self):
         """Covers creating order with all null values. Should raise a
         ClientException.

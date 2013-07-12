@@ -536,3 +536,87 @@ class OrdersAPI(OrdersFixture):
         resp = self.behaviors.create_order_from_config()
         if not resp['order_ref'].startswith(self.cloudkeep.base_url):
             self.fail('Incorrect hostname in response ref.')
+
+    @tags(type='positive')
+    def test_orders_paging_max_limit(self):
+        """Covers case of listing secrets with a limit more than the current
+        maximum of 100.
+        """
+        # Create order pool
+        for count in range(101):
+            resp = self.behaviors.create_order_from_config()
+            self.assertEqual(resp['status_code'], 202,
+                             'Returned bad status code')
+
+        resp = self.orders_client.get_orders(limit=101, offset=0)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+
+        orders_group = resp.entity
+        self.assertEqual(len(orders_group.orders), 100,
+                         'Returned wrong number of orders')
+
+    @tags(type='positive')
+    def test_order_paging_limit(self):
+        """Covers listing orders with limit attribute from limits
+        of 2 to 50.
+        """
+        # Create order pool
+        for count in range(50):
+            resp = self.behaviors.create_order_from_config()
+            self.assertEqual(resp['status_code'], 202,
+                             'Returned bad status code')
+
+        for limit in range(2, 50):
+            resp = self.orders_client.get_orders(limit=limit, offset=0)
+            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+
+            orders_group = resp.entity
+            self.assertEqual(len(orders_group.orders), limit,
+                             'Returned wrong number of orders')
+
+    @tags(type='positive')
+    def test_order_paging_offset(self):
+        """Covers listing orders with offset attribute from offsets
+        of 2 to 50.
+        """
+        # Create order pool
+        for count in range(55):
+            resp = self.behaviors.create_order_from_config()
+            self.assertEqual(resp['status_code'], 202,
+                             'Returned bad status code')
+
+        # Covers offsets between 1 and 50
+        for offset in range(1, 49):
+            resp = self.orders_client.get_orders(limit=2, offset=offset)
+            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+            orders_group1 = resp.entity
+            self.assertEqual(len(orders_group1.orders), 2)
+            previous_ref1 = orders_group1.previous
+            self.assertIsNotNone(previous_ref1)
+            next_ref1 = orders_group1.next
+            self.assertIsNotNone(next_ref1)
+
+            resp = self.orders_client.get_orders(limit=2, offset=offset+2)
+            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+            orders_group2 = resp.entity
+            self.assertEqual(len(orders_group2.orders), 2)
+            previous_ref2 = orders_group2.previous
+            self.assertIsNotNone(previous_ref2)
+            next_ref2 = orders_group2.next
+            self.assertIsNotNone(next_ref2)
+
+            duplicates = [order for order in orders_group1.orders
+                          if order in orders_group2.orders]
+
+            self.assertEqual(len(duplicates), 0)
+
+    @tags(type='negative')
+    def test_update_order(self):
+        """Covers case of putting to an order. Should return 405."""
+        resp = self.behaviors.create_order_from_config()
+        put_resp = self.orders_client.update_order(
+            order_id=resp['order_id'],
+            mime_type=self.config.mime_type,
+            data='test-update-order')
+        self.assertEqual(put_resp.status_code, 405,
+                         'Should have failed with 405')

@@ -90,6 +90,7 @@ class SecretsAPI(SecretsFixture):
         del_resp = self.behaviors.delete_secret(resp['secret_id'])
         self.assertEqual(del_resp.status_code, 200)
 
+    @tags(type='positive')
     def test_get_secrets(self):
         # Make sure we have at least one secret to list
         self.behaviors.create_secret_from_config(use_expiration=False)
