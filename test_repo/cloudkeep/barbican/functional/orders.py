@@ -287,11 +287,9 @@ class OrdersAPI(OrdersFixture):
         """ Covers case of creating an order with empty Strings for all
         entries. Should return a 400.
         """
-        resp = self.behaviors.create_order(name='',
-                                            expiration='',
-                                            algorithm='',
-                                            cypher_type='',
-                                            mime_type='')
+        resp = self.behaviors.create_order(name='', expiration='',
+                                           algorithm='', cypher_type='',
+                                           mime_type='')
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 

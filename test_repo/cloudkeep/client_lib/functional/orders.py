@@ -22,22 +22,14 @@ from cafe.drivers.unittest.decorators import tags
 
 class OrdersAPI(OrdersFixture):
 
-    @unittest2.skip
     @tags(type='positive')
     def test_cl_create_order_w_only_mime_type(self):
-        """Covers creating order with only required fields. In this case,
-        only mime type is required.
+        """Covers creating order with only mime type. Should raise a
+        ClientException.
         """
-        try:
-            order = self.cl_behaviors.create_order(
-                mime_type=self.config.mime_type)
-        except ClientException, error:
-            self.fail("Creation failed with ClientException: "
-                      "{0}".format(error))
-
-        resp = self.barb_client.get_order(order.id)
-        self.assertEqual(resp.status_code, 200,
-                         'Barbican returned bad status code')
+        self.assertRaises(ClientException,
+                          self.cl_behaviors.create_order,
+                          mime_type=self.config.mime_type)
 
     @tags(type='negative')
     def test_cl_create_order_w_null_values(self):

@@ -21,7 +21,6 @@ from cafe.drivers.unittest.decorators import tags
 
 class SecretsAPI(SecretsFixture):
 
-    @unittest2.skip
     @tags(type='positive')
     def test_cl_create_secret(self):
         """Covers creating a secret with the barbicanclient library.

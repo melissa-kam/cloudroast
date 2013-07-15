@@ -22,7 +22,7 @@ from cloudcafe.cloudkeep.barbican.orders.client import OrdersClient
 from cloudcafe.cloudkeep.barbican.secrets.behaviors import SecretsBehaviors
 from cloudcafe.cloudkeep.barbican.orders.behaviors import OrdersBehavior
 from cloudcafe.cloudkeep.config import MarshallingConfig, CloudKeepConfig, \
-    CloudKeepSecretsConfig, CloudKeepClientLibConfig
+    CloudKeepSecretsConfig, CloudKeepOrdersConfig, CloudKeepClientLibConfig
 from cloudcafe.cloudkeep.client_lib.secrets.clients import \
     ClientLibSecretsClient
 from cloudcafe.cloudkeep.client_lib.secrets.behaviors import \
@@ -99,7 +99,7 @@ class OrdersFixture(ClientLibFixture):
     @classmethod
     def setUpClass(cls):
         super(OrdersFixture, cls).setUpClass()
-        cls.config = CloudKeepSecretsConfig()
+        cls.config = CloudKeepOrdersConfig()
         cls.client_lib_config = CloudKeepClientLibConfig()
         cls.barb_client = OrdersClient(
             url=cls.cloudkeep.base_url,

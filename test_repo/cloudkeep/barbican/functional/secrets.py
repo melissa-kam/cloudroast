@@ -723,13 +723,14 @@ class SecretsAPI(SecretsFixture):
 
     @tags(type='positive')
     def test_creating_w_large_string_values(self):
-
-        data = str(bytearray().zfill(10001))
-
+        """Covers case of creating secret with large String values for
+        name, algorithm, and cypher type attributes.
+        """
+        large_string = str(bytearray().zfill(10001))
         resps = self.behaviors.create_and_check_secret(
             mime_type=self.config.mime_type,
-            name=data,
-            algorithm=data,
-            cypher_type=data)
+            name=large_string,
+            algorithm=large_string,
+            cypher_type=large_string)
         self.assertEqual(resps['create_resp']['status_code'], 201,
                          'Returned bad status code')
