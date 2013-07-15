@@ -546,9 +546,21 @@ class OrdersAPI(OrdersFixture):
         as the configured hostname.
         - Reported in Barbican GitHub Issue #182
         """
-        resp = self.behaviors.create_order_from_config()
-        if not resp['order_ref'].startswith(self.cloudkeep.base_url):
-            self.fail('Incorrect hostname in response ref.')
+        create_resp = self.behaviors.create_order_from_config()
+        self.assertEqual(create_resp['status_code'], 202,
+                         'Returned bad status code')
+
+        # Get secret using returned secret_ref
+        ref_get_resp = self.orders_client.get_order(
+            ref=create_resp['order_ref'])
+        self.assertEqual(ref_get_resp.status_code, 200,
+                         'Returned bad status code')
+
+        # Get secret using secret id and configured base url
+        config_get_resp = self.orders_client.get_order(
+            order_id=create_resp['order_id'])
+        self.assertEqual(config_get_resp.status_code, 200,
+                         'Returned bad status code')
 
     @tags(type='positive')
     def test_orders_paging_max_limit(self):
@@ -638,7 +650,7 @@ class OrdersAPI(OrdersFixture):
     def test_create_order_w_plain_text(self):
         """Covers case of creating order with plain text.
         Should return 400."""
-        resp = self.orders_client.create_order_w_plain_text(
+        resp = self.behaviors.create_order_w_plain_text(
             plain_text='test-create-order-w-plain-text',
             mime_type=self.config.mime_type,
             name=self.config.name,
@@ -646,13 +658,14 @@ class OrdersAPI(OrdersFixture):
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type,
             expiration=None)
-        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_w_empty_plain_text(self):
         """Covers case of creating order with an empty String as plain text.
         Should return 400."""
-        resp = self.orders_client.create_order_w_plain_text(
+        resp = self.behaviors.create_order_w_plain_text(
             plain_text='',
             mime_type=self.config.mime_type,
             name=self.config.name,
@@ -660,8 +673,27 @@ class OrdersAPI(OrdersFixture):
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type,
             expiration=None)
-        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
 
+    @tags(type='negative')
+    def test_create_order_w_oversized_plain_text(self):
+        """Covers case of creating an order with a value larger than the 10k
+        limit for the secret plain text attribute. Should return 413.
+        """
+        data = bytearray().zfill(10001)
+
+        resp = self.behaviors.create_order_w_plain_text(
+            plain_text=str(data),
+            mime_type=self.config.mime_type,
+            name=self.config.name,
+            algorithm=self.config.algorithm,
+            bit_length=self.config.bit_length,
+            cypher_type=self.config.cypher_type,
+            expiration=None)
+
+        self.assertEqual(resp['status_code'], 413,
+                         'Should have failed with 413')
 
     @tags(type='negative')
     def test_creating_order_wout_algorithm(self):

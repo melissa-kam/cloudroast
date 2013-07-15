@@ -31,7 +31,7 @@ class OrdersAPI(OrdersFixture):
         order status will be active and not pending.
         """
         resps = self.behaviors.create_and_check_order(
-            mime_type="application/octet-stream",
+            mime_type=self.config.mime_type,
             name=self.config.name,
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,

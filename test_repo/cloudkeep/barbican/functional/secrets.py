@@ -496,7 +496,7 @@ class SecretsAPI(SecretsFixture):
         """
         name = '~!@#$%^&*()_+`-={}[]|:;<>,.?"'
         resps = self.behaviors.create_and_check_secret(name=name)
-        self.assertEqual(resps['create_resp']['status_code'],201,
+        self.assertEqual(resps['create_resp']['status_code'], 201,
                          'Returned bad status code')
 
         secret = resps['get_resp'].entity
@@ -578,9 +578,20 @@ class SecretsAPI(SecretsFixture):
         as the configured hostname.
         - Reported in Barbican GitHub Issue #182
         """
-        resp = self.behaviors.create_secret_from_config()
-        if not resp['secret_ref'].startswith(self.cloudkeep.base_url):
-            self.fail('Incorrect hostname in response ref.')
+        create_resp = self.behaviors.create_secret_from_config()
+        self.assertEqual(create_resp['status_code'], 201,
+                         'Returned bad status code')
+
+        # Get secret using returned secret_ref
+        ref_get_resp = self.client.get_secret(ref=create_resp['secret_ref'])
+        self.assertEqual(ref_get_resp.status_code, 200,
+                         'Returned bad status code')
+
+        # Get secret using secret id and configured base url
+        config_get_resp = self.client.get_secret(
+            secret_id=create_resp['secret_id'])
+        self.assertEqual(config_get_resp.status_code, 200,
+                         'Returned bad status code')
 
     @tags(type='positive')
     def test_creating_secret_w_text_plain_mime_type(self):
@@ -709,3 +720,16 @@ class SecretsAPI(SecretsFixture):
                           if secret in sec_group2.secrets]
 
             self.assertEqual(len(duplicates), 0)
+
+    @tags(type='positive')
+    def test_creating_w_large_string_values(self):
+
+        data = str(bytearray().zfill(10001))
+
+        resps = self.behaviors.create_and_check_secret(
+            mime_type=self.config.mime_type,
+            name=data,
+            algorithm=data,
+            cypher_type=data)
+        self.assertEqual(resps['create_resp']['status_code'], 201,
+                         'Returned bad status code')
