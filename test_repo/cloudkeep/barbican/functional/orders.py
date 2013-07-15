@@ -16,6 +16,7 @@ limitations under the License.
 import unittest2
 from datetime import datetime, timedelta
 from uuid import uuid4
+from sys import maxint
 
 from test_repo.cloudkeep.barbican.fixtures import OrdersFixture
 from cafe.drivers.unittest.decorators import tags
@@ -694,7 +695,7 @@ class OrdersAPI(OrdersFixture):
                          'Should have failed with 413')
 
     @tags(type='negative')
-    def test_creating_order_wout_algorithm(self):
+    def test_create_order_wout_algorithm(self):
         """Covers case where order is created without an algorithm.
         Should return 400.
         """
@@ -708,7 +709,7 @@ class OrdersAPI(OrdersFixture):
                          'Should have failed with 400')
 
     @tags(type='negative')
-    def test_creating_order_wout_cypher_type(self):
+    def test_create_order_wout_cypher_type(self):
         """Covers case where order is created without a cypher type.
         Should return 400.
         """
@@ -718,5 +719,54 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             cypher_type=None,
             bit_length=self.config.bit_length)
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
+    @tags(type='positive')
+    def test_create_order_w_large_string_as_name(self):
+        """Covers case of creating an order with a large String value as
+        the name."""
+        large_string = str(bytearray().zfill(10001))
+        resp = self.behaviors.create_order_overriding_cfg(name=large_string)
+        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+
+    @tags(type='negative')
+    def test_create_order_w_large_string_values(self):
+        """Covers case of creating an order with large String values.
+        Should return 400."""
+        large_string = str(bytearray().zfill(10001))
+        resp = self.behaviors.create_order(
+            mime_type=self.config.mime_type,
+            name=large_string,
+            algorithm=large_string,
+            cypher_type=large_string)
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
+    @tags(type='negative')
+    def test_create_order_w_large_bit_length(self):
+        """Covers case of creating an order with a large integer as
+        the bit length. Should return 400."""
+        resp = self.behaviors.create_order_overriding_cfg(bit_length=maxint)
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
+    @tags(type='negative')
+    def test_create_order_w_large_string_as_bit_length(self):
+        """Covers case of creating secret with a large String as
+        the bit length. Should return 400."""
+        large_string = str(bytearray().zfill(10001))
+        resp = self.behaviors.create_order_overriding_cfg(
+            bit_length=large_string)
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
+    @tags(type='negative')
+    def test_create_order_w_large_string_as_mime_type(self):
+        """Covers case of creating secret with a large String as
+        the bit length. Should return 400."""
+        large_string = str(bytearray().zfill(10001))
+        resp = self.behaviors.create_order_overriding_cfg(
+            mime_type=large_string)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')

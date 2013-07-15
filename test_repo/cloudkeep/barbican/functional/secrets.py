@@ -15,6 +15,7 @@ limitations under the License.
 """
 from datetime import datetime, timedelta
 from uuid import uuid4
+from sys import maxint
 import unittest2
 
 from test_repo.cloudkeep.barbican.fixtures import SecretsFixture
@@ -723,14 +724,50 @@ class SecretsAPI(SecretsFixture):
 
     @tags(type='positive')
     def test_creating_w_large_string_values(self):
-        """Covers case of creating secret with large String values for
-        name, algorithm, and cypher type attributes.
-        """
+        """Covers case of creating secret with large String values."""
         large_string = str(bytearray().zfill(10001))
-        resps = self.behaviors.create_and_check_secret(
+        resp = self.behaviors.create_secret(
             mime_type=self.config.mime_type,
             name=large_string,
             algorithm=large_string,
             cypher_type=large_string)
-        self.assertEqual(resps['create_resp']['status_code'], 201,
-                         'Returned bad status code')
+        self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
+
+    @tags(type='positive')
+    def test_creating_w_max_secret_size(self):
+        """Covers case of creating secret with the maximum value for
+        an encrypted secret. Current limit is 10k bytes."""
+        large_string = str(bytearray().zfill(10000))
+        resp = self.behaviors.create_secret(
+            mime_type=self.config.mime_type,
+            plain_text=large_string)
+        self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
+
+    @tags(type='positive')
+    def test_creating_w_large_bit_length(self):
+        """Covers case of creating secret with a large integer as
+        the bit length."""
+        resp = self.behaviors.create_secret(
+            mime_type=self.config.mime_type,
+            bit_length=maxint)
+        self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
+
+    @tags(type='negative')
+    def test_creating_w_large_string_as_bit_length(self):
+        """Covers case of creating secret with a large String as
+        the bit length. Should return 400."""
+        large_string = str(bytearray().zfill(10001))
+        resp = self.behaviors.create_secret(
+            mime_type=self.config.mime_type,
+            bit_length=large_string)
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
+    @tags(type='negative')
+    def test_creating_w_large_string_as_mime_type(self):
+        """Covers case of creating secret with a large String as
+        the bit length. Should return 400."""
+        large_string = str(bytearray().zfill(10001))
+        resp = self.behaviors.create_secret(mime_type=large_string)
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
