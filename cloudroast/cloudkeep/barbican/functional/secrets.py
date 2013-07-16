@@ -468,7 +468,6 @@ class SecretsAPI(SecretsFixture):
         resp = self.behaviors.create_secret(mime_type=self.config.mime_type)
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
 
-    @unittest2.skip('Issue #171')
     @tags(type='negative')
     def test_secret_paging_w_invalid_parameters(self):
         """ Covers listing secrets with invalid limit and offset parameters.
@@ -723,7 +722,7 @@ class SecretsAPI(SecretsFixture):
             self.assertEqual(len(duplicates), 0)
 
     @tags(type='positive')
-    def test_creating_w_large_string_values(self):
+    def test_creating_secret_w_large_string_values(self):
         """Covers case of creating secret with large String values."""
         large_string = str(bytearray().zfill(10001))
         resp = self.behaviors.create_secret(
@@ -734,7 +733,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
 
     @tags(type='positive')
-    def test_creating_w_max_secret_size(self):
+    def test_creating_secret_w_max_secret_size(self):
         """Covers case of creating secret with the maximum value for
         an encrypted secret. Current limit is 10k bytes."""
         large_string = str(bytearray().zfill(10000))
@@ -744,7 +743,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
 
     @tags(type='positive')
-    def test_creating_w_large_bit_length(self):
+    def test_creating_secret_w_large_bit_length(self):
         """Covers case of creating secret with a large integer as
         the bit length."""
         resp = self.behaviors.create_secret(
@@ -753,7 +752,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
 
     @tags(type='negative')
-    def test_creating_w_large_string_as_bit_length(self):
+    def test_creating_secret_w_large_string_as_bit_length(self):
         """Covers case of creating secret with a large String as
         the bit length. Should return 400."""
         large_string = str(bytearray().zfill(10001))
@@ -764,10 +763,34 @@ class SecretsAPI(SecretsFixture):
                          'Should have failed with 400')
 
     @tags(type='negative')
-    def test_creating_w_large_string_as_mime_type(self):
+    def test_creating_secret_w_large_string_as_mime_type(self):
         """Covers case of creating secret with a large String as
         the bit length. Should return 400."""
         large_string = str(bytearray().zfill(10001))
         resp = self.behaviors.create_secret(mime_type=large_string)
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
+    @tags(type='negative')
+    def test_creating_secret_w_int_as_name(self):
+        resp = self.behaviors.create_secret_overriding_cfg(name=400)
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
+    @tags(type='negative')
+    def test_creating_secret_w_int_as_mime_type(self):
+        resp = self.behaviors.create_secret_overriding_cfg(mime_type=400)
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
+    @tags(type='negative')
+    def test_creating_secret_w_int_as_algorithm(self):
+        resp = self.behaviors.create_secret_overriding_cfg(algorithm=400)
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
+    @tags(type='negative')
+    def test_creating_secret_w_int_as_cypher_type(self):
+        resp = self.behaviors.create_secret_overriding_cfg(cypher_type=400)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
