@@ -260,17 +260,17 @@ class SecretsAPI(SecretsFixture):
         reference.
         """
         # Create secret pool
-        for count in range(170):
+        for count in range(146):
             resp = self.behaviors.create_secret_from_config(
                 use_expiration=False)
             self.assertEqual(resp['status_code'], 201,
                              'Returned bad status code')
 
         # First set of secrets
-        resp = self.client.get_secrets(limit=25, offset=115)
+        resp = self.client.get_secrets(limit=15, offset=115)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         sec_group1 = resp.entity
-        self.assertEqual(len(sec_group1.secrets), 25,
+        self.assertEqual(len(sec_group1.secrets), 15,
                          'Returned wrong number of secrets')
         next_ref = sec_group1.next
         self.assertIsNotNone(next_ref)
@@ -279,7 +279,7 @@ class SecretsAPI(SecretsFixture):
         resp = self.client.get_secrets(ref=next_ref)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         sec_group2 = resp.entity
-        self.assertEqual(len(sec_group2.secrets), 25)
+        self.assertEqual(len(sec_group2.secrets), 15)
 
         duplicates = [secret for secret in sec_group1.secrets
                       if secret in sec_group2.secrets]
@@ -293,17 +293,17 @@ class SecretsAPI(SecretsFixture):
         reference.
         """
         # Create secret pool
-        for count in range(170):
+        for count in range(146):
             resp = self.behaviors.create_secret_from_config(
                 use_expiration=False)
             self.assertEqual(resp['status_code'], 201,
                              'Returned bad status code')
 
-        resp = self.client.get_secrets(limit=25, offset=115)
+        resp = self.client.get_secrets(limit=15, offset=115)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
 
         sec_group1 = resp.entity
-        self.assertEqual(len(sec_group1.secrets), 25,
+        self.assertEqual(len(sec_group1.secrets), 15,
                          'Returned wrong number of secrets')
         previous_ref = sec_group1.previous
         self.assertIsNotNone(previous_ref)
@@ -595,16 +595,14 @@ class SecretsAPI(SecretsFixture):
 
     @tags(type='positive')
     def test_creating_secret_w_text_plain_mime_type(self):
-        """Covers case of creating a secret with text/plain as mime type.
-        """
+        """Covers case of creating a secret with text/plain as mime type."""
         resp = self.behaviors.create_secret_overriding_cfg(
             mime_type='text/plain')
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
 
     @tags(type='positive')
     def test_creating_secret_w_app_octet_mime_type(self):
-        """Covers case of creating a secret with text/plain as mime type.
-        """
+        """Covers case of creating a secret with text/plain as mime type."""
         resp = self.behaviors.create_secret_overriding_cfg(
             mime_type='application/octet-stream')
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
@@ -667,16 +665,16 @@ class SecretsAPI(SecretsFixture):
     @tags(type='positive')
     def test_secret_paging_limit(self):
         """Covers listing secrets with limit attribute from limits
-        of 2 to 50.
+        of 2 to 25.
         """
         # Create secret pool
-        for count in range(50):
+        for count in range(25):
             resp = self.behaviors.create_secret_from_config(
                 use_expiration=False)
             self.assertEqual(resp['status_code'], 201,
                              'Returned bad status code')
 
-        for limit in range(2, 50):
+        for limit in range(2, 25):
             resp = self.client.get_secrets(limit=limit, offset=0)
             self.assertEqual(resp.status_code, 200, 'Returned bad status code')
 
@@ -687,17 +685,17 @@ class SecretsAPI(SecretsFixture):
     @tags(type='positive')
     def test_secret_paging_offset(self):
         """Covers listing secrets with offset attribute from offsets
-        of 2 to 50.
+        of 2 to 25.
         """
         # Create secret pool
-        for count in range(55):
+        for count in range(30):
             resp = self.behaviors.create_secret_from_config(
                 use_expiration=False)
             self.assertEqual(resp['status_code'], 201,
                              'Returned bad status code')
 
-        # Covers offsets between 1 and 50
-        for offset in range(1, 49):
+        # Covers offsets between 1 and 25
+        for offset in range(1, 24):
             resp = self.client.get_secrets(limit=2, offset=offset)
             self.assertEqual(resp.status_code, 200, 'Returned bad status code')
             sec_group1 = resp.entity
@@ -773,24 +771,32 @@ class SecretsAPI(SecretsFixture):
 
     @tags(type='negative')
     def test_creating_secret_w_int_as_name(self):
+        """Covers case of creating a secret with an integer as the name.
+        Should return 400."""
         resp = self.behaviors.create_secret_overriding_cfg(name=400)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
     def test_creating_secret_w_int_as_mime_type(self):
+        """Covers case of creating a secret with an integer as the mime type.
+        Should return 400."""
         resp = self.behaviors.create_secret_overriding_cfg(mime_type=400)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
     def test_creating_secret_w_int_as_algorithm(self):
+        """Covers case of creating a secret with an integer as the algorithm.
+        Should return 400."""
         resp = self.behaviors.create_secret_overriding_cfg(algorithm=400)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
     def test_creating_secret_w_int_as_cypher_type(self):
+        """Covers case of creating a secret with an integer as the cypher type.
+        Should return 400."""
         resp = self.behaviors.create_secret_overriding_cfg(cypher_type=400)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')

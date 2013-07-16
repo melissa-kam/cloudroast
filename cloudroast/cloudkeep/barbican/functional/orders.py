@@ -188,16 +188,16 @@ class OrdersAPI(OrdersFixture):
         reference.
         """
         # Create order pool
-        for count in range(170):
+        for count in range(146):
             resp = self.behaviors.create_order_from_config()
             self.assertEqual(resp['status_code'], 202,
                              'Returned bad status code')
 
         # First set of orders
-        resp = self.orders_client.get_orders(limit=25, offset=115)
+        resp = self.orders_client.get_orders(limit=15, offset=115)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         order_group1 = resp.entity
-        self.assertEqual(len(order_group1.orders), 25)
+        self.assertEqual(len(order_group1.orders), 15)
         next_ref = order_group1.next
         self.assertIsNotNone(next_ref)
 
@@ -205,7 +205,7 @@ class OrdersAPI(OrdersFixture):
         resp = self.orders_client.get_orders(ref=next_ref)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         order_group2 = resp.entity
-        self.assertEqual(len(order_group2.orders), 25)
+        self.assertEqual(len(order_group2.orders), 15)
 
         duplicates = [order for order in order_group1.orders
                       if order in order_group2.orders]
@@ -219,16 +219,16 @@ class OrdersAPI(OrdersFixture):
         reference.
         """
         # Create order pool
-        for count in range(170):
+        for count in range(146):
             resp = self.behaviors.create_order_from_config()
             self.assertEqual(resp['status_code'], 202,
                              'Returned bad status code')
 
         # First set of orders
-        resp = self.orders_client.get_orders(limit=25, offset=115)
+        resp = self.orders_client.get_orders(limit=15, offset=115)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         order_group1 = resp.entity
-        self.assertEqual(len(order_group1.orders), 25)
+        self.assertEqual(len(order_group1.orders), 15)
         prev_ref = order_group1.previous
         self.assertIsNotNone(prev_ref)
 
@@ -236,7 +236,7 @@ class OrdersAPI(OrdersFixture):
         resp = self.orders_client.get_orders(ref=prev_ref)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         order_group2 = resp.entity
-        self.assertEqual(len(order_group2.orders), 25)
+        self.assertEqual(len(order_group2.orders), 15)
 
         duplicates = [order for order in order_group1.orders
                       if order in order_group2.orders]
@@ -581,15 +581,15 @@ class OrdersAPI(OrdersFixture):
     @tags(type='positive')
     def test_order_paging_limit(self):
         """Covers listing orders with limit attribute from limits
-        of 2 to 50.
+        of 2 to 25.
         """
         # Create order pool
-        for count in range(50):
+        for count in range(25):
             resp = self.behaviors.create_order_from_config()
             self.assertEqual(resp['status_code'], 202,
                              'Returned bad status code')
 
-        for limit in range(2, 50):
+        for limit in range(2, 25):
             resp = self.orders_client.get_orders(limit=limit, offset=0)
             self.assertEqual(resp.status_code, 200, 'Returned bad status code')
 
@@ -600,16 +600,16 @@ class OrdersAPI(OrdersFixture):
     @tags(type='positive')
     def test_order_paging_offset(self):
         """Covers listing orders with offset attribute from offsets
-        of 2 to 50.
+        of 2 to 25.
         """
         # Create order pool
-        for count in range(55):
+        for count in range(30):
             resp = self.behaviors.create_order_from_config()
             self.assertEqual(resp['status_code'], 202,
                              'Returned bad status code')
 
-        # Covers offsets between 1 and 50
-        for offset in range(1, 49):
+        # Covers offsets between 1 and 25
+        for offset in range(1, 24):
             resp = self.orders_client.get_orders(limit=2, offset=offset)
             self.assertEqual(resp.status_code, 200, 'Returned bad status code')
             orders_group1 = resp.entity
@@ -772,24 +772,32 @@ class OrdersAPI(OrdersFixture):
 
     @tags(type='negative')
     def test_create_order_w_int_as_name(self):
+        """Covers case of creating an order with an integer as the name.
+        Should return 400."""
         resp = self.behaviors.create_order_overriding_cfg(name=400)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_w_int_as_mime_type(self):
+        """Covers case of creating an order with an integer as the mime type.
+        Should return 400."""
         resp = self.behaviors.create_order_overriding_cfg(mime_type=400)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_w_int_as_algorithm(self):
+        """Covers case of creating an order with an integer as the algorithm.
+        Should return 400."""
         resp = self.behaviors.create_order_overriding_cfg(algorithm=400)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_w_int_as_cypher_type(self):
+        """Covers case of creating an order with an integer as the cypher type.
+        Should return 400."""
         resp = self.behaviors.create_order_overriding_cfg(cypher_type=400)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
