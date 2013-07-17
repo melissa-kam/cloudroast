@@ -51,8 +51,8 @@ class OrdersAPI(OrdersFixture):
 
     @tags(type='positive')
     def test_cl_create_order_w_null_name_checking_name(self):
-        """Covers creating order with a null name, checking that the name
-        matches the order ID.
+        """Covers creating order with a null name, checking that the
+        created secret's name matches the secret's ID.
         """
         order = self.cl_behaviors.create_order(
             name=None,
@@ -77,8 +77,8 @@ class OrdersAPI(OrdersFixture):
 
     @tags(type='positive')
     def test_cl_create_order_w_empty_name_checking_name(self):
-        """Covers creating order with an empty name, checking that the name
-        matches the order ID."""
+        """Covers creating order with an empty name, checking that the
+        created secret's name matches the secret's ID."""
         order = self.cl_behaviors.create_order(
             name='',
             mime_type=self.config.mime_type,
@@ -87,7 +87,7 @@ class OrdersAPI(OrdersFixture):
             cypher_type=self.config.cypher_type)
         secret_id = self.cl_behaviors.get_id_from_ref(order.secret_ref)
         self.assertEqual(order.secret['name'], secret_id,
-                         "Name did not match order ID")
+                         "Name did not match secret ID")
 
     @tags(type='negative')
     def test_cl_create_order_w_invalid_mime_type(self):
@@ -149,7 +149,7 @@ class OrdersAPI(OrdersFixture):
                           'not-an-id')
 
     @tags(type='negative')
-    def test_def_get_nonexistent_order_by_href(self):
+    def test_cl_get_nonexistent_order_by_href(self):
         """Covers getting an order that does not exist by href.
         Should raise a ClientException.
         """

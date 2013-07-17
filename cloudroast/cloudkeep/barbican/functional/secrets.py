@@ -312,7 +312,7 @@ class SecretsAPI(SecretsFixture):
         resp = self.client.get_secrets(ref=previous_ref)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         sec_group2 = resp.entity
-        self.assertEqual(len(sec_group2.secrets), 25)
+        self.assertEqual(len(sec_group2.secrets), 15)
 
         duplicates = [secret for secret in sec_group1.secrets
                       if secret in sec_group2.secrets]
@@ -602,8 +602,9 @@ class SecretsAPI(SecretsFixture):
 
     @tags(type='positive')
     def test_creating_secret_w_app_octet_mime_type(self):
-        """Covers case of creating a secret with text/plain as mime type."""
-        resp = self.behaviors.create_secret_overriding_cfg(
+        """Covers case of creating a secret with application/octet-stream
+        as mime type."""
+        resp = self.behaviors.create_secret(
             mime_type='application/octet-stream')
         self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
 
@@ -798,5 +799,16 @@ class SecretsAPI(SecretsFixture):
         """Covers case of creating a secret with an integer as the cypher type.
         Should return 400."""
         resp = self.behaviors.create_secret_overriding_cfg(cypher_type=400)
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
+
+    @tags(type='negative')
+    def test_creating_secret_w_app_octet_mime_type_and_plain_text(self):
+        """Covers case of creating a secret with application/octet-stream
+        as mime type and a plain_text value provided. Should return 400.
+        - Reported in Barbican Launchpad Bug #1200659"""
+        resp = self.behaviors.create_secret(
+            mime_type='application/octet-stream',
+            plain_text=self.config.plain_text)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
