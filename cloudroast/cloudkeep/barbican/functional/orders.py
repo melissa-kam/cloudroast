@@ -309,8 +309,8 @@ class OrdersAPI(OrdersFixture):
             cypher_type=self.config.cypher_type)
 
         get_resp = self.orders_client.get_order(resp['order_id'])
-        secret_id = self.behaviors.get_id_from_ref(
-            ref=get_resp.entity.secret_href)
+        order = get_resp.entity
+        secret_id = order.get_secret_id()
         secret = get_resp.entity.secret
         self.assertEqual(secret.name, secret_id,
                          'Name did not match secret\'s UUID')
@@ -330,8 +330,8 @@ class OrdersAPI(OrdersFixture):
             cypher_type=self.config.cypher_type)
 
         get_resp = self.orders_client.get_order(resp['order_id'])
-        secret_id = self.behaviors.get_id_from_ref(
-            ref=get_resp.entity.secret_href)
+        order = get_resp.entity
+        secret_id = order.get_secret_id()
         secret = get_resp.entity.secret
         self.assertEqual(secret.name, secret_id,
                          'Name did not match secret\'s UUID')
