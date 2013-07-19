@@ -22,7 +22,7 @@ from cafe.drivers.unittest.decorators import tags
 
 class AuthenticationAPI(AuthenticationFixture):
 
-    @unittest2.skip
+    @unittest2.skip('Not testing until after M2')
     @tags(type='positive')
     def test_get_version_w_authentication(self):
         """Covers acquiring an authentication token and using it to get the

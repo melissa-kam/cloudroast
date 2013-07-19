@@ -769,4 +769,4 @@ class OrdersPagingAPI(OrdersPagingFixture):
         self.behaviors.create_order_from_config(use_expiration=False)
         resp = self.orders_client.get_orders(
             limit='not-an-int', offset='not-an-int')
-        self.assertEqual(resp['status_code'], 200, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
