@@ -19,10 +19,10 @@ from cafe.drivers.unittest.fixtures import BaseTestFixture
 from cloudcafe.cloudkeep.barbican.version.client import VersionClient
 from cloudcafe.cloudkeep.barbican.secrets.client import SecretsClient
 from cloudcafe.cloudkeep.barbican.orders.client import OrdersClient
-from cloudcafe.cloudkeep.barbican.tokens_api.client import TokenAPI_Client
+from cloudcafe.identity.v2_0.tokens_api.client import TokenAPI_Client
 from cloudcafe.cloudkeep.barbican.secrets.behaviors import SecretsBehaviors
 from cloudcafe.cloudkeep.barbican.orders.behaviors import OrdersBehavior
-from cloudcafe.cloudkeep.barbican.tokens_api.behaviors import \
+from cloudcafe.identity.v2_0.tokens_api.behaviors import \
     TokenAPI_Behaviors
 from cloudcafe.cloudkeep.config import MarshallingConfig, CloudKeepConfig, \
     CloudKeepSecretsConfig, CloudKeepOrdersConfig, CloudKeepKeystoneConfig
@@ -76,6 +76,22 @@ class SecretsFixture(BarbicanFixture):
         self.behaviors.delete_all_created_secrets()
         super(SecretsFixture, self).tearDown()
 
+class SecretsPagingFixture(SecretsFixture):
+
+    @classmethod
+    def setUpClass(cls):
+        super(SecretsPagingFixture, cls).setUpClass()
+        for count in range(150):
+            resp = cls.behaviors.create_secret_from_config(
+                use_expiration=False)
+
+    def tearDown(self):
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.behaviors.delete_all_created_secrets()
+
 
 class OrdersFixture(BarbicanFixture):
     @classmethod
@@ -101,6 +117,23 @@ class OrdersFixture(BarbicanFixture):
     def tearDown(self):
         self.behaviors.delete_all_created_orders_and_secrets()
         super(OrdersFixture, self).tearDown()
+
+
+class OrdersPagingFixture(OrdersFixture):
+
+    @classmethod
+    def setUpClass(cls):
+        super(OrdersPagingFixture, cls).setUpClass()
+        for count in range(150):
+            resp = cls.behaviors.create_order_from_config(
+                use_expiration=False)
+
+    def tearDown(self):
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.behaviors.delete_all_created_orders_and_secrets()
 
 
 class AuthenticationFixture(BarbicanFixture):

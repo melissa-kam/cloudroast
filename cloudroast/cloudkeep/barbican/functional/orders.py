@@ -18,7 +18,8 @@ from datetime import datetime, timedelta
 from uuid import uuid4
 from sys import maxint
 
-from cloudroast.cloudkeep.barbican.fixtures import OrdersFixture
+from cloudroast.cloudkeep.barbican.fixtures import OrdersFixture, \
+    OrdersPagingFixture
 from cafe.drivers.unittest.decorators import tags
 from cloudcafe.common.tools import randomstring
 
@@ -156,105 +157,6 @@ class OrdersAPI(OrdersFixture):
         """
         resp = self.orders_client.delete_order('not_an_order')
         self.assertEqual(resp.status_code, 404, 'Should have failed with 404')
-
-    @tags(type='positive')
-    def test_order_paging_limit_and_offset(self):
-        """
-        Covers testing paging limit and offset attributes when getting orders.
-        """
-        # Create order pool
-        for count in range(20):
-            self.behaviors.create_order_from_config()
-
-        # First set of orders
-        resp = self.orders_client.get_orders(limit=10, offset=0)
-        ord_group1 = resp.entity
-
-        # Second set of orders
-        resp = self.orders_client.get_orders(limit=10, offset=10)
-        ord_group2 = resp.entity
-
-        duplicates = [order for order in ord_group1.orders
-                      if order in ord_group2.orders]
-
-        self.assertEqual(len(ord_group1.orders), 10)
-        self.assertEqual(len(ord_group2.orders), 10)
-        self.assertEqual(len(duplicates), 0,
-                         'Using offset didn\'t return unique orders.')
-
-    @tags(type='positive')
-    def test_order_paging_next_option(self):
-        """Covers getting a list of orders and using the next
-        reference.
-        """
-        # Create order pool
-        for count in range(146):
-            resp = self.behaviors.create_order_from_config()
-            self.assertEqual(resp['status_code'], 202,
-                             'Returned bad status code')
-
-        # First set of orders
-        resp = self.orders_client.get_orders(limit=15, offset=115)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-        order_group1 = resp.entity
-        self.assertEqual(len(order_group1.orders), 15)
-        next_ref = order_group1.next
-        self.assertIsNotNone(next_ref)
-
-        #Next set of orders
-        resp = self.orders_client.get_orders(ref=next_ref)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-        order_group2 = resp.entity
-        self.assertEqual(len(order_group2.orders), 15)
-
-        duplicates = [order for order in order_group1.orders
-                      if order in order_group2.orders]
-
-        self.assertEqual(len(duplicates), 0,
-                         'Using next reference didn\'t return unique orders')
-
-    @tags(type='positive')
-    def test_order_paging_previous_option(self):
-        """Covers getting a list of orders and using the previous
-        reference.
-        """
-        # Create order pool
-        for count in range(146):
-            resp = self.behaviors.create_order_from_config()
-            self.assertEqual(resp['status_code'], 202,
-                             'Returned bad status code')
-
-        # First set of orders
-        resp = self.orders_client.get_orders(limit=15, offset=115)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-        order_group1 = resp.entity
-        self.assertEqual(len(order_group1.orders), 15)
-        prev_ref = order_group1.previous
-        self.assertIsNotNone(prev_ref)
-
-        #Previous set of orders
-        resp = self.orders_client.get_orders(ref=prev_ref)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-        order_group2 = resp.entity
-        self.assertEqual(len(order_group2.orders), 15)
-
-        duplicates = [order for order in order_group1.orders
-                      if order in order_group2.orders]
-
-        self.assertEqual(len(duplicates), 0,
-                         'Using previous reference '
-                         'didn\'t return unique orders')
-
-    @tags(type='positive')
-    def test_find_a_single_order_via_paging(self):
-        """
-        Covers finding an order with paging.
-        """
-        resp = self.behaviors.create_order_from_config()
-        for count in range(10):
-            self.behaviors.create_order_from_config()
-        order = self.behaviors.find_order(resp['order_id'])
-        self.assertIsNotNone(order, 'Couldn\'t find created order')
 
     @tags(type='positive')
     def test_create_order_w_expiration(self):
@@ -460,17 +362,6 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
 
-    @tags(type='negative')
-    def test_order_paging_w_invalid_parameters(self):
-        """ Covers listing orders with invalid limit and offset parameters.
-        Should return 400.
-        - Reported in Barbican GitHub Issue #171
-        """
-        self.behaviors.create_order_from_config(use_expiration=False)
-        resp = self.orders_client.get_orders(
-            limit='not-an-int', offset='not-an-int')
-        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
-
     @tags(type='positive')
     def test_create_order_w_cbc_cypher_type(self):
         """Covers case of creating an order with a cbc cypher type."""
@@ -560,79 +451,6 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(config_get_resp.status_code, 200,
                          'Returned bad status code')
 
-    @tags(type='positive')
-    def test_orders_paging_max_limit(self):
-        """Covers case of listing secrets with a limit more than the current
-        maximum of 100.
-        """
-        # Create order pool
-        for count in range(101):
-            resp = self.behaviors.create_order_from_config()
-            self.assertEqual(resp['status_code'], 202,
-                             'Returned bad status code')
-
-        resp = self.orders_client.get_orders(limit=101, offset=0)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-
-        orders_group = resp.entity
-        self.assertEqual(len(orders_group.orders), 100,
-                         'Returned wrong number of orders')
-
-    @tags(type='positive')
-    def test_order_paging_limit(self):
-        """Covers listing orders with limit attribute from limits
-        of 2 to 25.
-        """
-        # Create order pool
-        for count in range(25):
-            resp = self.behaviors.create_order_from_config()
-            self.assertEqual(resp['status_code'], 202,
-                             'Returned bad status code')
-
-        for limit in range(2, 25):
-            resp = self.orders_client.get_orders(limit=limit, offset=0)
-            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-
-            orders_group = resp.entity
-            self.assertEqual(len(orders_group.orders), limit,
-                             'Returned wrong number of orders')
-
-    @tags(type='positive')
-    def test_order_paging_offset(self):
-        """Covers listing orders with offset attribute from offsets
-        of 2 to 25.
-        """
-        # Create order pool
-        for count in range(30):
-            resp = self.behaviors.create_order_from_config()
-            self.assertEqual(resp['status_code'], 202,
-                             'Returned bad status code')
-
-        # Covers offsets between 1 and 25
-        for offset in range(1, 24):
-            resp = self.orders_client.get_orders(limit=2, offset=offset)
-            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-            orders_group1 = resp.entity
-            self.assertEqual(len(orders_group1.orders), 2)
-            previous_ref1 = orders_group1.previous
-            self.assertIsNotNone(previous_ref1)
-            next_ref1 = orders_group1.next
-            self.assertIsNotNone(next_ref1)
-
-            resp = self.orders_client.get_orders(limit=2, offset=offset + 2)
-            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-            orders_group2 = resp.entity
-            self.assertEqual(len(orders_group2.orders), 2)
-            previous_ref2 = orders_group2.previous
-            self.assertIsNotNone(previous_ref2)
-            next_ref2 = orders_group2.next
-            self.assertIsNotNone(next_ref2)
-
-            duplicates = [order for order in orders_group1.orders
-                          if order in orders_group2.orders]
-
-            self.assertEqual(len(duplicates), 0)
-
     @tags(type='negative')
     def test_update_order(self):
         """Covers case of putting to an order. Should return 405."""
@@ -677,7 +495,7 @@ class OrdersAPI(OrdersFixture):
     @tags(type='negative')
     def test_create_order_w_oversized_plain_text(self):
         """Covers case of creating an order with a value larger than the 10k
-        limit for the secret plain text attribute. Should return 413.
+        limit for the secret plain text attribute. Should return 400.
         """
         data = bytearray().zfill(10001)
 
@@ -690,8 +508,8 @@ class OrdersAPI(OrdersFixture):
             cypher_type=self.config.cypher_type,
             expiration=None)
 
-        self.assertEqual(resp['status_code'], 413,
-                         'Should have failed with 413')
+        self.assertEqual(resp['status_code'], 400,
+                         'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_wout_algorithm(self):
@@ -801,3 +619,154 @@ class OrdersAPI(OrdersFixture):
         resp = self.behaviors.create_order_overriding_cfg(cypher_type=400)
         self.assertEqual(resp['status_code'], 400,
                          'Should have failed with 400')
+
+
+class OrdersPagingAPI(OrdersPagingFixture):
+
+    @tags(type='positive')
+    def test_order_paging_limit_and_offset(self):
+        """
+        Covers testing paging limit and offset attributes when getting orders.
+        """
+        # First set of orders
+        resp = self.orders_client.get_orders(limit=10, offset=0)
+        ord_group1 = resp.entity
+
+        # Second set of orders
+        resp = self.orders_client.get_orders(limit=10, offset=10)
+        ord_group2 = resp.entity
+
+        duplicates = [order for order in ord_group1.orders
+                      if order in ord_group2.orders]
+
+        self.assertEqual(len(ord_group1.orders), 10)
+        self.assertEqual(len(ord_group2.orders), 10)
+        self.assertEqual(len(duplicates), 0,
+                         'Using offset didn\'t return unique orders.')
+
+    @tags(type='positive')
+    def test_find_a_single_order_via_paging(self):
+        """
+        Covers finding an order with paging.
+        """
+        resp = self.behaviors.create_order_from_config()
+        order = self.behaviors.find_order(resp['order_id'])
+        self.assertIsNotNone(order, 'Couldn\'t find created order')
+
+    @tags(type='positive')
+    def test_order_paging_next_option(self):
+        """Covers getting a list of orders and using the next
+        reference.
+        """
+
+        # First set of orders
+        resp = self.orders_client.get_orders(limit=15, offset=115)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+        order_group1 = resp.entity
+        self.assertEqual(len(order_group1.orders), 15)
+        next_ref = order_group1.next
+        self.assertIsNotNone(next_ref)
+
+        #Next set of orders
+        resp = self.orders_client.get_orders(ref=next_ref)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+        order_group2 = resp.entity
+        self.assertEqual(len(order_group2.orders), 15)
+
+        duplicates = [order for order in order_group1.orders
+                      if order in order_group2.orders]
+
+        self.assertEqual(len(duplicates), 0,
+                         'Using next reference didn\'t return unique orders')
+
+    @tags(type='positive')
+    def test_order_paging_previous_option(self):
+        """Covers getting a list of orders and using the previous
+        reference.
+        """
+
+        # First set of orders
+        resp = self.orders_client.get_orders(limit=15, offset=115)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+        order_group1 = resp.entity
+        self.assertEqual(len(order_group1.orders), 15)
+        prev_ref = order_group1.previous
+        self.assertIsNotNone(prev_ref)
+
+        #Previous set of orders
+        resp = self.orders_client.get_orders(ref=prev_ref)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+        order_group2 = resp.entity
+        self.assertEqual(len(order_group2.orders), 15)
+
+        duplicates = [order for order in order_group1.orders
+                      if order in order_group2.orders]
+
+        self.assertEqual(len(duplicates), 0,
+                         'Using previous reference '
+                         'didn\'t return unique orders')
+
+    @tags(type='positive')
+    def test_orders_paging_max_limit(self):
+        """Covers case of listing secrets with a limit more than the current
+        maximum of 100.
+        """
+        resp = self.orders_client.get_orders(limit=101, offset=0)
+        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+
+        orders_group = resp.entity
+        self.assertEqual(len(orders_group.orders), 100,
+                         'Returned wrong number of orders')
+
+    @tags(type='positive')
+    def test_order_paging_limit(self):
+        """Covers listing orders with limit attribute from limits
+        of 2 to 25.
+        """
+        for limit in range(2, 25):
+            resp = self.orders_client.get_orders(limit=limit, offset=0)
+            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+
+            orders_group = resp.entity
+            self.assertEqual(len(orders_group.orders), limit,
+                             'Returned wrong number of orders')
+
+    @tags(type='positive')
+    def test_order_paging_offset(self):
+        """Covers listing orders with offset attribute from offsets
+        of 2 to 25.
+        """
+        # Covers offsets between 1 and 25
+        for offset in range(1, 24):
+            resp = self.orders_client.get_orders(limit=2, offset=offset)
+            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+            orders_group1 = resp.entity
+            self.assertEqual(len(orders_group1.orders), 2)
+            previous_ref1 = orders_group1.previous
+            self.assertIsNotNone(previous_ref1)
+            next_ref1 = orders_group1.next
+            self.assertIsNotNone(next_ref1)
+
+            resp = self.orders_client.get_orders(limit=2, offset=offset + 2)
+            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+            orders_group2 = resp.entity
+            self.assertEqual(len(orders_group2.orders), 2)
+            previous_ref2 = orders_group2.previous
+            self.assertIsNotNone(previous_ref2)
+            next_ref2 = orders_group2.next
+            self.assertIsNotNone(next_ref2)
+
+            duplicates = [order for order in orders_group1.orders
+                          if order in orders_group2.orders]
+
+            self.assertEqual(len(duplicates), 0)
+
+    @tags(type='positive')
+    def test_order_paging_w_invalid_parameters(self):
+        """ Covers listing orders with invalid limit and offset parameters.
+        - Reported in Barbican GitHub Issue #171
+        """
+        self.behaviors.create_order_from_config(use_expiration=False)
+        resp = self.orders_client.get_orders(
+            limit='not-an-int', offset='not-an-int')
+        self.assertEqual(resp['status_code'], 200, 'Returned bad status code')
