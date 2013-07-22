@@ -17,6 +17,7 @@ import unittest2
 
 from cloudroast.cloudkeep.barbican.fixtures import SecretsFixture
 from cafe.drivers.unittest.decorators import tags
+from cloudcafe.cloudkeep.common.states import SecretsStates
 
 
 class SecretsAPI(SecretsFixture):
@@ -47,7 +48,7 @@ class SecretsAPI(SecretsFixture):
         metadata = sec_resp.entity
 
         self.assertEqual(sec_resp.status_code, 200)
-        self.assertEqual(metadata.status, 'ACTIVE')
+        self.assertEqual(metadata.status, SecretsStates.STATUS_ACTIVE)
         self.assertEqual(metadata.name, self.config.name)
         self.assertEqual(metadata.cypher_type, self.config.cypher_type)
         self.assertEqual(metadata.algorithm, self.config.algorithm)

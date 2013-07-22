@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from cloudcafe.cloudkeep.barbican.orders.models.order import Order
+from cloudcafe.cloudkeep.common.states import OrdersStates
 from cloudroast.cloudkeep.barbican.fixtures import OrdersFixture
 from cafe.drivers.unittest.decorators import tags
 
@@ -22,6 +22,9 @@ class OrdersAPI(OrdersFixture):
 
     @tags(type='positive')
     def test_create_order(self):
+        """Covers creating an order. Does not cover creating with
+        an expiration.
+        """
         resp = self.behaviors.create_order_from_config()
         self.assertEqual(resp.status_code, 202)
 
@@ -36,12 +39,12 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
-        create_resp = resps['create_resp']
+        create_resp = resps.create_resp
         self.assertEqual(create_resp.status_code, 202)
 
-        ord_resp = resps['get_order_resp']
+        ord_resp = resps.get_resp
         self.assertEqual(ord_resp.status_code, 200)
-        self.assertEqual(ord_resp.entity.status, 'ACTIVE')
+        self.assertEqual(ord_resp.entity.status, OrdersStates.STATUS_ACTIVE)
 
         metadata = ord_resp.entity.secret
         self.assertEqual(metadata.name, self.config.name)
@@ -51,6 +54,7 @@ class OrdersAPI(OrdersFixture):
 
     @tags(type='positive')
     def test_get_order(self):
+        """Covers getting an order."""
         # Create an order to get
         resp = self.behaviors.create_order_from_config()
         self.assertEqual(resp.status_code, 202)
@@ -58,8 +62,8 @@ class OrdersAPI(OrdersFixture):
         # Verify Creation
         get_resp = self.orders_client.get_order(resp.id)
         order = get_resp.entity
-        order_status = (order.status == Order.STATUS_ACTIVE or
-                        order.status == Order.STATUS_PENDING)
+        order_status = (order.status == OrdersStates.STATUS_ACTIVE or
+                        order.status == OrdersStates.STATUS_PENDING)
 
         self.assertEqual(get_resp.status_code, 200)
         self.assertIsNotNone(order.secret_href)
@@ -67,6 +71,7 @@ class OrdersAPI(OrdersFixture):
 
     @tags(type='positive')
     def test_delete_order(self):
+        """Covers deleting an order."""
         # Create an order to delete
         resp = self.behaviors.create_order_from_config()
         self.assertEqual(resp.status_code, 202)
@@ -76,6 +81,7 @@ class OrdersAPI(OrdersFixture):
 
     @tags(type='positive')
     def test_get_orders(self):
+        """Covers getting a list of orders."""
         # Create 10 orders
         for i in range(0, 11):
             self.behaviors.create_order_from_config()

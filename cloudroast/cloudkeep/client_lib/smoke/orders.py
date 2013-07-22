@@ -76,10 +76,11 @@ class OrdersAPI(OrdersFixture):
     def test_cl_order_get_secret(self):
         """Covers getting a secret using the order get method."""
         resps = self.barb_behaviors.create_and_check_order()
-        order_resp = resps['get_order_resp']
-        secret_resp = resps['get_secret_resp']
+        order_resp = resps.get_resp
+        secret_resp = self.secrets_client.get_secret(
+            ref=order_resp.entity.secret_href)
 
-        self.assertEqual(resps['create_resp'].status_code, 202,
+        self.assertEqual(resps.create_resp.status_code, 202,
                          'Barbican returned bad status code')
         self.assertEqual(order_resp.status_code, 200,
                          'Barbican returned bad status code')
@@ -88,7 +89,8 @@ class OrdersAPI(OrdersFixture):
 
         order = self.cl_client.get_order(order_resp.url)
         secret = order.get_secret()
-        self.assertEqual(secret.id, resps['secret_id'], 'Secrets do not match')
+        self.assertEqual(secret.id, secret_resp.entity.get_id(),
+                         'Secrets do not match')
 
     @tags(type='positive')
     def test_cl_delete_order_by_href(self):

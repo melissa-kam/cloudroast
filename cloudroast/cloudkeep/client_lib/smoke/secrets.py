@@ -116,7 +116,7 @@ class SecretsAPI(SecretsFixture):
         """Covers listing secrets by href with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
-        self.assertEqual(resp.status_code, 201, 
+        self.assertEqual(resp.status_code, 201,
                          'Barbican returned bad status code')
 
         list_tuple = self.cl_client.list_secrets_by_href()

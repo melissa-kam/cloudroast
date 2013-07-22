@@ -76,6 +76,7 @@ class SecretsFixture(BarbicanFixture):
         self.behaviors.delete_all_created_secrets()
         super(SecretsFixture, self).tearDown()
 
+
 class SecretsPagingFixture(SecretsFixture):
 
     @classmethod
