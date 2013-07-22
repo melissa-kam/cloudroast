@@ -38,9 +38,9 @@ class OrdersAPI(OrdersFixture):
 
         resp = self.behaviors.create_order_overriding_cfg(
             expiration=timestamp)
-        self.assertEqual(resp['status_code'], 202)
+        self.assertEqual(resp.status_code, 202)
 
-        order = self.orders_client.get_order(resp['order_id']).entity
+        order = self.orders_client.get_order(resp.id).entity
         exp = datetime.strptime(order.secret.expiration,
                                 '%Y-%m-%dT%H:%M:%S.%f')
         self.assertEqual(exp, one_day_ahead + timedelta(hours=offset),
@@ -56,7 +56,7 @@ class OrdersAPI(OrdersFixture):
 
         resp = self.behaviors.create_order_overriding_cfg(
             expiration=timestamp)
-        self.assertEqual(resp['status_code'], 400)
+        self.assertEqual(resp.status_code, 400)
 
     @tags(type='negative')
     def test_create_order_with_null_mime_type(self):
@@ -71,7 +71,7 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
-        self.assertEqual(resp['status_code'], 400, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 400, 'Returned bad status code')
 
     @tags(type='negative')
     def test_create_order_with_empty_mime_type(self):
@@ -84,7 +84,7 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
-        self.assertEqual(resp['status_code'], 400, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 400, 'Returned bad status code')
 
     @tags(type='positive')
     def test_create_order_wout_name(self):
@@ -97,7 +97,7 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
-        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
 
     @tags(type='positive')
     def test_create_order_w_empty_name(self):
@@ -110,7 +110,7 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
-        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
 
     @tags(type='negative')
     def test_create_order_with_invalid_mime_type(self):
@@ -124,7 +124,7 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
-        self.assertEqual(resp['status_code'], 400, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 400, 'Returned bad status code')
 
     @unittest2.skip('Issue #140')
     @tags(type='positive')
@@ -164,7 +164,7 @@ class OrdersAPI(OrdersFixture):
         Covers creating order with expiration.
         """
         resp = self.behaviors.create_order_from_config(use_expiration=True)
-        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
 
     @tags(type='negative')
     def test_create_order_w_invalid_expiration(self):
@@ -173,7 +173,7 @@ class OrdersAPI(OrdersFixture):
         """
         resp = self.behaviors.create_order_overriding_cfg(
             expiration='2000-01-10T14:58:52.546795')
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -182,7 +182,7 @@ class OrdersAPI(OrdersFixture):
         Covers creating order with all null entries.
         """
         resp = self.behaviors.create_order()
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -193,7 +193,7 @@ class OrdersAPI(OrdersFixture):
         resp = self.behaviors.create_order(name='', expiration='',
                                            algorithm='', cypher_type='',
                                            mime_type='')
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='positive')
@@ -210,7 +210,7 @@ class OrdersAPI(OrdersFixture):
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
 
-        get_resp = self.orders_client.get_order(resp['order_id'])
+        get_resp = self.orders_client.get_order(resp.id)
         order = get_resp.entity
         secret_id = order.get_secret_id()
         secret = get_resp.entity.secret
@@ -231,7 +231,7 @@ class OrdersAPI(OrdersFixture):
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
 
-        get_resp = self.orders_client.get_order(resp['order_id'])
+        get_resp = self.orders_client.get_order(resp.id)
         order = get_resp.entity
         secret_id = order.get_secret_id()
         secret = get_resp.entity.secret
@@ -269,7 +269,7 @@ class OrdersAPI(OrdersFixture):
     def test_create_order_w_128_bit_length(self):
         """Covers case of creating an order with a 128 bit length."""
         resps = self.behaviors.create_and_check_order(bit_length=128)
-        self.assertEqual(resps['create_resp']['status_code'],
+        self.assertEqual(resps['create_resp'].status_code,
                          202, 'Returned bad status code')
 
         secret = resps['get_order_resp'].entity.secret
@@ -281,7 +281,7 @@ class OrdersAPI(OrdersFixture):
     def test_create_order_w_192_bit_length(self):
         """Covers case of creating an order with a 192 bit length."""
         resps = self.behaviors.create_and_check_order(bit_length=192)
-        self.assertEqual(resps['create_resp']['status_code'],
+        self.assertEqual(resps['create_resp'].status_code,
                          202, 'Returned bad status code')
 
         secret = resps['get_order_resp'].entity.secret
@@ -293,7 +293,7 @@ class OrdersAPI(OrdersFixture):
     def test_create_order_w_256_bit_length(self):
         """Covers case of creating an order with a 256 bit length."""
         resps = self.behaviors.create_and_check_order(bit_length=256)
-        self.assertEqual(resps['create_resp']['status_code'],
+        self.assertEqual(resps['create_resp'].status_code,
                          202, 'Returned bad status code')
 
         secret = resps['get_order_resp'].entity.secret
@@ -334,7 +334,7 @@ class OrdersAPI(OrdersFixture):
         """
         resp = self.behaviors.create_order_overriding_cfg(
             bit_length='not-an-int')
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -344,7 +344,7 @@ class OrdersAPI(OrdersFixture):
         """
         resp = self.behaviors.create_order_overriding_cfg(
             bit_length=-1)
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -359,20 +359,20 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             cypher_type=self.config.cypher_type,
             bit_length=None)
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='positive')
     def test_create_order_w_cbc_cypher_type(self):
         """Covers case of creating an order with a cbc cypher type."""
         resp = self.behaviors.create_order_overriding_cfg(cypher_type='cbc')
-        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
 
     @tags(type='positive')
     def test_create_order_w_aes_algorithm(self):
         """Covers case of creating an order with an aes algorithm."""
         resp = self.behaviors.create_order_overriding_cfg(algorithm='aes')
-        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
 
     @tags(type='positive')
     def test_create_order_w_app_octet_stream_mime_type(self):
@@ -381,14 +381,14 @@ class OrdersAPI(OrdersFixture):
         """
         resp = self.behaviors.create_order_overriding_cfg(
             mime_type='application/octet-stream')
-        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
 
     @tags(type='positive')
     def test_create_order_w_alphanumeric_name(self):
         """Covers case of creating an order with an alphanumeric name."""
         name = randomstring.get_random_string(prefix='1a2b')
         resps = self.behaviors.create_and_check_order(name=name)
-        self.assertEqual(resps['create_resp']['status_code'], 202,
+        self.assertEqual(resps['create_resp'].status_code, 202,
                          'Returned bad status code')
 
         secret = resps['get_secret_resp'].entity
@@ -401,7 +401,7 @@ class OrdersAPI(OrdersFixture):
         """
         name = '~!@#$%^&*()_+`-={}[]|:;<>,.?"'
         resps = self.behaviors.create_and_check_order(name=name)
-        self.assertEqual(resps['create_resp']['status_code'], 202,
+        self.assertEqual(resps['create_resp'].status_code, 202,
                          'Returned bad status code')
 
         secret = resps['get_secret_resp'].entity
@@ -412,7 +412,7 @@ class OrdersAPI(OrdersFixture):
         """Covers case of creating an order with a random uuid as the name."""
         uuid = str(uuid4())
         resps = self.behaviors.create_and_check_order(name=uuid)
-        self.assertEqual(resps['create_resp']['status_code'], 202,
+        self.assertEqual(resps['create_resp'].status_code, 202,
                          'Returned bad status code')
 
         secret = resps['get_secret_resp'].entity
@@ -423,7 +423,7 @@ class OrdersAPI(OrdersFixture):
         """Covers case of creating an order with a 225 character name."""
         name = randomstring.get_random_string(size=225)
         resps = self.behaviors.create_and_check_order(name=name)
-        self.assertEqual(resps['create_resp']['status_code'], 202,
+        self.assertEqual(resps['create_resp'].status_code, 202,
                          'Returned bad status code')
 
         secret = resps['get_secret_resp'].entity
@@ -436,18 +436,18 @@ class OrdersAPI(OrdersFixture):
         - Reported in Barbican GitHub Issue #182
         """
         create_resp = self.behaviors.create_order_from_config()
-        self.assertEqual(create_resp['status_code'], 202,
+        self.assertEqual(create_resp.status_code, 202,
                          'Returned bad status code')
 
         # Get secret using returned secret_ref
         ref_get_resp = self.orders_client.get_order(
-            ref=create_resp['order_ref'])
+            ref=create_resp.ref)
         self.assertEqual(ref_get_resp.status_code, 200,
                          'Returned bad status code')
 
         # Get secret using secret id and configured base url
         config_get_resp = self.orders_client.get_order(
-            order_id=create_resp['order_id'])
+            order_id=create_resp.id)
         self.assertEqual(config_get_resp.status_code, 200,
                          'Returned bad status code')
 
@@ -456,7 +456,7 @@ class OrdersAPI(OrdersFixture):
         """Covers case of putting to an order. Should return 405."""
         resp = self.behaviors.create_order_from_config()
         put_resp = self.orders_client.update_order(
-            order_id=resp['order_id'],
+            order_id=resp.id,
             mime_type=self.config.mime_type,
             data='test-update-order')
         self.assertEqual(put_resp.status_code, 405,
@@ -474,8 +474,7 @@ class OrdersAPI(OrdersFixture):
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type,
             expiration=None)
-        self.assertEqual(resp['status_code'], 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_w_empty_plain_text(self):
@@ -489,8 +488,7 @@ class OrdersAPI(OrdersFixture):
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type,
             expiration=None)
-        self.assertEqual(resp['status_code'], 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_w_oversized_plain_text(self):
@@ -508,8 +506,7 @@ class OrdersAPI(OrdersFixture):
             cypher_type=self.config.cypher_type,
             expiration=None)
 
-        self.assertEqual(resp['status_code'], 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_wout_algorithm(self):
@@ -522,7 +519,7 @@ class OrdersAPI(OrdersFixture):
             algorithm=None,
             cypher_type=self.config.cypher_type,
             bit_length=self.config.bit_length)
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -536,7 +533,7 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             cypher_type=None,
             bit_length=self.config.bit_length)
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='positive')
@@ -545,7 +542,7 @@ class OrdersAPI(OrdersFixture):
         the name."""
         large_string = str(bytearray().zfill(10001))
         resp = self.behaviors.create_order_overriding_cfg(name=large_string)
-        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
 
     @tags(type='negative')
     def test_create_order_w_large_string_values(self):
@@ -557,7 +554,7 @@ class OrdersAPI(OrdersFixture):
             name=large_string,
             algorithm=large_string,
             cypher_type=large_string)
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -565,7 +562,7 @@ class OrdersAPI(OrdersFixture):
         """Covers case of creating an order with a large integer as
         the bit length. Should return 400."""
         resp = self.behaviors.create_order_overriding_cfg(bit_length=maxint)
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -575,7 +572,7 @@ class OrdersAPI(OrdersFixture):
         large_string = str(bytearray().zfill(10001))
         resp = self.behaviors.create_order_overriding_cfg(
             bit_length=large_string)
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -585,7 +582,7 @@ class OrdersAPI(OrdersFixture):
         large_string = str(bytearray().zfill(10001))
         resp = self.behaviors.create_order_overriding_cfg(
             mime_type=large_string)
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -593,7 +590,7 @@ class OrdersAPI(OrdersFixture):
         """Covers case of creating an order with an integer as the name.
         Should return 400."""
         resp = self.behaviors.create_order_overriding_cfg(name=400)
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -601,7 +598,7 @@ class OrdersAPI(OrdersFixture):
         """Covers case of creating an order with an integer as the mime type.
         Should return 400."""
         resp = self.behaviors.create_order_overriding_cfg(mime_type=400)
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -609,7 +606,7 @@ class OrdersAPI(OrdersFixture):
         """Covers case of creating an order with an integer as the algorithm.
         Should return 400."""
         resp = self.behaviors.create_order_overriding_cfg(algorithm=400)
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -617,7 +614,7 @@ class OrdersAPI(OrdersFixture):
         """Covers case of creating an order with an integer as the cypher type.
         Should return 400."""
         resp = self.behaviors.create_order_overriding_cfg(cypher_type=400)
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
 
@@ -650,7 +647,8 @@ class OrdersPagingAPI(OrdersPagingFixture):
         Covers finding an order with paging.
         """
         resp = self.behaviors.create_order_from_config()
-        order = self.behaviors.find_order(resp['order_id'])
+        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
+        order = self.behaviors.find_order(resp.id)
         self.assertIsNotNone(order, 'Couldn\'t find created order')
 
     @tags(type='positive')

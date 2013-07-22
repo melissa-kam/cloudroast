@@ -172,10 +172,10 @@ class OrdersAPI(OrdersFixture):
         metadata. Assumes that order status is active and not pending.
         """
         resp = self.barb_behaviors.create_order_from_config()
-        self.assertEqual(resp['status_code'], 202,
+        self.assertEqual(resp.status_code, 202,
                          'Barbican returned bad status code')
 
-        order = self.cl_client.get_order(resp['order_ref'])
+        order = self.cl_client.get_order(resp.ref)
         secret_metadata = order.secret
 
         self.assertEqual(secret_metadata['name'], self.config.name)
@@ -192,10 +192,10 @@ class OrdersAPI(OrdersFixture):
         Assumes that order status is active and not pending.
         """
         resp = self.barb_behaviors.create_order_from_config()
-        self.assertEqual(resp['status_code'], 202,
+        self.assertEqual(resp.status_code, 202,
                          'Barbican returned bad status code')
 
-        order = self.cl_client.get_order_by_id(resp['order_id'])
+        order = self.cl_client.get_order_by_id(resp.id)
         secret_metadata = order.secret
 
         self.assertEqual(secret_metadata['name'], self.config.name)
@@ -212,10 +212,10 @@ class OrdersAPI(OrdersFixture):
         """
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=True)
-        self.assertEqual(resp['status_code'], 202,
+        self.assertEqual(resp.status_code, 202,
                          'Barbican returned bad status code')
 
-        order_ref = resp['order_ref']
+        order_ref = resp.ref
         order = self.cl_client.get_order(href=order_ref)
         secret = order.secret
         self.assertIsNotNone(secret['expiration'])
@@ -227,10 +227,10 @@ class OrdersAPI(OrdersFixture):
         """
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=True)
-        self.assertEqual(resp['status_code'], 202,
+        self.assertEqual(resp.status_code, 202,
                          'Barbican returned bad status code')
 
-        order_id = resp['order_id']
+        order_id = resp.id
         order = self.cl_client.get_order_by_id(order_id=order_id)
         secret = order.secret
         self.assertIsNotNone(secret['expiration'])
@@ -242,10 +242,10 @@ class OrdersAPI(OrdersFixture):
         is active and not pending.
         """
         resp = self.barb_behaviors.create_order_from_config()
-        self.assertEqual(resp['status_code'], 202,
+        self.assertEqual(resp.status_code, 202,
                          'Barbican returned bad status code')
 
-        order = self.cl_client.get_order_by_id(resp['order_id'])
+        order = self.cl_client.get_order_by_id(resp.id)
         secret = order.get_secret()
 
         self.assertEqual(secret.status, 'ACTIVE')
@@ -262,7 +262,7 @@ class OrdersAPI(OrdersFixture):
         for count in range(20):
             resp = self.barb_behaviors.create_order_from_config(
                 use_expiration=False)
-            self.assertEqual(resp['status_code'], 202,
+            self.assertEqual(resp.status_code, 202,
                              'Barbican returned bad status code')
 
         # First set of orders
@@ -291,7 +291,7 @@ class OrdersAPI(OrdersFixture):
         for count in range(20):
             resp = self.barb_behaviors.create_order_from_config(
                 use_expiration=False)
-            self.assertEqual(resp['status_code'], 202,
+            self.assertEqual(resp.status_code, 202,
                              'Barbican returned bad status code')
 
         # First set of orders
@@ -319,7 +319,7 @@ class OrdersAPI(OrdersFixture):
         for count in range(20):
             resp = self.barb_behaviors.create_order_from_config(
                 use_expiration=False)
-            self.assertEqual(resp['status_code'], 202,
+            self.assertEqual(resp.status_code, 202,
                              'Barbican returned bad status code')
 
         # First set of orders

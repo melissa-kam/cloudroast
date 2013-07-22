@@ -86,6 +86,9 @@ class SecretsPagingFixture(SecretsFixture):
                 use_expiration=False)
 
     def tearDown(self):
+        """ Overrides superclass method so that secrets are not deleted
+        between tests.
+        """
         pass
 
     @classmethod
@@ -129,6 +132,9 @@ class OrdersPagingFixture(OrdersFixture):
                 use_expiration=False)
 
     def tearDown(self):
+        """ Overrides superclass method so that orders are not deleted
+        between tests.
+        """
         pass
 
     @classmethod

@@ -28,22 +28,22 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.behaviors.create_secret_from_config()
 
-        self.assertEqual(resp['status_code'], 201)
-        self.assertGreater(len(resp['secret_id']), 0)
+        self.assertEqual(resp.status_code, 201)
+        self.assertGreater(len(resp.id), 0)
 
     @tags(type='positive')
     def test_adding_secret_wout_expiration(self):
         resp = self.behaviors.create_secret_from_config(use_expiration=False)
 
-        self.assertEqual(resp['status_code'], 201)
-        self.assertGreater(len(resp['secret_id']), 0)
+        self.assertEqual(resp.status_code, 201)
+        self.assertGreater(len(resp.id), 0)
 
     @tags(type='positive')
     def test_get_secret_metadata(self):
         resp = self.behaviors.create_secret_from_config(use_expiration=False)
-        self.assertEqual(resp['status_code'], 201)
+        self.assertEqual(resp.status_code, 201)
 
-        sec_resp = self.client.get_secret(secret_id=resp['secret_id'])
+        sec_resp = self.client.get_secret(secret_id=resp.id)
         metadata = sec_resp.entity
 
         self.assertEqual(sec_resp.status_code, 200)
@@ -56,9 +56,9 @@ class SecretsAPI(SecretsFixture):
     @tags(type='positive')
     def test_get_secret(self):
         resp = self.behaviors.create_secret_from_config(use_expiration=False)
-        self.assertEqual(resp['status_code'], 201)
+        self.assertEqual(resp.status_code, 201)
 
-        sec_resp = self.client.get_secret(secret_id=resp['secret_id'],
+        sec_resp = self.client.get_secret(secret_id=resp.id,
                                           mime_type=self.config.mime_type)
         self.assertEqual(sec_resp.status_code, 200)
         self.assertIn(self.config.plain_text, sec_resp.content)
@@ -68,17 +68,17 @@ class SecretsAPI(SecretsFixture):
         # Create
         resp = self.behaviors.create_secret_from_config(use_expiration=False,
                                                         use_plain_text=False)
-        self.assertEqual(resp['status_code'], 201)
+        self.assertEqual(resp.status_code, 201)
 
         # Update
         update_resp = self.client.add_secret_plain_text(
-            secret_id=resp['secret_id'],
+            secret_id=resp.id,
             mime_type=self.config.mime_type,
             plain_text='testing_update_secret')
         self.assertEqual(update_resp.status_code, 200)
 
         # Get/Check Updated
-        sec_resp = self.client.get_secret(secret_id=resp['secret_id'],
+        sec_resp = self.client.get_secret(secret_id=resp.id,
                                           mime_type=self.config.mime_type)
         self.assertIn('testing_update_secret', sec_resp.content)
 
@@ -86,9 +86,9 @@ class SecretsAPI(SecretsFixture):
     def test_deleting_a_secret(self):
         resp = self.behaviors.create_secret_from_config(use_expiration=False,
                                                         use_plain_text=False)
-        self.assertEqual(resp['status_code'], 201)
+        self.assertEqual(resp.status_code, 201)
 
-        del_resp = self.behaviors.delete_secret(resp['secret_id'])
+        del_resp = self.behaviors.delete_secret(resp.id)
         self.assertEqual(del_resp.status_code, 200)
 
     @tags(type='positive')

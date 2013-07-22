@@ -55,10 +55,10 @@ class OrdersAPI(OrdersFixture):
         """Covers getting an order by href with barbicanclient library."""
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 202,
+        self.assertEqual(resp.status_code, 202,
                          'Barbican returned bad status code')
 
-        order = self.cl_client.get_order(resp['order_ref'])
+        order = self.cl_client.get_order(resp.ref)
         self.assertIsNotNone(order)
 
     @tags(type='positive')
@@ -66,10 +66,10 @@ class OrdersAPI(OrdersFixture):
         """Covers getting an order by id with barbicanclient library."""
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 202,
+        self.assertEqual(resp.status_code, 202,
                          'Barbican returned bad status code')
 
-        order = self.cl_client.get_order_by_id(resp['order_id'])
+        order = self.cl_client.get_order_by_id(resp.id)
         self.assertIsNotNone(order)
 
     @tags(type='positive')
@@ -79,7 +79,7 @@ class OrdersAPI(OrdersFixture):
         order_resp = resps['get_order_resp']
         secret_resp = resps['get_secret_resp']
 
-        self.assertEqual(resps['create_resp']['status_code'], 202,
+        self.assertEqual(resps['create_resp'].status_code, 202,
                          'Barbican returned bad status code')
         self.assertEqual(order_resp.status_code, 200,
                          'Barbican returned bad status code')
@@ -95,14 +95,13 @@ class OrdersAPI(OrdersFixture):
         """Covers deleting an order by href with barbicanclient library."""
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
 
-        self.cl_behaviors.delete_order(resp['order_ref'])
+        self.cl_behaviors.delete_order(resp.ref)
         # Deleting here because using two different behaviors
-        self.barb_behaviors.remove_from_created_orders(
-            order_id=resp['order_id'])
+        self.barb_behaviors.remove_from_created_orders(order_id=resp.id)
 
-        get_resp = self.barb_client.get_order(resp['order_id'])
+        get_resp = self.barb_client.get_order(resp.id)
         self.assertEqual(get_resp.status_code, 404,
                          'Should have failed with 404')
 
@@ -111,14 +110,14 @@ class OrdersAPI(OrdersFixture):
         """Covers deleting an order by id with barbicanclient library."""
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
 
-        self.cl_behaviors.delete_order_by_id(resp['order_id'])
+        self.cl_behaviors.delete_order_by_id(resp.id)
         # Deleting here because using two different behaviors
         self.barb_behaviors.remove_from_created_orders(
-            order_id=resp['order_id'])
+            order_id=resp.id)
 
-        get_resp = self.barb_client.get_order(resp['order_id'])
+        get_resp = self.barb_client.get_order(resp.id)
         self.assertEqual(get_resp.status_code, 404,
                          'Should have failed with 404')
 
@@ -127,7 +126,7 @@ class OrdersAPI(OrdersFixture):
         """Covers listing orders with barbicanclient library."""
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
 
         list_tuple = self.cl_client.list_orders(limit=10, offset=0)
         orders = list_tuple[0]
@@ -138,7 +137,7 @@ class OrdersAPI(OrdersFixture):
         """Covers listing orders by href with barbicanclient library."""
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 202,
+        self.assertEqual(resp.status_code, 202,
                          'Barbican returned bad status code')
 
         list_tuple = self.cl_client.list_orders_by_href()

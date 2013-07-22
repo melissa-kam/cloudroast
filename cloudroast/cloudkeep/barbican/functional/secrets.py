@@ -34,9 +34,9 @@ class SecretsAPI(SecretsFixture):
 
         resp = self.behaviors.create_secret_overriding_cfg(
             expiration=timestamp)
-        self.assertEqual(resp['status_code'], 201)
+        self.assertEqual(resp.status_code, 201)
 
-        secret = self.client.get_secret(resp['secret_id']).entity
+        secret = self.client.get_secret(resp.id).entity
         exp = datetime.strptime(secret.expiration, '%Y-%m-%dT%H:%M:%S.%f')
         self.assertEqual(exp, one_day_ahead + timedelta(hours=offset),
                          'Response didn\'t return the expected time')
@@ -48,7 +48,7 @@ class SecretsAPI(SecretsFixture):
 
         resp = self.behaviors.create_secret_overriding_cfg(
             expiration=timestamp)
-        self.assertEqual(resp['status_code'], 400)
+        self.assertEqual(resp.status_code, 400)
 
     @tags(type='positive')
     def test_secret_with_plain_text_deletion(self):
@@ -58,9 +58,9 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.behaviors.create_secret_from_config(use_expiration=False,
                                                         use_plain_text=True)
-        self.assertEqual(resp['status_code'], 201)
+        self.assertEqual(resp.status_code, 201)
 
-        del_resp = self.behaviors.delete_secret(resp['secret_id'])
+        del_resp = self.behaviors.delete_secret(resp.id)
         self.assertEqual(del_resp.status_code, 200)
 
     @tags(type='positive')
@@ -107,8 +107,7 @@ class SecretsAPI(SecretsFixture):
         - Reported in Barbican GitHub Issue #90
         """
         resp = self.behaviors.create_secret()
-        self.assertEqual(resp['status_code'], 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_creating_w_empty_entries(self):
@@ -121,8 +120,7 @@ class SecretsAPI(SecretsFixture):
                                             cypher_type='',
                                             plain_text='',
                                             mime_type='')
-        self.assertEqual(resp['status_code'], 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='positive')
     def test_creating_w_empty_name(self):
@@ -133,10 +131,9 @@ class SecretsAPI(SecretsFixture):
         c_resp = self.behaviors.create_secret(name='',
                                               mime_type=self.config.mime_type)
 
-        get_resp = self.client.get_secret(secret_id=c_resp['secret_id'])
-        self.assertEqual(get_resp.entity.name,
-                         c_resp['secret_id'],
-                         'name doesn\'t match UUID of secret')
+        get_resp = self.client.get_secret(secret_id=c_resp.id)
+        self.assertEqual(get_resp.entity.name, c_resp.id,
+                         'Name doesn\'t match UUID of secret')
 
     @tags(type='positive')
     def test_creating_w_null_name(self):
@@ -147,15 +144,14 @@ class SecretsAPI(SecretsFixture):
         c_resp = self.behaviors.create_secret(name=None,
                                               mime_type=self.config.mime_type)
 
-        get_resp = self.client.get_secret(secret_id=c_resp['secret_id'])
-        self.assertEqual(get_resp.entity.name,
-                         c_resp['secret_id'],
-                         'name doesn\'t match UUID of secret')
+        get_resp = self.client.get_secret(secret_id=c_resp.id)
+        self.assertEqual(get_resp.entity.name, c_resp.id,
+                         'Name doesn\'t match UUID of secret')
 
     @tags(type='negative')
     def test_creating_w_empty_mime_type(self):
         resp = self.behaviors.create_secret(mime_type='')
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -168,14 +164,14 @@ class SecretsAPI(SecretsFixture):
             bit_length=self.config.bit_length,
             mime_type=None
         )
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
     def test_creating_w_empty_secret(self):
         resp = self.behaviors.create_secret(mime_type=self.config.mime_type,
                                             plain_text='')
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -186,13 +182,13 @@ class SecretsAPI(SecretsFixture):
         data = bytearray().zfill(10001)
 
         resps = self.behaviors.create_and_check_secret(plain_text=str(data))
-        self.assertEqual(resps['create_resp']['status_code'], 413,
+        self.assertEqual(resps['create_resp'].status_code, 413,
                          'Should have failed with 413')
 
     @tags(type='negative')
     def test_creating_w_invalid_mime_type(self):
         resps = self.behaviors.create_and_check_secret(mime_type='crypto/boom')
-        self.assertEqual(resps['create_resp']['status_code'], 400,
+        self.assertEqual(resps['create_resp'].status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -203,13 +199,13 @@ class SecretsAPI(SecretsFixture):
     @tags(type='negative')
     def test_getting_secret_data_w_invalid_mime_type(self):
         resp = self.behaviors.create_secret_from_config(use_expiration=False)
-        resp = self.client.get_secret(resp['secret_id'], mime_type='i/m')
+        resp = self.client.get_secret(resp.id, mime_type='i/m')
         self.assertEqual(resp.status_code, 406, 'Should have failed with 406')
 
     @tags(type='negative')
     def test_creating_w_plain_text_as_array(self):
         resps = self.behaviors.create_and_check_secret(plain_text=['boom'])
-        self.assertEqual(resps['create_resp']['status_code'], 400,
+        self.assertEqual(resps['create_resp'].status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -221,8 +217,7 @@ class SecretsAPI(SecretsFixture):
             secret_id='not_a_uuid',
             mime_type=self.config.mime_type,
             plain_text='testing putting to non-existent secret')
-        self.assertEqual(resp.status_code, 404,
-                         'Should have failed with 404')
+        self.assertEqual(resp.status_code, 404, 'Should have failed with 404')
 
     @tags(type='negative')
     def test_putting_w_invalid_mime_type(self):
@@ -231,7 +226,7 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.behaviors.create_secret(mime_type=self.config.mime_type)
         put_resp = self.client.add_secret_plain_text(
-            secret_id=resp['secret_id'],
+            secret_id=resp.id,
             mime_type='crypto/boom',
             plain_text='testing putting with invalid mime type')
         self.assertEqual(put_resp.status_code, 400,
@@ -244,7 +239,7 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.behaviors.create_secret_from_config(use_expiration=False)
         put_resp = self.client.add_secret_plain_text(
-            secret_id=resp['secret_id'],
+            secret_id=resp.id,
             mime_type=self.config.mime_type,
             plain_text='testing putting to a secret that already has data')
         self.assertEqual(put_resp.status_code, 409,
@@ -257,7 +252,7 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.behaviors.create_secret(mime_type=self.config.mime_type)
         put_resp = self.client.add_secret_plain_text(
-            secret_id=resp['secret_id'],
+            secret_id=resp.id,
             mime_type=self.config.mime_type,
             plain_text='')
         self.assertEqual(put_resp.status_code, 400,
@@ -270,7 +265,7 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.behaviors.create_secret(mime_type=self.config.mime_type)
         put_resp = self.client.add_secret_plain_text(
-            secret_id=resp['secret_id'],
+            secret_id=resp.id,
             mime_type=self.config.mime_type,
             plain_text=None)
         self.assertEqual(put_resp.status_code, 400,
@@ -284,7 +279,7 @@ class SecretsAPI(SecretsFixture):
         data = bytearray().zfill(10001)
         resp = self.behaviors.create_secret(mime_type=self.config.mime_type)
         put_resp = self.client.add_secret_plain_text(
-            secret_id=resp['secret_id'],
+            secret_id=resp.id,
             mime_type=self.config.mime_type,
             plain_text=str(data))
         self.assertEqual(put_resp.status_code, 413,
@@ -306,8 +301,7 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.behaviors.create_secret_overriding_cfg(
             expiration='2000-01-10T14:58:52.546795')
-        self.assertEqual(resp['status_code'], 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='positive')
     def test_checking_content_types_when_data(self):
@@ -326,7 +320,7 @@ class SecretsAPI(SecretsFixture):
         """
         create_resp = self.behaviors.create_secret(
             mime_type=self.config.mime_type)
-        secret_id = create_resp['secret_id']
+        secret_id = create_resp.id
         resp = self.client.get_secret(secret_id=secret_id)
         secret = resp.entity
         self.assertIsNone(secret.content_types,
@@ -339,8 +333,7 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.behaviors.create_secret_overriding_cfg(
             bit_length='not-an-int')
-        self.assertEqual(resp['status_code'], 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_creating_secret_w_negative_bit_length(self):
@@ -349,8 +342,7 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.behaviors.create_secret_overriding_cfg(
             bit_length=-1)
-        self.assertEqual(resp['status_code'], 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='positive')
     def test_creating_secret_w_only_mime_type(self):
@@ -358,14 +350,14 @@ class SecretsAPI(SecretsFixture):
         only mime type is required.
         """
         resp = self.behaviors.create_secret(mime_type=self.config.mime_type)
-        self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 201, 'Returned bad status code')
 
     @tags(type='positive')
     def test_creating_secret_w_alphanumeric_name(self):
         """Covers case of creating secret with an alphanumeric name."""
         name = randomstring.get_random_string(prefix='1a2b')
         resps = self.behaviors.create_and_check_secret(name=name)
-        self.assertEqual(resps['create_resp']['status_code'], 201,
+        self.assertEqual(resps['create_resp'].status_code, 201,
                          'Returned bad status code')
 
         secret = resps['get_resp'].entity
@@ -378,7 +370,7 @@ class SecretsAPI(SecretsFixture):
         """
         name = '~!@#$%^&*()_+`-={}[]|:;<>,.?"'
         resps = self.behaviors.create_and_check_secret(name=name)
-        self.assertEqual(resps['create_resp']['status_code'], 201,
+        self.assertEqual(resps['create_resp'].status_code, 201,
                          'Returned bad status code')
 
         secret = resps['get_resp'].entity
@@ -389,7 +381,7 @@ class SecretsAPI(SecretsFixture):
         """Covers case of creating a secret with a random uuid as the name."""
         uuid = str(uuid4())
         resps = self.behaviors.create_and_check_secret(name=uuid)
-        self.assertEqual(resps['create_resp']['status_code'], 201,
+        self.assertEqual(resps['create_resp'].status_code, 201,
                          'Returned bad status code')
 
         secret = resps['get_resp'].entity
@@ -400,7 +392,7 @@ class SecretsAPI(SecretsFixture):
         """Covers case of creating a secret with a 225 character name."""
         name = randomstring.get_random_string(size=225)
         resps = self.behaviors.create_and_check_secret(name=name)
-        self.assertEqual(resps['create_resp']['status_code'], 201,
+        self.assertEqual(resps['create_resp'].status_code, 201,
                          'Returned bad status code')
 
         secret = resps['get_resp'].entity
@@ -410,7 +402,7 @@ class SecretsAPI(SecretsFixture):
     def test_creating_secret_w_128_bit_length(self):
         """Covers case of creating a secret with a 128 bit length."""
         resps = self.behaviors.create_and_check_secret(bit_length=128)
-        self.assertEqual(resps['create_resp']['status_code'], 201,
+        self.assertEqual(resps['create_resp'].status_code, 201,
                          'Returned bad status code')
 
         secret = resps['get_resp'].entity
@@ -422,7 +414,7 @@ class SecretsAPI(SecretsFixture):
     def test_creating_secret_w_192_bit_length(self):
         """Covers case of creating a secret with a 192 bit length."""
         resps = self.behaviors.create_and_check_secret(bit_length=192)
-        self.assertEqual(resps['create_resp']['status_code'], 201,
+        self.assertEqual(resps['create_resp'].status_code, 201,
                          'Returned bad status code')
 
         secret = resps['get_resp'].entity
@@ -434,7 +426,7 @@ class SecretsAPI(SecretsFixture):
     def test_creating_secret_w_256_bit_length(self):
         """Covers case of creating a secret with a 256 bit length."""
         resps = self.behaviors.create_and_check_secret(bit_length=256)
-        self.assertEqual(resps['create_resp']['status_code'], 201,
+        self.assertEqual(resps['create_resp'].status_code, 201,
                          'Returned bad status code')
 
         secret = resps['get_resp'].entity
@@ -446,13 +438,13 @@ class SecretsAPI(SecretsFixture):
     def test_creating_secret_w_aes_algorithm(self):
         """Covers case of creating a secret with an aes algorithm."""
         resp = self.behaviors.create_secret_overriding_cfg(algorithm='aes')
-        self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 201, 'Returned bad status code')
 
     @tags(type='positive')
     def test_creating_secret_w_cbc_cypher_type(self):
         """Covers case of creating a secret with a cbc cypher type."""
         resp = self.behaviors.create_secret_overriding_cfg(cypher_type='cbc')
-        self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 201, 'Returned bad status code')
 
     @tags(type='positive')
     def test_secret_hostname_response(self):
@@ -461,17 +453,17 @@ class SecretsAPI(SecretsFixture):
         - Reported in Barbican GitHub Issue #182
         """
         create_resp = self.behaviors.create_secret_from_config()
-        self.assertEqual(create_resp['status_code'], 201,
+        self.assertEqual(create_resp.status_code, 201,
                          'Returned bad status code')
 
         # Get secret using returned secret_ref
-        ref_get_resp = self.client.get_secret(ref=create_resp['secret_ref'])
+        ref_get_resp = self.client.get_secret(ref=create_resp.ref)
         self.assertEqual(ref_get_resp.status_code, 200,
                          'Returned bad status code')
 
         # Get secret using secret id and configured base url
         config_get_resp = self.client.get_secret(
-            secret_id=create_resp['secret_id'])
+            secret_id=create_resp.id)
         self.assertEqual(config_get_resp.status_code, 200,
                          'Returned bad status code')
 
@@ -480,7 +472,7 @@ class SecretsAPI(SecretsFixture):
         """Covers case of creating a secret with text/plain as mime type."""
         resp = self.behaviors.create_secret_overriding_cfg(
             mime_type='text/plain')
-        self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 201, 'Returned bad status code')
 
     @tags(type='positive')
     def test_creating_secret_w_app_octet_mime_type(self):
@@ -488,7 +480,7 @@ class SecretsAPI(SecretsFixture):
         as mime type."""
         resp = self.behaviors.create_secret(
             mime_type='application/octet-stream')
-        self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 201, 'Returned bad status code')
 
     @tags(type='positive')
     def test_creating_secret_w_empty_checking_name(self):
@@ -503,7 +495,7 @@ class SecretsAPI(SecretsFixture):
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
 
-        get_resp = self.client.get_secret(resp['secret_id'])
+        get_resp = self.client.get_secret(resp.id)
         secret = get_resp.entity
         self.assertEqual(secret.name, secret.get_id(),
                          'Name did not match secret\'s UUID')
@@ -521,7 +513,7 @@ class SecretsAPI(SecretsFixture):
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
 
-        get_resp = self.client.get_secret(resp['secret_id'])
+        get_resp = self.client.get_secret(resp.id)
         secret = get_resp.entity
         self.assertEqual(secret.name, secret.get_id(),
                          'Name did not match secret\'s UUID')
@@ -536,7 +528,7 @@ class SecretsAPI(SecretsFixture):
             name=large_string,
             algorithm=large_string,
             cypher_type=large_string)
-        self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 201, 'Returned bad status code')
 
     @tags(type='positive')
     def test_creating_secret_w_max_secret_size(self):
@@ -546,7 +538,7 @@ class SecretsAPI(SecretsFixture):
         resp = self.behaviors.create_secret(
             mime_type=self.config.mime_type,
             plain_text=large_string)
-        self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 201, 'Returned bad status code')
 
     @tags(type='positive')
     def test_creating_secret_w_large_bit_length(self):
@@ -555,7 +547,7 @@ class SecretsAPI(SecretsFixture):
         resp = self.behaviors.create_secret(
             mime_type=self.config.mime_type,
             bit_length=maxint)
-        self.assertEqual(resp['status_code'], 201, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 201, 'Returned bad status code')
 
     @tags(type='negative')
     def test_creating_secret_w_large_string_as_bit_length(self):
@@ -565,8 +557,7 @@ class SecretsAPI(SecretsFixture):
         resp = self.behaviors.create_secret(
             mime_type=self.config.mime_type,
             bit_length=large_string)
-        self.assertEqual(resp['status_code'], 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_creating_secret_w_large_string_as_mime_type(self):
@@ -574,23 +565,21 @@ class SecretsAPI(SecretsFixture):
         the bit length. Should return 400."""
         large_string = str(bytearray().zfill(10001))
         resp = self.behaviors.create_secret(mime_type=large_string)
-        self.assertEqual(resp['status_code'], 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_creating_secret_w_int_as_name(self):
         """Covers case of creating a secret with an integer as the name.
         Should return 400."""
         resp = self.behaviors.create_secret_overriding_cfg(name=400)
-        self.assertEqual(resp['status_code'], 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400,  'Should have failed with 400')
 
     @tags(type='negative')
     def test_creating_secret_w_int_as_mime_type(self):
         """Covers case of creating a secret with an integer as the mime type.
         Should return 400."""
         resp = self.behaviors.create_secret_overriding_cfg(mime_type=400)
-        self.assertEqual(resp['status_code'], 400,
+        self.assertEqual(resp.status_code, 400,
                          'Should have failed with 400')
 
     @tags(type='negative')
@@ -598,16 +587,14 @@ class SecretsAPI(SecretsFixture):
         """Covers case of creating a secret with an integer as the algorithm.
         Should return 400."""
         resp = self.behaviors.create_secret_overriding_cfg(algorithm=400)
-        self.assertEqual(resp['status_code'], 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_creating_secret_w_int_as_cypher_type(self):
         """Covers case of creating a secret with an integer as the cypher type.
         Should return 400."""
         resp = self.behaviors.create_secret_overriding_cfg(cypher_type=400)
-        self.assertEqual(resp['status_code'], 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_creating_secret_w_app_octet_mime_type_and_plain_text(self):
@@ -617,8 +604,7 @@ class SecretsAPI(SecretsFixture):
         resp = self.behaviors.create_secret(
             mime_type='application/octet-stream',
             plain_text=self.config.plain_text)
-        self.assertEqual(resp['status_code'], 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
 
 class SecretsPagingAPI(SecretsPagingFixture):
@@ -631,7 +617,7 @@ class SecretsPagingAPI(SecretsPagingFixture):
         - Reported in Barbican GitHub Issue #81
         """
         resp = self.behaviors.create_secret_from_config(use_expiration=False)
-        secret = self.behaviors.find_secret(resp['secret_id'])
+        secret = self.behaviors.find_secret(resp.id)
         self.assertIsNotNone(secret, 'Couldn\'t find created secret')
 
     @tags(type='positive')

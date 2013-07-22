@@ -23,7 +23,7 @@ class OrdersAPI(OrdersFixture):
     @tags(type='positive')
     def test_create_order(self):
         resp = self.behaviors.create_order_from_config()
-        self.assertEqual(resp['status_code'], 202)
+        self.assertEqual(resp.status_code, 202)
 
     @tags(type='positive')
     def test_get_order_metadata(self):
@@ -37,7 +37,7 @@ class OrdersAPI(OrdersFixture):
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
         create_resp = resps['create_resp']
-        self.assertEqual(create_resp['status_code'], 202)
+        self.assertEqual(create_resp.status_code, 202)
 
         ord_resp = resps['get_order_resp']
         self.assertEqual(ord_resp.status_code, 200)
@@ -53,10 +53,10 @@ class OrdersAPI(OrdersFixture):
     def test_get_order(self):
         # Create an order to get
         resp = self.behaviors.create_order_from_config()
-        self.assertEqual(resp['status_code'], 202)
+        self.assertEqual(resp.status_code, 202)
 
         # Verify Creation
-        get_resp = self.orders_client.get_order(resp['order_id'])
+        get_resp = self.orders_client.get_order(resp.id)
         order = get_resp.entity
         order_status = (order.status == Order.STATUS_ACTIVE or
                         order.status == Order.STATUS_PENDING)
@@ -69,9 +69,9 @@ class OrdersAPI(OrdersFixture):
     def test_delete_order(self):
         # Create an order to delete
         resp = self.behaviors.create_order_from_config()
-        self.assertEqual(resp['status_code'], 202)
+        self.assertEqual(resp.status_code, 202)
 
-        del_resp = self.behaviors.delete_order(resp['order_id'])
+        del_resp = self.behaviors.delete_order(resp.id)
         self.assertEqual(del_resp.status_code, 200)
 
     @tags(type='positive')

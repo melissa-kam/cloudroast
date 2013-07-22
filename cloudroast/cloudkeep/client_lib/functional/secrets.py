@@ -175,10 +175,10 @@ class SecretsAPI(SecretsFixture):
         """Covers getting a secret by href and checking the secret metadata."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 201,
+        self.assertEqual(resp.status_code, 201,
                          'Barbican returned bad status code')
 
-        secret = self.cl_client.get_secret(resp['secret_ref'])
+        secret = self.cl_client.get_secret(resp.ref)
 
         self.assertEqual(secret.status, 'ACTIVE')
         self.assertEqual(secret.name, self.config.name)
@@ -192,10 +192,10 @@ class SecretsAPI(SecretsFixture):
         """Covers getting a secret by id and checking the secret metadata."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 201,
+        self.assertEqual(resp.status_code, 201,
                          'Barbican returned bad status code')
 
-        secret = self.cl_client.get_secret_by_id(resp['secret_id'])
+        secret = self.cl_client.get_secret_by_id(resp.id)
 
         self.assertEqual(secret.status, 'ACTIVE')
         self.assertEqual(secret.name, self.config.name)
@@ -231,12 +231,12 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.barb_behaviors.create_secret(
             mime_type=self.config.mime_type)
-        self.assertEqual(resp['status_code'], 201,
+        self.assertEqual(resp.status_code, 201,
                          'Barbican returned bad status code')
 
         self.assertRaises(ClientException,
                           self.cl_client.get_raw_secret,
-                          href=resp['secret_ref'],
+                          href=resp.ref,
                           mime_type=self.config.mime_type)
 
     @tags(type='negative')
@@ -246,12 +246,12 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.barb_behaviors.create_secret(
             mime_type=self.config.mime_type)
-        self.assertEqual(resp['status_code'], 201,
+        self.assertEqual(resp.status_code, 201,
                          'Barbican returned bad status code')
 
         self.assertRaises(ClientException,
                           self.cl_client.get_raw_secret_by_id,
-                          secret_id=resp['secret_id'],
+                          secret_id=resp.id,
                           mime_type=self.config.mime_type)
 
     @tags(type='negative')
@@ -261,12 +261,12 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.barb_behaviors.create_secret(
             mime_type=self.config.mime_type)
-        self.assertEqual(resp['status_code'], 201,
+        self.assertEqual(resp.status_code, 201,
                          'Barbican returned bad status code')
 
         self.assertRaises(ClientException,
                           self.cl_client.get_raw_secret,
-                          href=resp['secret_ref'],
+                          href=resp.ref,
                           mime_type='crypto/boom')
 
     @tags(type='negative')
@@ -276,12 +276,12 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.barb_behaviors.create_secret(
             mime_type=self.config.mime_type)
-        self.assertEqual(resp['status_code'], 201,
+        self.assertEqual(resp.status_code, 201,
                          'Barbican returned bad status code')
 
         self.assertRaises(ClientException,
                           self.cl_client.get_raw_secret_by_id,
-                          secret_id=resp['secret_id'],
+                          secret_id=resp.id,
                           mime_type='crypto/boom')
 
     @tags(type='positive')
@@ -291,19 +291,19 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.barb_behaviors.create_secret(
             mime_type=self.config.mime_type)
-        self.assertEqual(resp['status_code'], 201,
+        self.assertEqual(resp.status_code, 201,
                          'Barbican returned bad status code')
 
         data = 'testing_cl_get_raw_secret_by_href_after_update'
         update_resp = self.barb_client.add_secret_plain_text(
-            secret_id=resp['secret_id'],
+            secret_id=resp.id,
             mime_type=self.config.mime_type,
             plain_text=data)
         self.assertEqual(update_resp.status_code, 200,
                          'Barbican returned bad status code')
 
         raw_secret = self.cl_client.get_raw_secret(
-            href=resp['secret_ref'],
+            href=resp.ref,
             mime_type=self.config.mime_type)
         self.assertEquals(raw_secret, data, 'Secret data does not match')
 
@@ -314,19 +314,19 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.barb_behaviors.create_secret(
             mime_type=self.config.mime_type)
-        self.assertEqual(resp['status_code'], 201,
+        self.assertEqual(resp.status_code, 201,
                          'Barbican returned bad status code')
 
         data = 'testing_cl_get_raw_secret_by_id_after_update'
         update_resp = self.barb_client.add_secret_plain_text(
-            secret_id=resp['secret_id'],
+            secret_id=resp.id,
             mime_type=self.config.mime_type,
             plain_text=data)
         self.assertEqual(update_resp.status_code, 200,
                          'Barbican returned bad status code')
 
         raw_secret = self.cl_client.get_raw_secret_by_id(
-            secret_id=resp['secret_id'],
+            secret_id=resp.id,
             mime_type=self.config.mime_type)
         self.assertEquals(raw_secret, data, 'Secret data does not match')
 
@@ -337,7 +337,7 @@ class SecretsAPI(SecretsFixture):
         for count in range(20):
             resp = self.barb_behaviors.create_secret_from_config(
                 use_expiration=False)
-            self.assertEqual(resp['status_code'], 201,
+            self.assertEqual(resp.status_code, 201,
                              'Barbican returned bad status code')
 
         # First set of secrets
@@ -366,7 +366,7 @@ class SecretsAPI(SecretsFixture):
         for count in range(20):
             resp = self.barb_behaviors.create_secret_from_config(
                 use_expiration=False)
-            self.assertEqual(resp['status_code'], 201,
+            self.assertEqual(resp.status_code, 201,
                              'Barbican returned bad status code')
 
         # First set of secrets
@@ -393,7 +393,7 @@ class SecretsAPI(SecretsFixture):
         for count in range(20):
             resp = self.barb_behaviors.create_secret_from_config(
                 use_expiration=False)
-            self.assertEqual(resp['status_code'], 201,
+            self.assertEqual(resp.status_code, 201,
                              'Barbican returned bad status code')
 
         # First set of secrets

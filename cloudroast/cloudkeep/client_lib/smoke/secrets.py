@@ -52,7 +52,7 @@ class SecretsAPI(SecretsFixture):
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
 
-        secret = self.cl_client.get_secret(href=resp['secret_ref'])
+        secret = self.cl_client.get_secret(href=resp.ref)
         self.assertIsNotNone(secret)
 
     @tags(type='positive')
@@ -60,9 +60,9 @@ class SecretsAPI(SecretsFixture):
         """Covers getting a secret by id with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 201,
+        self.assertEqual(resp.status_code, 201,
                          'Barbican returned bad status code')
-        secret = self.cl_client.get_secret_by_id(secret_id=resp['secret_id'])
+        secret = self.cl_client.get_secret_by_id(secret_id=resp.id)
         self.assertIsNotNone(secret)
 
     @tags(type='positive')
@@ -70,15 +70,15 @@ class SecretsAPI(SecretsFixture):
         """Covers deleting a secret by href with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 201,
+        self.assertEqual(resp.status_code, 201,
                          'Barbican returned bad status code')
 
-        self.cl_behaviors.delete_secret(secret_ref=resp['secret_ref'])
+        self.cl_behaviors.delete_secret(secret_ref=resp.ref)
         # Deleting here because using two different behaviors
         self.barb_behaviors.remove_from_created_secrets(
-            secret_id=resp['secret_id'])
+            secret_id=resp.id)
 
-        get_resp = self.barb_client.get_secret(secret_id=resp['secret_id'])
+        get_resp = self.barb_client.get_secret(secret_id=resp.id)
         self.assertEqual(get_resp.status_code, 404,
                          'Should have failed with 404')
 
@@ -87,15 +87,15 @@ class SecretsAPI(SecretsFixture):
         """Covers deleting a secret by id with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 201,
+        self.assertEqual(resp.status_code, 201,
                          'Barbican returned bad status code')
 
-        self.cl_behaviors.delete_secret_by_id(secret_id=resp['secret_id'])
+        self.cl_behaviors.delete_secret_by_id(secret_id=resp.id)
         # Deleting here because using two different behaviors
         self.barb_behaviors.remove_from_created_secrets(
-            secret_id=resp['secret_id'])
+            secret_id=resp.id)
 
-        get_resp = self.barb_client.get_secret(secret_id=resp['secret_id'])
+        get_resp = self.barb_client.get_secret(secret_id=resp.id)
         self.assertEqual(get_resp.status_code, 404,
                          'Should have failed with 404')
 
@@ -104,7 +104,7 @@ class SecretsAPI(SecretsFixture):
         """Covers listing secrets with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 201,
+        self.assertEqual(resp.status_code, 201,
                          'Barbican returned bad status code')
 
         list_tuple = self.cl_client.list_secrets(limit=10, offset=0)
@@ -116,7 +116,7 @@ class SecretsAPI(SecretsFixture):
         """Covers listing secrets by href with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 201,
+        self.assertEqual(resp.status_code, 201, 
                          'Barbican returned bad status code')
 
         list_tuple = self.cl_client.list_secrets_by_href()
@@ -148,11 +148,11 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 201,
+        self.assertEqual(resp.status_code, 201,
                          'Barbican returned bad status code')
 
         raw_secret = self.cl_client.get_raw_secret(
-            resp['secret_ref'], self.config.mime_type)
+            resp.ref, self.config.mime_type)
 
         self.assertEqual(raw_secret, self.config.plain_text)
 
@@ -163,10 +163,10 @@ class SecretsAPI(SecretsFixture):
         """
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
-        self.assertEqual(resp['status_code'], 201,
+        self.assertEqual(resp.status_code, 201,
                          'Barbican returned bad status code')
 
         raw_secret = self.cl_client.get_raw_secret_by_id(
-            resp['secret_id'], self.config.mime_type)
+            resp.id, self.config.mime_type)
 
         self.assertEqual(raw_secret, self.config.plain_text)
