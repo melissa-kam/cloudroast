@@ -22,7 +22,7 @@ from cafe.drivers.unittest.decorators import tags
 class SecretsAPI(SecretsFixture):
 
     @tags(type='positive')
-    def test_cl_create_secret(self):
+    def test_create_secret(self):
         """Covers creating a secret with the barbicanclient library.
         Includes creating a secret with an expiration.
         - Reported in python-barbicanclient GitHub Issue #9
@@ -38,7 +38,7 @@ class SecretsAPI(SecretsFixture):
                          'Barbican returned bad status code')
 
     @tags(type='positive')
-    def test_cl_create_secret_wout_expiration(self):
+    def test_create_secret_wout_expiration(self):
         """Covers creating a secret without expiration with
         barbicanclient library.
         """
@@ -47,7 +47,7 @@ class SecretsAPI(SecretsFixture):
                          'Barbican returned bad status code')
 
     @tags(type='positive')
-    def test_cl_get_secret_by_href(self):
+    def test_get_secret_by_href(self):
         """Covers getting a secret by href with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
@@ -56,7 +56,7 @@ class SecretsAPI(SecretsFixture):
         self.assertIsNotNone(secret)
 
     @tags(type='positive')
-    def test_cl_get_secret_by_id(self):
+    def test_get_secret_by_id(self):
         """Covers getting a secret by id with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
@@ -66,7 +66,7 @@ class SecretsAPI(SecretsFixture):
         self.assertIsNotNone(secret)
 
     @tags(type='positive')
-    def test_cl_delete_secret_by_href(self):
+    def test_delete_secret_by_href(self):
         """Covers deleting a secret by href with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
@@ -83,7 +83,7 @@ class SecretsAPI(SecretsFixture):
                          'Should have failed with 404')
 
     @tags(type='positive')
-    def test_cl_delete_secret_by_id(self):
+    def test_delete_secret_by_id(self):
         """Covers deleting a secret by id with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
@@ -100,7 +100,7 @@ class SecretsAPI(SecretsFixture):
                          'Should have failed with 404')
 
     @tags(type='positive')
-    def test_cl_list_secrets(self):
+    def test_list_secrets(self):
         """Covers listing secrets with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
@@ -112,7 +112,7 @@ class SecretsAPI(SecretsFixture):
         self.assertGreater(len(secrets), 0)
 
     @tags(type='positive')
-    def test_cl_list_secrets_by_href(self):
+    def test_list_secrets_by_href(self):
         """Covers listing secrets by href with barbicanclient library."""
         resp = self.barb_behaviors.create_secret_from_config(
             use_expiration=False)
@@ -124,7 +124,7 @@ class SecretsAPI(SecretsFixture):
         self.assertGreater(len(secrets), 0)
 
     @tags(type='positive')
-    def test_cl_create_secret_metadata(self):
+    def test_create_secret_metadata(self):
         """Covers creating a secret with barbicanclient library and checking
         the metadata of the secret.
         """
@@ -142,7 +142,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(metadata.bit_length, self.config.bit_length)
 
     @tags(type='positive')
-    def test_cl_get_raw_secret_by_href(self):
+    def test_get_raw_secret_by_href(self):
         """Covers getting the secret payload by href with
         barbicanclient library.
         """
@@ -157,7 +157,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(raw_secret, self.config.plain_text)
 
     @tags(type='positive')
-    def test_cl_get_raw_secret_by_id(self):
+    def test_get_raw_secret_by_id(self):
         """Covers getting the secret payload by id with
         barbicanclient library.
         """

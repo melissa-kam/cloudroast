@@ -20,14 +20,14 @@ from cafe.drivers.unittest.decorators import tags
 class OrdersAPI(OrdersFixture):
 
     @tags(type='positive')
-    def test_cl_create_order(self):
+    def test_create_order(self):
         """Covers creating an order with the barbicanclient library."""
         resp = self.cl_behaviors.create_and_check_order()
         self.assertEqual(resp['get_resp'].status_code, 200,
                          'Returned bad status code')
 
     @tags(type='positive')
-    def test_cl_create_order_metadata(self):
+    def test_create_order_metadata(self):
         """Covers creating an order with barbicanclient library and checking
         the metadata of the order.
         """
@@ -51,7 +51,7 @@ class OrdersAPI(OrdersFixture):
         self.assertEqual(secret['cypher_type'], self.config.cypher_type)
 
     @tags(type='positive')
-    def test_cl_get_order_by_href(self):
+    def test_get_order_by_href(self):
         """Covers getting an order by href with barbicanclient library."""
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
@@ -62,7 +62,7 @@ class OrdersAPI(OrdersFixture):
         self.assertIsNotNone(order)
 
     @tags(type='positive')
-    def test_cl_get_order_by_id(self):
+    def test_get_order_by_id(self):
         """Covers getting an order by id with barbicanclient library."""
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
@@ -73,7 +73,7 @@ class OrdersAPI(OrdersFixture):
         self.assertIsNotNone(order)
 
     @tags(type='positive')
-    def test_cl_order_get_secret(self):
+    def test_order_get_secret(self):
         """Covers getting a secret using the order get method."""
         resps = self.barb_behaviors.create_and_check_order()
         order_resp = resps.get_resp
@@ -93,7 +93,7 @@ class OrdersAPI(OrdersFixture):
                          'Secrets do not match')
 
     @tags(type='positive')
-    def test_cl_delete_order_by_href(self):
+    def test_delete_order_by_href(self):
         """Covers deleting an order by href with barbicanclient library."""
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
@@ -108,7 +108,7 @@ class OrdersAPI(OrdersFixture):
                          'Should have failed with 404')
 
     @tags(type='positive')
-    def test_cl_delete_order_by_id(self):
+    def test_delete_order_by_id(self):
         """Covers deleting an order by id with barbicanclient library."""
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
@@ -124,7 +124,7 @@ class OrdersAPI(OrdersFixture):
                          'Should have failed with 404')
 
     @tags(type='positive')
-    def test_cl_list_orders(self):
+    def test_list_orders(self):
         """Covers listing orders with barbicanclient library."""
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
@@ -135,7 +135,7 @@ class OrdersAPI(OrdersFixture):
         self.assertGreater(len(orders), 0)
 
     @tags(type='positive')
-    def test_cl_list_orders_by_href(self):
+    def test_list_orders_by_href(self):
         """Covers listing orders by href with barbicanclient library."""
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
