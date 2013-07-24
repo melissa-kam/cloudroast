@@ -20,7 +20,7 @@ import unittest2
 
 from cloudroast.cloudkeep.barbican.fixtures import SecretsFixture, \
     SecretsPagingFixture
-from cafe.drivers.unittest.decorators import tags
+from cafe.drivers.unittest.decorators import tags, skip_open_issue
 from cloudcafe.common.tools import randomstring
 
 
@@ -592,6 +592,7 @@ class SecretsAPI(SecretsFixture):
         self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
+    @skip_open_issue('launchpad', '1200659')
     def test_creating_secret_w_app_octet_mime_type_and_plain_text(self):
         """Covers case of creating a secret with application/octet-stream
         as mime type and a plain_text value provided. Should return 400.
