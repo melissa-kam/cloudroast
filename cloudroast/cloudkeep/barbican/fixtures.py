@@ -25,7 +25,8 @@ from cloudcafe.cloudkeep.barbican.orders.behaviors import OrdersBehavior
 from cloudcafe.identity.v2_0.tokens_api.behaviors import \
     TokenAPI_Behaviors
 from cloudcafe.cloudkeep.config import MarshallingConfig, CloudKeepConfig, \
-    CloudKeepSecretsConfig, CloudKeepOrdersConfig, CloudKeepKeystoneConfig
+    CloudKeepSecretsConfig, CloudKeepOrdersConfig
+from cloudcafe.identity.config import IdentityTokenConfig
 
 
 class BarbicanFixture(BaseTestFixture):
@@ -35,7 +36,7 @@ class BarbicanFixture(BaseTestFixture):
         super(BarbicanFixture, cls).setUpClass()
         cls.marshalling = MarshallingConfig()
         cls.cloudkeep = CloudKeepConfig()
-        cls.keystone = CloudKeepKeystoneConfig()
+        cls.keystone = IdentityTokenConfig()
 
     def get_id(self, request):
         """
@@ -153,6 +154,6 @@ class AuthenticationFixture(BarbicanFixture):
             deserialize_format=cls.marshalling.deserializer)
         cls.auth_behaviors = TokenAPI_Behaviors(cls.auth_client)
         cls.version_client = VersionClient(
-            url=cls.keystone.endpoint,
+            url=cls.cloudkeep.base_url,
             serialize_format=cls.marshalling.serializer,
             deserialize_format=cls.marshalling.deserializer)

@@ -163,15 +163,13 @@ class SecretsAPI(SecretsFixture):
             bit_length=self.config.bit_length,
             mime_type=None
         )
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_creating_w_empty_secret(self):
         resp = self.behaviors.create_secret(mime_type=self.config.mime_type,
                                             plain_text='')
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_creating_w_oversized_secret(self):

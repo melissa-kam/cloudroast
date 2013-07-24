@@ -31,7 +31,7 @@ class AuthenticationAPI(AuthenticationFixture):
         access = self.auth_behaviors.get_access_data(
             self.keystone.username,
             self.keystone.password,
-            self.keystone.auth_tenant)
+            self.keystone.tenant_name)
         token = access.token.id_
 
         headers = {'X-Auth-Token': token,

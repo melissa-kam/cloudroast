@@ -177,8 +177,7 @@ class OrdersAPI(OrdersFixture):
         """
         resp = self.behaviors.create_order_overriding_cfg(
             expiration='2000-01-10T14:58:52.546795')
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_w_null_entries(self):
@@ -186,8 +185,7 @@ class OrdersAPI(OrdersFixture):
         Covers creating order with all null entries.
         """
         resp = self.behaviors.create_order()
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_w_empty_entries(self):
@@ -197,8 +195,7 @@ class OrdersAPI(OrdersFixture):
         resp = self.behaviors.create_order(name='', expiration='',
                                            algorithm='', cypher_type='',
                                            mime_type='')
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='positive')
     def test_create_order_w_empty_checking_name(self):
@@ -341,8 +338,7 @@ class OrdersAPI(OrdersFixture):
         """
         resp = self.behaviors.create_order_overriding_cfg(
             bit_length='not-an-int')
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_creating_order_w_negative_bit_length(self):
@@ -351,8 +347,7 @@ class OrdersAPI(OrdersFixture):
         """
         resp = self.behaviors.create_order_overriding_cfg(
             bit_length=-1)
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_creating_order_wout_bit_length(self):
@@ -366,8 +361,7 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             cypher_type=self.config.cypher_type,
             bit_length=None)
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='positive')
     def test_create_order_w_cbc_cypher_type(self):
@@ -540,8 +534,7 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             cypher_type=None,
             bit_length=self.config.bit_length)
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400,  'Should have failed with 400')
 
     @tags(type='positive')
     def test_create_order_w_large_string_as_name(self):
@@ -561,16 +554,14 @@ class OrdersAPI(OrdersFixture):
             name=large_string,
             algorithm=large_string,
             cypher_type=large_string)
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400,  'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_w_large_bit_length(self):
         """Covers case of creating an order with a large integer as
         the bit length. Should return 400."""
         resp = self.behaviors.create_order_overriding_cfg(bit_length=maxint)
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_w_large_string_as_bit_length(self):
@@ -579,8 +570,7 @@ class OrdersAPI(OrdersFixture):
         large_string = str(bytearray().zfill(10001))
         resp = self.behaviors.create_order_overriding_cfg(
             bit_length=large_string)
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_w_large_string_as_mime_type(self):
@@ -589,40 +579,35 @@ class OrdersAPI(OrdersFixture):
         large_string = str(bytearray().zfill(10001))
         resp = self.behaviors.create_order_overriding_cfg(
             mime_type=large_string)
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_w_int_as_name(self):
         """Covers case of creating an order with an integer as the name.
         Should return 400."""
         resp = self.behaviors.create_order_overriding_cfg(name=400)
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_w_int_as_mime_type(self):
         """Covers case of creating an order with an integer as the mime type.
         Should return 400."""
         resp = self.behaviors.create_order_overriding_cfg(mime_type=400)
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_w_int_as_algorithm(self):
         """Covers case of creating an order with an integer as the algorithm.
         Should return 400."""
         resp = self.behaviors.create_order_overriding_cfg(algorithm=400)
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
     @tags(type='negative')
     def test_create_order_w_int_as_cypher_type(self):
         """Covers case of creating an order with an integer as the cypher type.
         Should return 400."""
         resp = self.behaviors.create_order_overriding_cfg(cypher_type=400)
-        self.assertEqual(resp.status_code, 400,
-                         'Should have failed with 400')
+        self.assertEqual(resp.status_code, 400, 'Should have failed with 400')
 
 
 class OrdersPagingAPI(OrdersPagingFixture):
