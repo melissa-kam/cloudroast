@@ -618,6 +618,9 @@ class SecretsPagingAPI(SecretsPagingFixture):
 
     @tags(type='positive')
     def test_paging_limit_and_offset(self):
+        """Covers testing paging limit and offset attributes
+        when getting secrets.
+        """
         # First set of secrets
         resp = self.client.get_secrets(limit=10, offset=0)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
@@ -631,8 +634,10 @@ class SecretsPagingAPI(SecretsPagingFixture):
         duplicates = [secret for secret in sec_group1.secrets
                       if secret in sec_group2.secrets]
 
-        self.assertEqual(len(sec_group1.secrets), 10)
-        self.assertEqual(len(sec_group2.secrets), 10)
+        self.assertEqual(len(sec_group1.secrets), 10,
+                         'Returned wrong number of secrets')
+        self.assertEqual(len(sec_group2.secrets), 10,
+                         'Returned wrong number of secrets')
         self.assertEqual(len(duplicates), 0,
                          'Using offset didn\'t return unique secrets')
 
@@ -654,7 +659,8 @@ class SecretsPagingAPI(SecretsPagingFixture):
         resp = self.client.get_secrets(ref=next_ref)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         sec_group2 = resp.entity
-        self.assertEqual(len(sec_group2.secrets), 15)
+        self.assertEqual(len(sec_group2.secrets), 15,
+                         'Returned wrong number of secrets')
 
         duplicates = [secret for secret in sec_group1.secrets
                       if secret in sec_group2.secrets]
@@ -681,7 +687,8 @@ class SecretsPagingAPI(SecretsPagingFixture):
         resp = self.client.get_secrets(ref=previous_ref)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         sec_group2 = resp.entity
-        self.assertEqual(len(sec_group2.secrets), 15)
+        self.assertEqual(len(sec_group2.secrets), 15,
+                         'Returned wrong number of secrets')
 
         duplicates = [secret for secret in sec_group1.secrets
                       if secret in sec_group2.secrets]
@@ -724,7 +731,8 @@ class SecretsPagingAPI(SecretsPagingFixture):
             resp = self.client.get_secrets(limit=2, offset=offset)
             self.assertEqual(resp.status_code, 200, 'Returned bad status code')
             sec_group1 = resp.entity
-            self.assertEqual(len(sec_group1.secrets), 2)
+            self.assertEqual(len(sec_group1.secrets), 2,
+                             'Returned wrong number of orders')
             previous_ref1 = sec_group1.previous
             self.assertIsNotNone(previous_ref1)
             next_ref1 = sec_group1.next
@@ -733,7 +741,8 @@ class SecretsPagingAPI(SecretsPagingFixture):
             resp = self.client.get_secrets(limit=2, offset=offset + 2)
             self.assertEqual(resp.status_code, 200, 'Returned bad status code')
             sec_group2 = resp.entity
-            self.assertEqual(len(sec_group2.secrets), 2)
+            self.assertEqual(len(sec_group2.secrets), 2,
+                             'Returned wrong number of orders')
             previous_ref2 = sec_group2.previous
             self.assertIsNotNone(previous_ref2)
             next_ref2 = sec_group2.next
@@ -742,7 +751,8 @@ class SecretsPagingAPI(SecretsPagingFixture):
             duplicates = [secret for secret in sec_group1.secrets
                           if secret in sec_group2.secrets]
 
-            self.assertEqual(len(duplicates), 0)
+            self.assertEqual(len(duplicates), 0,
+                             'Did not return unique set of secrets')
 
     @tags(type='positive')
     def test_secret_paging_w_invalid_parameters(self):

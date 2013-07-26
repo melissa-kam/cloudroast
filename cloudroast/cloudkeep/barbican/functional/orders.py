@@ -614,8 +614,8 @@ class OrdersPagingAPI(OrdersPagingFixture):
 
     @tags(type='positive')
     def test_order_paging_limit_and_offset(self):
-        """
-        Covers testing paging limit and offset attributes when getting orders.
+        """Covers testing paging limit and offset attributes
+        when getting orders.
         """
         # First set of orders
         resp = self.orders_client.get_orders(limit=10, offset=0)
@@ -628,16 +628,16 @@ class OrdersPagingAPI(OrdersPagingFixture):
         duplicates = [order for order in ord_group1.orders
                       if order in ord_group2.orders]
 
-        self.assertEqual(len(ord_group1.orders), 10)
-        self.assertEqual(len(ord_group2.orders), 10)
+        self.assertEqual(len(ord_group1.orders), 10,
+                         'Returned wrong number of orders')
+        self.assertEqual(len(ord_group2.orders), 10,
+                         'Returned wrong number of orders')
         self.assertEqual(len(duplicates), 0,
                          'Using offset didn\'t return unique orders.')
 
     @tags(type='positive')
     def test_find_a_single_order_via_paging(self):
-        """
-        Covers finding an order with paging.
-        """
+        """Covers finding an order with paging."""
         resp = self.behaviors.create_order_from_config()
         self.assertEqual(resp.status_code, 202, 'Returned bad status code')
         order = self.behaviors.find_order(resp.id)
@@ -648,12 +648,12 @@ class OrdersPagingAPI(OrdersPagingFixture):
         """Covers getting a list of orders and using the next
         reference.
         """
-
         # First set of orders
         resp = self.orders_client.get_orders(limit=15, offset=115)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         order_group1 = resp.entity
-        self.assertEqual(len(order_group1.orders), 15)
+        self.assertEqual(len(order_group1.orders), 15,
+                         'Returned wrong number of orders')
         next_ref = order_group1.next
         self.assertIsNotNone(next_ref)
 
@@ -661,7 +661,8 @@ class OrdersPagingAPI(OrdersPagingFixture):
         resp = self.orders_client.get_orders(ref=next_ref)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         order_group2 = resp.entity
-        self.assertEqual(len(order_group2.orders), 15)
+        self.assertEqual(len(order_group2.orders), 15,
+                         'Returned wrong number of orders')
 
         duplicates = [order for order in order_group1.orders
                       if order in order_group2.orders]
@@ -674,12 +675,12 @@ class OrdersPagingAPI(OrdersPagingFixture):
         """Covers getting a list of orders and using the previous
         reference.
         """
-
         # First set of orders
         resp = self.orders_client.get_orders(limit=15, offset=115)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         order_group1 = resp.entity
-        self.assertEqual(len(order_group1.orders), 15)
+        self.assertEqual(len(order_group1.orders), 15,
+                         'Returned wrong number of orders')
         prev_ref = order_group1.previous
         self.assertIsNotNone(prev_ref)
 
@@ -687,7 +688,8 @@ class OrdersPagingAPI(OrdersPagingFixture):
         resp = self.orders_client.get_orders(ref=prev_ref)
         self.assertEqual(resp.status_code, 200, 'Returned bad status code')
         order_group2 = resp.entity
-        self.assertEqual(len(order_group2.orders), 15)
+        self.assertEqual(len(order_group2.orders), 15,
+                         'Returned wrong number of orders')
 
         duplicates = [order for order in order_group1.orders
                       if order in order_group2.orders]
@@ -731,7 +733,8 @@ class OrdersPagingAPI(OrdersPagingFixture):
             resp = self.orders_client.get_orders(limit=2, offset=offset)
             self.assertEqual(resp.status_code, 200, 'Returned bad status code')
             orders_group1 = resp.entity
-            self.assertEqual(len(orders_group1.orders), 2)
+            self.assertEqual(len(orders_group1.orders), 2,
+                             'Returned wrong number of orders')
             previous_ref1 = orders_group1.previous
             self.assertIsNotNone(previous_ref1)
             next_ref1 = orders_group1.next
@@ -740,7 +743,8 @@ class OrdersPagingAPI(OrdersPagingFixture):
             resp = self.orders_client.get_orders(limit=2, offset=offset + 2)
             self.assertEqual(resp.status_code, 200, 'Returned bad status code')
             orders_group2 = resp.entity
-            self.assertEqual(len(orders_group2.orders), 2)
+            self.assertEqual(len(orders_group2.orders), 2,
+                             'Returned wrong number of orders')
             previous_ref2 = orders_group2.previous
             self.assertIsNotNone(previous_ref2)
             next_ref2 = orders_group2.next
@@ -749,7 +753,8 @@ class OrdersPagingAPI(OrdersPagingFixture):
             duplicates = [order for order in orders_group1.orders
                           if order in orders_group2.orders]
 
-            self.assertEqual(len(duplicates), 0)
+            self.assertEqual(len(duplicates), 0,
+                             'Using offset didn\'t return unique orders')
 
     @tags(type='positive')
     def test_order_paging_w_invalid_parameters(self):
