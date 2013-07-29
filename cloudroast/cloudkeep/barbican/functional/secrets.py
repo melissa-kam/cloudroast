@@ -347,7 +347,8 @@ class SecretsAPI(SecretsFixture):
         only mime type is required.
         """
         resp = self.behaviors.create_secret(mime_type=self.config.mime_type)
-        self.assertEqual(resp.status_code, 201, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 201,
+                         'Returned unexpected response code')
 
     @tags(type='positive')
     def test_creating_secret_w_alphanumeric_name(self):
@@ -355,7 +356,7 @@ class SecretsAPI(SecretsFixture):
         name = randomstring.get_random_string(prefix='1a2b')
         resps = self.behaviors.create_and_check_secret(name=name)
         self.assertEqual(resps.create_resp.status_code, 201,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
         secret = resps.get_resp.entity
         self.assertEqual(secret.name, name, 'Secret name is not correct')
@@ -368,7 +369,7 @@ class SecretsAPI(SecretsFixture):
         name = '~!@#$%^&*()_+`-={}[]|:;<>,.?"'
         resps = self.behaviors.create_and_check_secret(name=name)
         self.assertEqual(resps.create_resp.status_code, 201,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
         secret = resps.get_resp.entity
         self.assertEqual(secret.name, name, 'Secret name is not correct')
@@ -379,7 +380,7 @@ class SecretsAPI(SecretsFixture):
         uuid = str(uuid4())
         resps = self.behaviors.create_and_check_secret(name=uuid)
         self.assertEqual(resps.create_resp.status_code, 201,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
         secret = resps.get_resp.entity
         self.assertEqual(secret.name, uuid, 'Secret name is not correct')
@@ -390,7 +391,7 @@ class SecretsAPI(SecretsFixture):
         name = randomstring.get_random_string(size=225)
         resps = self.behaviors.create_and_check_secret(name=name)
         self.assertEqual(resps.create_resp.status_code, 201,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
         secret = resps.get_resp.entity
         self.assertEqual(secret.name, name, 'Secret name is not correct')
@@ -400,7 +401,7 @@ class SecretsAPI(SecretsFixture):
         """Covers case of creating a secret with a 128 bit length."""
         resps = self.behaviors.create_and_check_secret(bit_length=128)
         self.assertEqual(resps.create_resp.status_code, 201,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
         secret = resps.get_resp.entity
         self.assertEqual(resps.get_resp.status_code, 200)
@@ -412,7 +413,7 @@ class SecretsAPI(SecretsFixture):
         """Covers case of creating a secret with a 192 bit length."""
         resps = self.behaviors.create_and_check_secret(bit_length=192)
         self.assertEqual(resps.create_resp.status_code, 201,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
         secret = resps.get_resp.entity
         self.assertEqual(resps.get_resp.status_code, 200)
@@ -424,7 +425,7 @@ class SecretsAPI(SecretsFixture):
         """Covers case of creating a secret with a 256 bit length."""
         resps = self.behaviors.create_and_check_secret(bit_length=256)
         self.assertEqual(resps.create_resp.status_code, 201,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
         secret = resps.get_resp.entity
         self.assertEqual(resps.get_resp.status_code, 200)
@@ -435,14 +436,17 @@ class SecretsAPI(SecretsFixture):
     def test_creating_secret_w_aes_algorithm(self):
         """Covers case of creating a secret with an aes algorithm."""
         resp = self.behaviors.create_secret_overriding_cfg(algorithm='aes')
-        self.assertEqual(resp.status_code, 201, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 201,
+                         'Returned unexpected response code')
 
     @tags(type='positive')
     def test_creating_secret_w_cbc_cypher_type(self):
         """Covers case of creating a secret with a cbc cypher type."""
         resp = self.behaviors.create_secret_overriding_cfg(cypher_type='cbc')
-        self.assertEqual(resp.status_code, 201, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 201,
+                         'Returned unexpected response code')
 
+    @skip_open_issue(type='GitHub', bug_id='183')
     @tags(type='positive')
     def test_secret_hostname_response(self):
         """Covers case of checking that hostname of secret_ref is the same
@@ -451,25 +455,26 @@ class SecretsAPI(SecretsFixture):
         """
         create_resp = self.behaviors.create_secret_from_config()
         self.assertEqual(create_resp.status_code, 201,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
         # Get secret using returned secret_ref
         ref_get_resp = self.client.get_secret(ref=create_resp.ref)
         self.assertEqual(ref_get_resp.status_code, 200,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
         # Get secret using secret id and configured base url
         config_get_resp = self.client.get_secret(
             secret_id=create_resp.id)
         self.assertEqual(config_get_resp.status_code, 200,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
     @tags(type='positive')
     def test_creating_secret_w_text_plain_mime_type(self):
         """Covers case of creating a secret with text/plain as mime type."""
         resp = self.behaviors.create_secret_overriding_cfg(
             mime_type='text/plain')
-        self.assertEqual(resp.status_code, 201, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 201,
+                         'Returned unexpected response code')
 
     @tags(type='positive')
     def test_creating_secret_w_app_octet_mime_type(self):
@@ -477,7 +482,8 @@ class SecretsAPI(SecretsFixture):
         as mime type."""
         resp = self.behaviors.create_secret(
             mime_type='application/octet-stream')
-        self.assertEqual(resp.status_code, 201, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 201,
+                         'Returned unexpected response code')
 
     @tags(type='positive')
     def test_creating_secret_w_empty_checking_name(self):
@@ -524,7 +530,8 @@ class SecretsAPI(SecretsFixture):
             name=large_string,
             algorithm=large_string,
             cypher_type=large_string)
-        self.assertEqual(resp.status_code, 201, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 201,
+                         'Returned unexpected response code')
 
     @tags(type='positive')
     def test_creating_secret_w_max_secret_size(self):
@@ -534,7 +541,8 @@ class SecretsAPI(SecretsFixture):
         resp = self.behaviors.create_secret(
             mime_type=self.config.mime_type,
             plain_text=large_string)
-        self.assertEqual(resp.status_code, 201, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 201,
+                         'Returned unexpected response code')
 
     @tags(type='positive')
     def test_creating_secret_w_large_bit_length(self):
@@ -543,7 +551,8 @@ class SecretsAPI(SecretsFixture):
         resp = self.behaviors.create_secret(
             mime_type=self.config.mime_type,
             bit_length=maxint)
-        self.assertEqual(resp.status_code, 201, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 201,
+                         'Returned unexpected response code')
 
     @tags(type='negative')
     def test_creating_secret_w_large_string_as_bit_length(self):
@@ -605,6 +614,18 @@ class SecretsAPI(SecretsFixture):
 
 class SecretsPagingAPI(SecretsPagingFixture):
 
+    def check_list_of_secrets(self, resp, limit):
+        """Checks that the response from getting list of secrets
+        returns a 200 status code and the correct number of secrets.
+        Also returns the list of secrets from the response.
+        """
+        self.assertEqual(resp.status_code, 200,
+                         'Returned unexpected response code')
+        sec_group = resp.entity
+        self.assertEqual(len(sec_group.secrets), limit,
+                         'Returned wrong number of secrets')
+        return resp.entity
+
     @tags(type='positive')
     def test_find_a_single_secret_via_paging(self):
         """ Covers case where when you attempt to retrieve a list of secrets,
@@ -623,21 +644,15 @@ class SecretsPagingAPI(SecretsPagingFixture):
         """
         # First set of secrets
         resp = self.client.get_secrets(limit=10, offset=0)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-        sec_group1 = resp.entity
+        sec_group1 = self.check_list_of_secrets(resp=resp, limit=10)
 
         # Second set of secrets
         resp = self.client.get_secrets(limit=10, offset=10)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-        sec_group2 = resp.entity
+        sec_group2 = self.check_list_of_secrets(resp=resp, limit=10)
 
         duplicates = [secret for secret in sec_group1.secrets
                       if secret in sec_group2.secrets]
 
-        self.assertEqual(len(sec_group1.secrets), 10,
-                         'Returned wrong number of secrets')
-        self.assertEqual(len(sec_group2.secrets), 10,
-                         'Returned wrong number of secrets')
         self.assertEqual(len(duplicates), 0,
                          'Using offset didn\'t return unique secrets')
 
@@ -648,19 +663,13 @@ class SecretsPagingAPI(SecretsPagingFixture):
         """
         # First set of secrets
         resp = self.client.get_secrets(limit=15, offset=115)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-        sec_group1 = resp.entity
-        self.assertEqual(len(sec_group1.secrets), 15,
-                         'Returned wrong number of secrets')
+        sec_group1 = self.check_list_of_secrets(resp=resp, limit=15)
         next_ref = sec_group1.next
         self.assertIsNotNone(next_ref)
 
         #Next set of secrets
         resp = self.client.get_secrets(ref=next_ref)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-        sec_group2 = resp.entity
-        self.assertEqual(len(sec_group2.secrets), 15,
-                         'Returned wrong number of secrets')
+        sec_group2 = self.check_list_of_secrets(resp=resp, limit=15)
 
         duplicates = [secret for secret in sec_group1.secrets
                       if secret in sec_group2.secrets]
@@ -675,20 +684,13 @@ class SecretsPagingAPI(SecretsPagingFixture):
         """
         # First set of secrets
         resp = self.client.get_secrets(limit=15, offset=115)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-
-        sec_group1 = resp.entity
-        self.assertEqual(len(sec_group1.secrets), 15,
-                         'Returned wrong number of secrets')
+        sec_group1 = self.check_list_of_secrets(resp=resp, limit=15)
         previous_ref = sec_group1.previous
         self.assertIsNotNone(previous_ref)
 
         #Previous set of secrets
         resp = self.client.get_secrets(ref=previous_ref)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-        sec_group2 = resp.entity
-        self.assertEqual(len(sec_group2.secrets), 15,
-                         'Returned wrong number of secrets')
+        sec_group2 = self.check_list_of_secrets(resp=resp, limit=15)
 
         duplicates = [secret for secret in sec_group1.secrets
                       if secret in sec_group2.secrets]
@@ -702,11 +704,7 @@ class SecretsPagingAPI(SecretsPagingFixture):
         maximum of 100.
         """
         resp = self.client.get_secrets(limit=101, offset=0)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-
-        sec_group = resp.entity
-        self.assertEqual(len(sec_group.secrets), 100,
-                         'Returned wrong number of secrets')
+        self.check_list_of_secrets(resp=resp, limit=100)
 
     @tags(type='positive')
     def test_secret_paging_limit(self):
@@ -715,11 +713,7 @@ class SecretsPagingAPI(SecretsPagingFixture):
         """
         for limit in range(2, 25):
             resp = self.client.get_secrets(limit=limit, offset=0)
-            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-
-            sec_group = resp.entity
-            self.assertEqual(len(sec_group.secrets), limit,
-                             'Returned wrong number of secrets')
+            self.check_list_of_secrets(resp=resp, limit=limit)
 
     @tags(type='positive')
     def test_secret_paging_offset(self):
@@ -729,20 +723,14 @@ class SecretsPagingAPI(SecretsPagingFixture):
         # Covers offsets between 1 and 25
         for offset in range(1, 24):
             resp = self.client.get_secrets(limit=2, offset=offset)
-            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-            sec_group1 = resp.entity
-            self.assertEqual(len(sec_group1.secrets), 2,
-                             'Returned wrong number of orders')
+            sec_group1 = self.check_list_of_secrets(resp=resp, limit=2)
             previous_ref1 = sec_group1.previous
             self.assertIsNotNone(previous_ref1)
             next_ref1 = sec_group1.next
             self.assertIsNotNone(next_ref1)
 
             resp = self.client.get_secrets(limit=2, offset=offset + 2)
-            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-            sec_group2 = resp.entity
-            self.assertEqual(len(sec_group2.secrets), 2,
-                             'Returned wrong number of orders')
+            sec_group2 = self.check_list_of_secrets(resp=resp, limit=2)
             previous_ref2 = sec_group2.previous
             self.assertIsNotNone(previous_ref2)
             next_ref2 = sec_group2.next
@@ -750,9 +738,8 @@ class SecretsPagingAPI(SecretsPagingFixture):
 
             duplicates = [secret for secret in sec_group1.secrets
                           if secret in sec_group2.secrets]
-
-            self.assertEqual(len(duplicates), 0,
-                             'Did not return unique set of secrets')
+            self.assertEqual(len(duplicates), 0, 'Using offset did not return '
+                                                 'unique set of secrets')
 
     @tags(type='positive')
     def test_secret_paging_w_invalid_parameters(self):
@@ -761,4 +748,5 @@ class SecretsPagingAPI(SecretsPagingFixture):
         """
         self.behaviors.create_secret_from_config(use_expiration=False)
         resp = self.client.get_secrets(limit='not-an-int', offset='not-an-int')
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 200,
+                         'Returned unexpected response code')

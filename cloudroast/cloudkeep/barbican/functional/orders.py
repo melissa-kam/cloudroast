@@ -71,7 +71,8 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
-        self.assertEqual(resp.status_code, 400, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 400,
+                         'Returned unexpected response code')
 
     @tags(type='negative')
     def test_create_order_with_empty_mime_type(self):
@@ -84,7 +85,8 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
-        self.assertEqual(resp.status_code, 400, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 400,
+                         'Returned unexpected response code')
 
     @tags(type='positive')
     def test_create_order_wout_name(self):
@@ -97,7 +99,8 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
-        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202,
+                         'Returned unexpected response code')
 
     @tags(type='positive')
     def test_create_order_w_empty_name(self):
@@ -110,7 +113,8 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
-        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202,
+                         'Returned unexpected response code')
 
     @tags(type='negative')
     def test_create_order_with_invalid_mime_type(self):
@@ -124,7 +128,8 @@ class OrdersAPI(OrdersFixture):
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
-        self.assertEqual(resp.status_code, 400, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 400,
+                         'Returned unexpected response code')
 
     @unittest2.skip('Issue #140')
     @tags(type='positive')
@@ -144,7 +149,7 @@ class OrdersAPI(OrdersFixture):
         secret_resp = self.secrets_client.get_secret(ref=secret_ref,
                                                      mime_type='text/plain')
         self.assertEqual(secret_resp.status_code, 200,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
     @tags(type='negative')
     def test_get_order_that_doesnt_exist(self):
@@ -168,7 +173,8 @@ class OrdersAPI(OrdersFixture):
         Covers creating order with expiration.
         """
         resp = self.behaviors.create_order_from_config(use_expiration=True)
-        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202,
+                         'Returned unexpected response code')
 
     @tags(type='negative')
     def test_create_order_w_invalid_expiration(self):
@@ -271,7 +277,7 @@ class OrdersAPI(OrdersFixture):
         """Covers case of creating an order with a 128 bit length."""
         resps = self.behaviors.create_and_check_order(bit_length=128)
         self.assertEqual(resps.create_resp.status_code,
-                         202, 'Returned bad status code')
+                         202, 'Returned unexpected response code')
 
         secret = resps.get_resp.entity.secret
         self.assertEqual(resps.get_resp.status_code, 200)
@@ -283,7 +289,7 @@ class OrdersAPI(OrdersFixture):
         """Covers case of creating an order with a 192 bit length."""
         resps = self.behaviors.create_and_check_order(bit_length=192)
         self.assertEqual(resps.create_resp.status_code,
-                         202, 'Returned bad status code')
+                         202, 'Returned unexpected response code')
 
         secret = resps.get_resp.entity.secret
         self.assertEqual(resps.get_resp.status_code, 200)
@@ -295,7 +301,7 @@ class OrdersAPI(OrdersFixture):
         """Covers case of creating an order with a 256 bit length."""
         resps = self.behaviors.create_and_check_order(bit_length=256)
         self.assertEqual(resps.create_resp.status_code,
-                         202, 'Returned bad status code')
+                         202, 'Returned unexpected response code')
 
         secret = resps.get_resp.entity.secret
         self.assertEqual(resps.get_resp.status_code, 200)
@@ -367,13 +373,15 @@ class OrdersAPI(OrdersFixture):
     def test_create_order_w_cbc_cypher_type(self):
         """Covers case of creating an order with a cbc cypher type."""
         resp = self.behaviors.create_order_overriding_cfg(cypher_type='cbc')
-        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202,
+                         'Returned unexpected response code')
 
     @tags(type='positive')
     def test_create_order_w_aes_algorithm(self):
         """Covers case of creating an order with an aes algorithm."""
         resp = self.behaviors.create_order_overriding_cfg(algorithm='aes')
-        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202,
+                         'Returned unexpected response code')
 
     @tags(type='positive')
     def test_create_order_w_app_octet_stream_mime_type(self):
@@ -382,7 +390,8 @@ class OrdersAPI(OrdersFixture):
         """
         resp = self.behaviors.create_order_overriding_cfg(
             mime_type='application/octet-stream')
-        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202,
+                         'Returned unexpected response code')
 
     @tags(type='positive')
     def test_create_order_w_alphanumeric_name(self):
@@ -390,7 +399,7 @@ class OrdersAPI(OrdersFixture):
         name = randomstring.get_random_string(prefix='1a2b')
         resps = self.behaviors.create_and_check_order(name=name)
         self.assertEqual(resps.create_resp.status_code, 202,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
         secret = resps.get_resp.entity.secret
         self.assertEqual(secret.name, name, 'Secret name is not correct')
@@ -403,7 +412,7 @@ class OrdersAPI(OrdersFixture):
         name = '~!@#$%^&*()_+`-={}[]|:;<>,.?"'
         resps = self.behaviors.create_and_check_order(name=name)
         self.assertEqual(resps.create_resp.status_code, 202,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
         secret = resps.get_resp.entity.secret
         self.assertEqual(secret.name, name, 'Secret name is not correct')
@@ -414,7 +423,7 @@ class OrdersAPI(OrdersFixture):
         uuid = str(uuid4())
         resps = self.behaviors.create_and_check_order(name=uuid)
         self.assertEqual(resps.create_resp.status_code, 202,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
         secret = resps.get_resp.entity.secret
         self.assertEqual(secret.name, uuid, 'Secret name is not correct')
@@ -425,7 +434,7 @@ class OrdersAPI(OrdersFixture):
         name = randomstring.get_random_string(size=225)
         resps = self.behaviors.create_and_check_order(name=name)
         self.assertEqual(resps.create_resp.status_code, 202,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
         secret = resps.get_resp.entity.secret
         self.assertEqual(secret.name, name, 'Secret name is not correct')
@@ -438,19 +447,19 @@ class OrdersAPI(OrdersFixture):
         """
         create_resp = self.behaviors.create_order_from_config()
         self.assertEqual(create_resp.status_code, 202,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
         # Get secret using returned secret_ref
         ref_get_resp = self.orders_client.get_order(
             ref=create_resp.ref)
         self.assertEqual(ref_get_resp.status_code, 200,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
         # Get secret using secret id and configured base url
         config_get_resp = self.orders_client.get_order(
             order_id=create_resp.id)
         self.assertEqual(config_get_resp.status_code, 200,
-                         'Returned bad status code')
+                         'Returned unexpected response code')
 
     @tags(type='negative')
     def test_update_order(self):
@@ -542,7 +551,8 @@ class OrdersAPI(OrdersFixture):
         the name."""
         large_string = str(bytearray().zfill(10001))
         resp = self.behaviors.create_order_overriding_cfg(name=large_string)
-        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202,
+                         'Returned unexpected response code')
 
     @tags(type='negative')
     def test_create_order_w_large_string_values(self):
@@ -612,6 +622,18 @@ class OrdersAPI(OrdersFixture):
 
 class OrdersPagingAPI(OrdersPagingFixture):
 
+    def check_list_of_orders(self, resp, limit):
+        """Checks that the response from getting list of orders
+        returns a 200 status code and the correct number of orders.
+        Also returns the list of orders from the response.
+        """
+        self.assertEqual(resp.status_code, 200,
+                         'Returned unexpected response code')
+        ord_group = resp.entity
+        self.assertEqual(len(ord_group.orders), limit,
+                         'Returned wrong number of orders')
+        return resp.entity
+
     @tags(type='positive')
     def test_order_paging_limit_and_offset(self):
         """Covers testing paging limit and offset attributes
@@ -619,19 +641,14 @@ class OrdersPagingAPI(OrdersPagingFixture):
         """
         # First set of orders
         resp = self.orders_client.get_orders(limit=10, offset=0)
-        ord_group1 = resp.entity
+        ord_group1 = self.check_list_of_orders(resp=resp, limit=10)
 
         # Second set of orders
         resp = self.orders_client.get_orders(limit=10, offset=10)
-        ord_group2 = resp.entity
+        ord_group2 = self.check_list_of_orders(resp=resp, limit=10)
 
         duplicates = [order for order in ord_group1.orders
                       if order in ord_group2.orders]
-
-        self.assertEqual(len(ord_group1.orders), 10,
-                         'Returned wrong number of orders')
-        self.assertEqual(len(ord_group2.orders), 10,
-                         'Returned wrong number of orders')
         self.assertEqual(len(duplicates), 0,
                          'Using offset didn\'t return unique orders.')
 
@@ -639,7 +656,8 @@ class OrdersPagingAPI(OrdersPagingFixture):
     def test_find_a_single_order_via_paging(self):
         """Covers finding an order with paging."""
         resp = self.behaviors.create_order_from_config()
-        self.assertEqual(resp.status_code, 202, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 202,
+                         'Returned unexpected response code')
         order = self.behaviors.find_order(resp.id)
         self.assertIsNotNone(order, 'Couldn\'t find created order')
 
@@ -650,23 +668,16 @@ class OrdersPagingAPI(OrdersPagingFixture):
         """
         # First set of orders
         resp = self.orders_client.get_orders(limit=15, offset=115)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-        order_group1 = resp.entity
-        self.assertEqual(len(order_group1.orders), 15,
-                         'Returned wrong number of orders')
+        order_group1 = self.check_list_of_orders(resp=resp, limit=15)
         next_ref = order_group1.next
         self.assertIsNotNone(next_ref)
 
         #Next set of orders
         resp = self.orders_client.get_orders(ref=next_ref)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-        order_group2 = resp.entity
-        self.assertEqual(len(order_group2.orders), 15,
-                         'Returned wrong number of orders')
+        order_group2 = self.check_list_of_orders(resp=resp, limit=15)
 
         duplicates = [order for order in order_group1.orders
                       if order in order_group2.orders]
-
         self.assertEqual(len(duplicates), 0,
                          'Using next reference didn\'t return unique orders')
 
@@ -677,23 +688,16 @@ class OrdersPagingAPI(OrdersPagingFixture):
         """
         # First set of orders
         resp = self.orders_client.get_orders(limit=15, offset=115)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-        order_group1 = resp.entity
-        self.assertEqual(len(order_group1.orders), 15,
-                         'Returned wrong number of orders')
+        order_group1 = self.check_list_of_orders(resp=resp, limit=15)
         prev_ref = order_group1.previous
         self.assertIsNotNone(prev_ref)
 
         #Previous set of orders
         resp = self.orders_client.get_orders(ref=prev_ref)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-        order_group2 = resp.entity
-        self.assertEqual(len(order_group2.orders), 15,
-                         'Returned wrong number of orders')
+        order_group2 = self.check_list_of_orders(resp=resp, limit=15)
 
         duplicates = [order for order in order_group1.orders
                       if order in order_group2.orders]
-
         self.assertEqual(len(duplicates), 0,
                          'Using previous reference '
                          'didn\'t return unique orders')
@@ -704,11 +708,7 @@ class OrdersPagingAPI(OrdersPagingFixture):
         maximum of 100.
         """
         resp = self.orders_client.get_orders(limit=101, offset=0)
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-
-        orders_group = resp.entity
-        self.assertEqual(len(orders_group.orders), 100,
-                         'Returned wrong number of orders')
+        self.check_list_of_orders(resp=resp, limit=100)
 
     @tags(type='positive')
     def test_order_paging_limit(self):
@@ -717,11 +717,7 @@ class OrdersPagingAPI(OrdersPagingFixture):
         """
         for limit in range(2, 25):
             resp = self.orders_client.get_orders(limit=limit, offset=0)
-            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-
-            orders_group = resp.entity
-            self.assertEqual(len(orders_group.orders), limit,
-                             'Returned wrong number of orders')
+            self.check_list_of_orders(resp=resp, limit=limit)
 
     @tags(type='positive')
     def test_order_paging_offset(self):
@@ -731,20 +727,14 @@ class OrdersPagingAPI(OrdersPagingFixture):
         # Covers offsets between 1 and 25
         for offset in range(1, 24):
             resp = self.orders_client.get_orders(limit=2, offset=offset)
-            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-            orders_group1 = resp.entity
-            self.assertEqual(len(orders_group1.orders), 2,
-                             'Returned wrong number of orders')
+            orders_group1 = self.check_list_of_orders(resp=resp, limit=2)
             previous_ref1 = orders_group1.previous
             self.assertIsNotNone(previous_ref1)
             next_ref1 = orders_group1.next
             self.assertIsNotNone(next_ref1)
 
             resp = self.orders_client.get_orders(limit=2, offset=offset + 2)
-            self.assertEqual(resp.status_code, 200, 'Returned bad status code')
-            orders_group2 = resp.entity
-            self.assertEqual(len(orders_group2.orders), 2,
-                             'Returned wrong number of orders')
+            orders_group2 = self.check_list_of_orders(resp=resp, limit=2)
             previous_ref2 = orders_group2.previous
             self.assertIsNotNone(previous_ref2)
             next_ref2 = orders_group2.next
@@ -752,7 +742,6 @@ class OrdersPagingAPI(OrdersPagingFixture):
 
             duplicates = [order for order in orders_group1.orders
                           if order in orders_group2.orders]
-
             self.assertEqual(len(duplicates), 0,
                              'Using offset didn\'t return unique orders')
 
@@ -764,4 +753,5 @@ class OrdersPagingAPI(OrdersPagingFixture):
         self.behaviors.create_order_from_config(use_expiration=False)
         resp = self.orders_client.get_orders(
             limit='not-an-int', offset='not-an-int')
-        self.assertEqual(resp.status_code, 200, 'Returned bad status code')
+        self.assertEqual(resp.status_code, 200,
+                         'Returned unexpected response code')
