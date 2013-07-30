@@ -97,7 +97,8 @@ class OrdersAPI(OrdersFixture):
         """Covers deleting an order by href with barbicanclient library."""
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
-        self.assertEqual(resp.status_code, 202, 'Returned unexpected response code')
+        self.assertEqual(resp.status_code, 202,
+                         'Returned unexpected response code')
 
         self.cl_behaviors.delete_order(resp.ref)
         # Deleting here because using two different behaviors
@@ -112,7 +113,8 @@ class OrdersAPI(OrdersFixture):
         """Covers deleting an order by id with barbicanclient library."""
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
-        self.assertEqual(resp.status_code, 202, 'Returned unexpected response code')
+        self.assertEqual(resp.status_code, 202,
+                         'Returned unexpected response code')
 
         self.cl_behaviors.delete_order_by_id(resp.id)
         # Deleting here because using two different behaviors
@@ -128,7 +130,8 @@ class OrdersAPI(OrdersFixture):
         """Covers listing orders with barbicanclient library."""
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=False)
-        self.assertEqual(resp.status_code, 202, 'Returned unexpected response code')
+        self.assertEqual(resp.status_code, 202,
+                         'Returned unexpected response code')
 
         list_tuple = self.cl_client.list_orders(limit=10, offset=0)
         orders = list_tuple[0]

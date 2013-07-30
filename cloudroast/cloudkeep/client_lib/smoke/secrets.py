@@ -134,7 +134,8 @@ class SecretsAPI(SecretsFixture):
         resp = self.barb_client.get_secret(secret.id)
         metadata = resp.entity
 
-        self.assertEqual(resp.status_code, 200, 'Returned unexpected response code')
+        self.assertEqual(resp.status_code, 200,
+                         'Returned unexpected response code')
         self.assertEqual(metadata.status, 'ACTIVE')
         self.assertEqual(metadata.name, self.config.name)
         self.assertEqual(metadata.cypher_type, self.config.cypher_type)

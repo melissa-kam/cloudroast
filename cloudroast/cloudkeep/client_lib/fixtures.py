@@ -95,6 +95,26 @@ class SecretsFixture(ClientLibFixture):
         super(SecretsFixture, self).tearDown()
 
 
+class SecretsPagingFixture(SecretsFixture):
+
+    @classmethod
+    def setUpClass(cls):
+        super(SecretsPagingFixture, cls).setUpClass()
+        for count in range(20):
+            cls.barb_behaviors.create_secret_from_config(use_expiration=False)
+
+    def tearDown(self):
+        """ Overrides superclass method so that secrets are not deleted
+        between tests.
+        """
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.cl_behaviors.delete_all_created_orders_and_secrets()
+        cls.barb_behaviors.delete_all_created_secrets()
+
+
 class OrdersFixture(ClientLibFixture):
     @classmethod
     def setUpClass(cls):
@@ -132,3 +152,23 @@ class OrdersFixture(ClientLibFixture):
         self.cl_behaviors.delete_all_created_orders_and_secrets()
         self.barb_behaviors.delete_all_created_orders_and_secrets()
         super(OrdersFixture, self).tearDown()
+
+
+class OrdersPagingFixture(OrdersFixture):
+
+    @classmethod
+    def setUpClass(cls):
+        super(OrdersPagingFixture, cls).setUpClass()
+        for count in range(20):
+            cls.barb_behaviors.create_order_from_config(use_expiration=False)
+
+    def tearDown(self):
+        """ Overrides superclass method so that orders are not deleted
+        between tests.
+        """
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.cl_behaviors.delete_all_created_orders_and_secrets()
+        cls.barb_behaviors.delete_all_created_orders_and_secrets()

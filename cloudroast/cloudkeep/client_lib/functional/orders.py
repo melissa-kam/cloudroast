@@ -173,7 +173,7 @@ class OrdersAPI(OrdersFixture):
         """
         resp = self.barb_behaviors.create_order_from_config()
         self.assertEqual(resp.status_code, 202,
-                         'Barbican returned bad status code')
+                         'Barbican returned unexpected response code')
 
         order = self.cl_client.get_order(resp.ref)
         secret_metadata = order.secret
@@ -193,7 +193,7 @@ class OrdersAPI(OrdersFixture):
         """
         resp = self.barb_behaviors.create_order_from_config()
         self.assertEqual(resp.status_code, 202,
-                         'Barbican returned bad status code')
+                         'Barbican returned unexpected response code')
 
         order = self.cl_client.get_order_by_id(resp.id)
         secret_metadata = order.secret
@@ -213,7 +213,7 @@ class OrdersAPI(OrdersFixture):
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=True)
         self.assertEqual(resp.status_code, 202,
-                         'Barbican returned bad status code')
+                         'Barbican returned unexpected response code')
 
         order_ref = resp.ref
         order = self.cl_client.get_order(href=order_ref)
@@ -228,7 +228,7 @@ class OrdersAPI(OrdersFixture):
         resp = self.barb_behaviors.create_order_from_config(
             use_expiration=True)
         self.assertEqual(resp.status_code, 202,
-                         'Barbican returned bad status code')
+                         'Barbican returned unexpected response code')
 
         order_id = resp.id
         order = self.cl_client.get_order_by_id(order_id=order_id)
@@ -243,7 +243,7 @@ class OrdersAPI(OrdersFixture):
         """
         resp = self.barb_behaviors.create_order_from_config()
         self.assertEqual(resp.status_code, 202,
-                         'Barbican returned bad status code')
+                         'Barbican returned unexpected response code')
 
         order = self.cl_client.get_order_by_id(resp.id)
         secret = order.get_secret()
@@ -258,13 +258,6 @@ class OrdersAPI(OrdersFixture):
     @tags(type='positive')
     def test_list_orders_limit_and_offset(self):
         """Covers using the limit and offset attribute of listing orders."""
-        # Create order pool
-        for count in range(20):
-            resp = self.barb_behaviors.create_order_from_config(
-                use_expiration=False)
-            self.assertEqual(resp.status_code, 202,
-                             'Barbican returned bad status code')
-
         # First set of orders
         tuple = self.cl_client.list_orders(limit=10, offset=0)
         order_group1 = tuple[0]
@@ -287,13 +280,6 @@ class OrdersAPI(OrdersFixture):
     @tags(type='positive')
     def test_list_orders_next(self):
         """Covers using next reference for listing orders."""
-        # Create order pool
-        for count in range(20):
-            resp = self.barb_behaviors.create_order_from_config(
-                use_expiration=False)
-            self.assertEqual(resp.status_code, 202,
-                             'Barbican returned bad status code')
-
         # First set of orders
         order_group1, prev_ref, next_ref = self.cl_client.list_orders(
             limit=10, offset=0)
@@ -315,13 +301,6 @@ class OrdersAPI(OrdersFixture):
     @tags(type='positive')
     def test_list_orders_previous(self):
         """Covers using next reference for listing orders."""
-        # Create order pool
-        for count in range(20):
-            resp = self.barb_behaviors.create_order_from_config(
-                use_expiration=False)
-            self.assertEqual(resp.status_code, 202,
-                             'Barbican returned bad status code')
-
         # First set of orders
         order_group1, prev_ref, next_ref = self.cl_client.list_orders(
             limit=10, offset=10)
