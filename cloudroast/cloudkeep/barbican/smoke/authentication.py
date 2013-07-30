@@ -16,8 +16,8 @@ limitations under the License.
 
 import unittest2
 
-from cloudroast.cloudkeep.barbican.fixtures import AuthenticationFixture
 from cafe.drivers.unittest.decorators import tags
+from cloudroast.cloudkeep.barbican.fixtures import AuthenticationFixture
 
 
 class AuthenticationAPI(AuthenticationFixture):

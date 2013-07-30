@@ -15,9 +15,10 @@ limitations under the License.
 """
 import unittest2
 
-from cloudroast.cloudkeep.client_lib.fixtures import OrdersFixture
 from barbicanclient.common.exceptions import ClientException
 from cafe.drivers.unittest.decorators import tags
+from cloudcafe.cloudkeep.common.states import SecretsStates
+from cloudroast.cloudkeep.client_lib.fixtures import OrdersFixture
 
 
 class OrdersAPI(OrdersFixture):
@@ -248,7 +249,7 @@ class OrdersAPI(OrdersFixture):
         order = self.cl_client.get_order_by_id(resp.id)
         secret = order.get_secret()
 
-        self.assertEqual(secret.status, 'ACTIVE')
+        self.assertEqual(secret.status, SecretsStates.STATUS_ACTIVE)
         self.assertEqual(secret.name, self.config.name)
         self.assertEqual(secret.mime_type, self.config.mime_type)
         self.assertEqual(secret.algorithm, self.config.algorithm)

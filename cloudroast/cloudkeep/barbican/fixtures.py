@@ -19,14 +19,14 @@ from cafe.drivers.unittest.fixtures import BaseTestFixture
 from cloudcafe.cloudkeep.barbican.version.client import VersionClient
 from cloudcafe.cloudkeep.barbican.secrets.client import SecretsClient
 from cloudcafe.cloudkeep.barbican.orders.client import OrdersClient
-from cloudcafe.identity.v2_0.tokens_api.client import TokenAPI_Client
 from cloudcafe.cloudkeep.barbican.secrets.behaviors import SecretsBehaviors
 from cloudcafe.cloudkeep.barbican.orders.behaviors import OrdersBehavior
-from cloudcafe.identity.v2_0.tokens_api.behaviors import \
-    TokenAPI_Behaviors
 from cloudcafe.cloudkeep.config import MarshallingConfig, CloudKeepConfig, \
     CloudKeepSecretsConfig, CloudKeepOrdersConfig
 from cloudcafe.identity.config import IdentityTokenConfig
+from cloudcafe.identity.v2_0.tokens_api.behaviors import \
+    TokenAPI_Behaviors
+from cloudcafe.identity.v2_0.tokens_api.client import TokenAPI_Client
 
 
 class BarbicanFixture(BaseTestFixture):
@@ -84,8 +84,7 @@ class SecretsPagingFixture(SecretsFixture):
     def setUpClass(cls):
         super(SecretsPagingFixture, cls).setUpClass()
         for count in range(150):
-            resp = cls.behaviors.create_secret_from_config(
-                use_expiration=False)
+            cls.behaviors.create_secret_from_config(use_expiration=False)
 
     def tearDown(self):
         """ Overrides superclass method so that secrets are not deleted
@@ -130,8 +129,7 @@ class OrdersPagingFixture(OrdersFixture):
     def setUpClass(cls):
         super(OrdersPagingFixture, cls).setUpClass()
         for count in range(150):
-            resp = cls.behaviors.create_order_from_config(
-                use_expiration=False)
+            cls.behaviors.create_order_from_config(use_expiration=False)
 
     def tearDown(self):
         """ Overrides superclass method so that orders are not deleted

@@ -13,8 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from cloudroast.cloudkeep.barbican.fixtures import VersionFixture
 from cafe.drivers.unittest.decorators import tags
+from cloudroast.cloudkeep.barbican.fixtures import VersionFixture
 
 
 class TestVersion(VersionFixture):

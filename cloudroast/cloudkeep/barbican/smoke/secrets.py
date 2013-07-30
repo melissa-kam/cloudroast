@@ -15,9 +15,9 @@ limitations under the License.
 """
 import unittest2
 
-from cloudroast.cloudkeep.barbican.fixtures import SecretsFixture
 from cafe.drivers.unittest.decorators import tags
 from cloudcafe.cloudkeep.common.states import SecretsStates
+from cloudroast.cloudkeep.barbican.fixtures import SecretsFixture
 
 
 class SecretsAPI(SecretsFixture):

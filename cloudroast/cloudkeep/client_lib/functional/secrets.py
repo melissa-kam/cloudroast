@@ -13,9 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from cloudroast.cloudkeep.client_lib.fixtures import SecretsFixture
 from barbicanclient.common.exceptions import ClientException
 from cafe.drivers.unittest.decorators import tags
+from cloudcafe.cloudkeep.common.states import SecretsStates
+from cloudroast.cloudkeep.client_lib.fixtures import SecretsFixture
 
 
 class SecretsAPI(SecretsFixture):
@@ -180,7 +181,7 @@ class SecretsAPI(SecretsFixture):
 
         secret = self.cl_client.get_secret(resp.ref)
 
-        self.assertEqual(secret.status, 'ACTIVE')
+        self.assertEqual(secret.status, SecretsStates.STATUS_ACTIVE)
         self.assertEqual(secret.name, self.config.name)
         self.assertEqual(secret.mime_type, self.config.mime_type)
         self.assertEqual(secret.cypher_type, self.config.cypher_type)
@@ -197,7 +198,7 @@ class SecretsAPI(SecretsFixture):
 
         secret = self.cl_client.get_secret_by_id(resp.id)
 
-        self.assertEqual(secret.status, 'ACTIVE')
+        self.assertEqual(secret.status, SecretsStates.STATUS_ACTIVE)
         self.assertEqual(secret.name, self.config.name)
         self.assertEqual(secret.mime_type, self.config.mime_type)
         self.assertEqual(secret.cypher_type, self.config.cypher_type)

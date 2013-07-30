@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from datetime import datetime, timedelta
-from uuid import uuid4
 from sys import maxint
 import unittest2
+from uuid import uuid4
 
-from cloudroast.cloudkeep.barbican.fixtures import SecretsFixture, \
-    SecretsPagingFixture
 from cafe.drivers.unittest.decorators import tags, skip_open_issue
 from cloudcafe.common.tools import randomstring
+from cloudroast.cloudkeep.barbican.fixtures import SecretsFixture, \
+    SecretsPagingFixture
 
 
 class SecretsAPI(SecretsFixture):

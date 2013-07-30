@@ -13,15 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import unittest2
 from datetime import datetime, timedelta
-from uuid import uuid4
 from sys import maxint
+from uuid import uuid4
+import unittest2
 
-from cloudroast.cloudkeep.barbican.fixtures import OrdersFixture, \
-    OrdersPagingFixture
 from cafe.drivers.unittest.decorators import tags
 from cloudcafe.common.tools import randomstring
+from cloudroast.cloudkeep.barbican.fixtures import OrdersFixture, \
+    OrdersPagingFixture
 
 
 class OrdersAPI(OrdersFixture):

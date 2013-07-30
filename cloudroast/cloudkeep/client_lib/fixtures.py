@@ -21,8 +21,6 @@ from cloudcafe.cloudkeep.barbican.secrets.client import SecretsClient
 from cloudcafe.cloudkeep.barbican.orders.client import OrdersClient
 from cloudcafe.cloudkeep.barbican.secrets.behaviors import SecretsBehaviors
 from cloudcafe.cloudkeep.barbican.orders.behaviors import OrdersBehavior
-from cloudcafe.cloudkeep.config import MarshallingConfig, CloudKeepConfig, \
-    CloudKeepSecretsConfig, CloudKeepOrdersConfig, CloudKeepClientLibConfig
 from cloudcafe.cloudkeep.client_lib.secrets.clients import \
     ClientLibSecretsClient
 from cloudcafe.cloudkeep.client_lib.secrets.behaviors import \
@@ -31,6 +29,8 @@ from cloudcafe.cloudkeep.client_lib.orders.clients import \
     ClientLibOrdersClient
 from cloudcafe.cloudkeep.client_lib.orders.behaviors import \
     ClientLibOrdersBehaviors
+from cloudcafe.cloudkeep.config import MarshallingConfig, CloudKeepConfig, \
+    CloudKeepSecretsConfig, CloudKeepOrdersConfig, CloudKeepClientLibConfig
 
 
 class ClientLibFixture(BaseTestFixture):
