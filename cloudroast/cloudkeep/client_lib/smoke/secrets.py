@@ -154,9 +154,9 @@ class SecretsAPI(SecretsFixture):
                          'Barbican returned unexpected response code')
 
         raw_secret = self.cl_client.get_raw_secret(
-            resp.ref, self.config.mime_type)
+            resp.ref, self.config.payload_content_type)
 
-        self.assertEqual(raw_secret, self.config.plain_text)
+        self.assertEqual(raw_secret, self.config.payload)
 
     @tags(type='positive')
     def test_get_raw_secret_by_id(self):
@@ -169,6 +169,6 @@ class SecretsAPI(SecretsFixture):
                          'Barbican returned unexpected response code')
 
         raw_secret = self.cl_client.get_raw_secret_by_id(
-            resp.id, self.config.mime_type)
+            resp.id, self.config.payload_content_type)
 
-        self.assertEqual(raw_secret, self.config.plain_text)
+        self.assertEqual(raw_secret, self.config.payload)

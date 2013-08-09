@@ -26,13 +26,13 @@ from cloudroast.cloudkeep.client_lib.fixtures import OrdersFixture, \
 class OrdersAPI(OrdersFixture):
 
     @tags(type='positive')
-    def test_create_order_w_only_mime_type(self):
+    def test_create_order_w_only_payload_content_type(self):
         """Covers creating order with only mime type. Should raise a
         ClientException.
         """
         self.assertRaises(ClientException,
                           self.cl_behaviors.create_order,
-                          mime_type=self.config.mime_type)
+                          payload_content_type=self.config.payload_content_type)
 
     @tags(type='negative')
     def test_create_order_w_null_values(self):
@@ -46,7 +46,8 @@ class OrdersAPI(OrdersFixture):
         """Covers creating order without a null name."""
         order = self.cl_behaviors.create_order(
             name=None,
-            mime_type=self.config.mime_type,
+            payload_content_type=self.config.payload_content_type,
+            payload_content_encoding=self.config.payload_content_encoding,
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
@@ -59,7 +60,8 @@ class OrdersAPI(OrdersFixture):
         """
         order = self.cl_behaviors.create_order(
             name=None,
-            mime_type=self.config.mime_type,
+            payload_content_type=self.config.payload_content_type,
+            payload_content_encoding=self.config.payload_content_encoding,
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
@@ -72,7 +74,8 @@ class OrdersAPI(OrdersFixture):
         """Covers creating order without an empty name."""
         order = self.cl_behaviors.create_order(
             name='',
-            mime_type=self.config.mime_type,
+            payload_content_type=self.config.payload_content_type,
+            payload_content_encoding=self.config.payload_content_encoding,
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
@@ -84,7 +87,8 @@ class OrdersAPI(OrdersFixture):
         created secret's name matches the secret's ID."""
         order = self.cl_behaviors.create_order(
             name='',
-            mime_type=self.config.mime_type,
+            payload_content_type=self.config.payload_content_type,
+            payload_content_encoding=self.config.payload_content_encoding,
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
             cypher_type=self.config.cypher_type)
@@ -93,13 +97,13 @@ class OrdersAPI(OrdersFixture):
                          "Name did not match secret ID")
 
     @tags(type='negative')
-    def test_create_order_w_invalid_mime_type(self):
+    def test_create_order_w_invalid_payload_content_type(self):
         """Covers creating order with an invalid mime type.
         Should raise a ClientException.
         """
         self.assertRaises(ClientException,
                           self.cl_behaviors.create_order_overriding_cfg,
-                          mime_type='crypto/boom')
+                          payload_content_type='crypto/boom')
 
     @tags(type='negative')
     def test_create_order_w_invalid_bit_length(self):
@@ -128,7 +132,8 @@ class OrdersAPI(OrdersFixture):
         secret = order.secret
 
         self.assertEqual(secret['name'], self.config.name)
-        self.assertEqual(secret['mime_type'], self.config.mime_type)
+        self.assertEqual(secret['payload_content_type'],
+                         self.config.payload_content_type)
         self.assertEqual(secret['cypher_type'], self.config.cypher_type)
         self.assertEqual(secret['algorithm'], self.config.algorithm)
         self.assertEqual(secret['bit_length'], self.config.bit_length)
@@ -182,7 +187,8 @@ class OrdersAPI(OrdersFixture):
         secret_metadata = order.secret
 
         self.assertEqual(secret_metadata['name'], self.config.name)
-        self.assertEqual(secret_metadata['mime_type'], self.config.mime_type)
+        self.assertEqual(secret_metadata['payload_content_type'],
+                         self.config.payload_content_type)
         self.assertEqual(secret_metadata['algorithm'], self.config.algorithm)
         self.assertEqual(secret_metadata['bit_length'], self.config.bit_length)
         self.assertEqual(secret_metadata['cypher_type'],
@@ -202,7 +208,8 @@ class OrdersAPI(OrdersFixture):
         secret_metadata = order.secret
 
         self.assertEqual(secret_metadata['name'], self.config.name)
-        self.assertEqual(secret_metadata['mime_type'], self.config.mime_type)
+        self.assertEqual(secret_metadata['payload_content_type'],
+                         self.config.payload_content_type)
         self.assertEqual(secret_metadata['algorithm'], self.config.algorithm)
         self.assertEqual(secret_metadata['bit_length'], self.config.bit_length)
         self.assertEqual(secret_metadata['cypher_type'],
@@ -253,7 +260,8 @@ class OrdersAPI(OrdersFixture):
 
         self.assertEqual(secret.status, SecretsStates.ACTIVE)
         self.assertEqual(secret.name, self.config.name)
-        self.assertEqual(secret.mime_type, self.config.mime_type)
+        self.assertEqual(secret.payload_content_type,
+                         self.config.payload_content_type)
         self.assertEqual(secret.algorithm, self.config.algorithm)
         self.assertEqual(secret.bit_length, self.config.bit_length)
         self.assertEqual(secret.cypher_type, self.config.cypher_type)

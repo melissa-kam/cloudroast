@@ -17,7 +17,6 @@ from cafe.drivers.unittest.decorators import tags
 from cloudcafe.cloudkeep.common.states import OrdersStates
 from cloudroast.cloudkeep.client_lib.fixtures import OrdersFixture
 
-
 class OrdersAPI(OrdersFixture):
 
     @tags(type='positive')
@@ -33,7 +32,8 @@ class OrdersAPI(OrdersFixture):
         the metadata of the order.
         """
         resp = self.cl_behaviors.create_and_check_order(
-            mime_type=self.config.mime_type,
+            payload_content_type=self.config.payload_content_type,
+            payload_content_encoding=self.config.payload_content_encoding,
             name=self.config.name,
             algorithm=self.config.algorithm,
             bit_length=self.config.bit_length,
@@ -45,7 +45,8 @@ class OrdersAPI(OrdersFixture):
         secret = order.secret
 
         self.assertEqual(order.status, OrdersStates.ACTIVE)
-        self.assertEqual(secret['mime_type'], self.config.mime_type)
+        self.assertEqual(secret['payload_content_type'],
+                         self.config.payload_content_type)
         self.assertEqual(secret['name'], self.config.name)
         self.assertEqual(secret['algorithm'], self.config.algorithm)
         self.assertEqual(secret['bit_length'], self.config.bit_length)
